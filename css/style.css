@@ -79,6 +79,7 @@ td { padding: 0.8rem 0; border-bottom: 1px solid var(--border); font-size: 0.95r
     display: block; 
     position: relative;
 }
+.paper + .paper { margin-top: 20px; }
 
 /* HEADER SECTION */
 .prev-header { 

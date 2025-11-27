@@ -9,7 +9,7 @@ export default class Router {
         this.handleRoute(); 
     }
     handleRoute() {
-        const hash = window.location.hash.slice(1) || 'dashboard';
+        const hash = window.location.hash.slice(1) || 'editor';
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         

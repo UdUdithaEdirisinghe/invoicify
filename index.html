@@ -20,32 +20,23 @@
                 <i class="ph ph-hexagon-fill"></i> Invoicify
             </div>
             <nav>
-                <a href="#dashboard" class="nav-link active" data-link="dashboard"><i class="ph ph-squares-four"></i> Dashboard</a>
+                <a href="/dashboard.html"><i class="ph ph-squares-four"></i> Dashboard</a>
                 <a href="#documents" class="nav-link" data-link="documents"><i class="ph ph-files"></i> Documents</a>
                 <a href="#editor" class="nav-link" data-link="editor"><i class="ph ph-plus-circle"></i> New Document</a>
                 <a href="#customers" class="nav-link" data-link="customers"><i class="ph ph-users"></i> Customers</a>
                 <a href="#settings" class="nav-link" data-link="settings"><i class="ph ph-gear"></i> Settings</a>
             </nav>
+            <div style="padding: 20px; margin-top: auto;">
+                <button class="logout-btn" style="width: 100%; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    <i class="ph ph-sign-out"></i> Logout
+                </button>
+            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
             
-            <!-- VIEW: DASHBOARD -->
-            <section id="view-dashboard" class="view active">
-                <header class="view-header"><h1>Dashboard</h1></header>
-                <div class="stats-grid">
-                    <div class="card stat-card"><h3>Total Generated</h3><p id="dash-total-docs">0</p></div>
-                    <div class="card stat-card"><h3>Recent Revenue</h3><p id="dash-revenue">0.00</p></div>
-                </div>
-                <h2>Recent Documents</h2>
-                <div class="table-container card">
-                    <table id="dash-table">
-                        <thead><tr><th>#</th><th>Type</th><th>Customer</th><th>Date</th><th>Total</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </section>
+            <!-- Dashboard moved to separate page; default view is Editor/Documents -->
 
             <!-- VIEW: DOCUMENTS LIST -->
             <section id="view-documents" class="view">
@@ -207,10 +198,12 @@
     <script type="module">
         // Protect this page - redirect to login if not authenticated
         import ApiClient from './js/api-client.js';
+        import { setupLogout } from './js/auth.js';
         
         if (!ApiClient.isAuthenticated()) {
             window.location.href = '/login.html';
         }
+        setupLogout();
     </script>
     <script type="module" src="js/app.js"></script>
 </body>

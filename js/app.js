@@ -1,6 +1,7 @@
 import Store from './store.js';
 import Router from './router.js';
 import PdfGenerator from './pdf-generator.js';
+import ApiClient from './api-client.js';
 
 class App {
     constructor() {
@@ -67,10 +68,14 @@ class App {
             this.calculateTotals();
         });
 
-        document.getElementById('btn-save').addEventListener('click', () => {
-            Store.saveDocument(this.state.currentDoc);
-            alert('Draft Saved!');
-            this.renderDashboard();
+        document.getElementById('btn-save').addEventListener('click', async () => {
+            const res = await Store.saveDocumentAsync(this.state.currentDoc);
+            alert(res.remote ? 'Saved to cloud!' : 'Draft Saved locally!');
+            if (res.remote) {
+                window.location.href = '/dashboard.html';
+            } else {
+                this.renderDashboard();
+            }
         });
 
         document.getElementById('btn-generate-pdf').addEventListener('click', () => {
@@ -393,8 +398,8 @@ class App {
         document.querySelector('#dash-table tbody').innerHTML = docs.slice(-5).reverse().map(d => `<tr><td>${d.number}</td><td style="text-transform:capitalize">${d.type}</td><td>${d.customer.name}</td><td>${d.date}</td><td>${currency} ${d.totals.grandTotal.toFixed(2)}</td></tr>`).join('');
     }
 
-    renderDocList() {
-        const docs = Store.getDocuments();
+    async renderDocList() {
+        const docs = await Store.getDocumentsAsync();
         const settings = Store.getSettings();
         const currency = settings.currency || 'LKR';
         document.querySelector('#docs-table tbody').innerHTML = docs.map((d) => `<tr><td>${d.number}</td><td>${d.type}</td><td>${d.customer.name}</td><td>${d.date}</td><td>${currency} ${d.totals.grandTotal.toFixed(2)}</td><td><button class="btn btn-sm btn-secondary" onclick="window.editDoc('${d.id}')">Edit</button></td></tr>`).join('');

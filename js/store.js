@@ -1,3 +1,5 @@
+import Api from './api-client.js';
+
 const DB_KEYS = { DOCUMENTS: 'invoicify_docs', SETTINGS: 'invoicify_settings', CUSTOMERS: 'invoicify_customers' };
 
 export default class Store {
@@ -12,12 +14,29 @@ export default class Store {
     }
     static saveSettings(settings) { localStorage.setItem(DB_KEYS.SETTINGS, JSON.stringify(settings)); }
     static getDocuments() { const data = localStorage.getItem(DB_KEYS.DOCUMENTS); return data ? JSON.parse(data) : []; }
+    static async getDocumentsAsync() {
+        if (Api.isAuthenticated()) {
+            const resp = await Api.getInvoices();
+            const docs = (resp.invoices || []).map(i => ({ id: `remote-${i.id}`, ...i.data }));
+            return docs;
+        }
+        return this.getDocuments();
+    }
     static saveDocument(doc) {
         const docs = this.getDocuments();
         const index = docs.findIndex(d => d.id === doc.id);
         if (index >= 0) docs[index] = doc; else docs.push(doc);
         localStorage.setItem(DB_KEYS.DOCUMENTS, JSON.stringify(docs));
         this.saveCustomer({ name: doc.customer.name, email: doc.customer.email });
+    }
+    static async saveDocumentAsync(doc) {
+        if (Api.isAuthenticated()) {
+            await Api.createInvoice(doc);
+            this.saveCustomer({ name: doc.customer.name, email: doc.customer.email });
+            return { remote: true };
+        }
+        this.saveDocument(doc);
+        return { remote: false };
     }
     static getCustomers() { const data = localStorage.getItem(DB_KEYS.CUSTOMERS); return data ? JSON.parse(data) : []; }
     static saveCustomer(customer) {
