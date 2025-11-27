@@ -1,7 +1,8 @@
 {
   "version": 2,
   
-  "buildCommand": "npm install",
+  
+  "outputDirectory": ".",
   "rewrites": [
     { "source": "/", "destination": "/login.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
