@@ -1,9 +1,6 @@
 {
   "version": 2,
-  "env": {
-    "POSTGRES_URL": "@postgres_url",
-    "JWT_SECRET": "@jwt_secret"
-  },
+  
   "buildCommand": "npm install",
   "rewrites": [
     { "source": "/", "destination": "/login.html" },
