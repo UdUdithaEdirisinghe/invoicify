@@ -17,7 +17,6 @@ class App {
     init() {
         this.setupEventListeners();
         this.loadCustomers();
-        this.renderDashboard();
     }
 
     applyTheme(color) {
@@ -42,7 +41,6 @@ class App {
     }
 
     handleRouteChange(hash) {
-        if (hash === 'dashboard') this.renderDashboard();
         if (hash === 'documents') this.renderDocList();
         if (hash === 'customers') this.renderCustomers();
         if (hash === 'settings') this.renderSettings();
@@ -74,7 +72,8 @@ class App {
             if (res.remote) {
                 window.location.href = '/dashboard.html';
             } else {
-                this.renderDashboard();
+                this.router.navigate('documents');
+                this.renderDocList();
             }
         });
 
