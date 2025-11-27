@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "build": "vercel build"
+    "build": "echo 'No build step needed for static site + functions'"
   },
   "dependencies": {
     "@vercel/postgres": "^0.5.1",
