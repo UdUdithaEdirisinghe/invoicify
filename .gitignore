@@ -1,0 +1,24 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Builds & cache
+dist/
+build/
+.cache/
+
+# Editor
+.vscode/
+.idea/
