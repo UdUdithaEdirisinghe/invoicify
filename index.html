@@ -204,6 +204,14 @@
             </section>
         </main>
     </div>
+    <script type="module">
+        // Protect this page - redirect to login if not authenticated
+        import ApiClient from './js/api-client.js';
+        
+        if (!ApiClient.isAuthenticated()) {
+            window.location.href = '/login.html';
+        }
+    </script>
     <script type="module" src="js/app.js"></script>
 </body>
 </html>
