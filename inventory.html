@@ -81,10 +81,14 @@
           return;
         }
         tbody.innerHTML = products.map(p => {
-          const isLow = Number(p.quantity) <= Number(p.low_stock_threshold || 0);
-          const qtyCell = isLow 
-            ? `${p.quantity} <span class=\"badge badge-low\"><i class=\"ph ph-flag\"></i>Low</span>`
-            : `${p.quantity}`;
+          const qty = Number(p.quantity);
+          const threshold = Number(p.low_stock_threshold || 0);
+          let qtyCell = `${p.quantity}`;
+          if (qty === 0) {
+            qtyCell = `${p.quantity} <span class="badge badge-out"><i class="ph ph-x-circle"></i>Out of Stock</span>`;
+          } else if (qty <= threshold) {
+            qtyCell = `${p.quantity} <span class="badge badge-low"><i class="ph ph-warning"></i>Low</span>`;
+          }
           return `
           <tr>
             <td>${p.name}</td>
