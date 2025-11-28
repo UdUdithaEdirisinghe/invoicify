@@ -82,12 +82,15 @@
         }
         tbody.innerHTML = products.map(p => {
           const isLow = Number(p.quantity) <= Number(p.low_stock_threshold || 0);
+          const qtyCell = isLow 
+            ? `${p.quantity} <span class=\"badge badge-low\"><i class=\"ph ph-flag\"></i>Low</span>`
+            : `${p.quantity}`;
           return `
-          <tr class="${isLow ? 'low-stock' : ''}">
+          <tr>
             <td>${p.name}</td>
             <td>${p.sku || ''}</td>
             <td>LKR ${Number(p.unit_price).toFixed(2)}</td>
-            <td>${isLow ? `<span class=\"qty-low\">${p.quantity}</span>` : p.quantity}</td>
+            <td>${qtyCell}</td>
             <td>${p.low_stock_threshold}</td>
             <td>
               <button class="secondary-btn" data-id="${p.id}" data-action="in">Stock In</button>
