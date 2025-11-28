@@ -28,6 +28,29 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invoice data is required' });
     }
 
+    // Consolidate duplicate items by productId
+    const rawItems = invoiceData?.items || invoiceData?.lines || [];
+    const consolidated = new Map();
+    for (const item of rawItems) {
+      const productId = item.productId || item.product_id;
+      const qty = parseInt(item.quantity || item.qty || 0, 10);
+      if (!productId || !qty || qty <= 0) continue;
+      const prev = consolidated.get(productId) || 0;
+      consolidated.set(productId, prev + qty);
+    }
+
+    // Validate stock availability before saving
+    for (const [productId, totalQty] of consolidated.entries()) {
+      const stockRes = await sql`SELECT quantity, name FROM products WHERE id = ${productId} AND user_id = ${userId}`;
+      const prod = stockRes.rows[0];
+      if (!prod) {
+        return res.status(400).json({ error: `Product not found: ${productId}` });
+      }
+      if (prod.quantity < totalQty) {
+        return res.status(400).json({ error: `Insufficient stock for ${prod.name}. Available: ${prod.quantity}, requested: ${totalQty}` });
+      }
+    }
+
     // Insert invoice
     const result = await sql`
       INSERT INTO invoices (user_id, invoice_data)
@@ -36,6 +59,13 @@ export default async function handler(req, res) {
     `;
 
     const invoice = result.rows[0];
+
+    // Deduct inventory using consolidated quantities
+    for (const [productId, totalQty] of consolidated.entries()) {
+      await sql`
+        INSERT INTO inventory_movements (user_id, product_id, type, quantity, note)
+        VALUES (${userId}, ${productId}, ${'out'}, ${totalQty}, ${'Invoice deduction'})`;
+    }
 
     return res.status(201).json({
       success: true,
