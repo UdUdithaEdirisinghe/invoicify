@@ -80,6 +80,69 @@ td { padding: 0.8rem 0; border-bottom: 1px solid var(--border); font-size: 0.95r
     font-size: 0.75rem;
     font-weight: 500;
 }
+.duplicate-badge {
+    display: inline-block;
+    margin-top: 4px;
+    margin-right: 8px;
+    padding: 2px 8px;
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.duplicate-warning {
+    border-color: #fbbf24 !important;
+    background: #fffbeb;
+}
+.product-suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    margin-top: 2px;
+    min-width: 300px;
+}
+.suggestion-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+.suggestion-item:hover {
+    background: #f9fafb;
+}
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+.suggestion-item strong {
+    flex: 1;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+.suggestion-stock {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: #dbeafe;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+.suggestion-price {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+.editor-items-table td {
+    position: relative;
+}
 .btn-delete-line {
     background: transparent;
     border: none;

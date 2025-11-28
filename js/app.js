@@ -91,9 +91,37 @@ class App {
             }
         });
 
-        document.getElementById('btn-generate-pdf').addEventListener('click', () => {
+        document.getElementById('btn-generate-pdf').addEventListener('click', async () => {
+            // Deduct inventory before generating PDF
+            try {
+                if (ApiClient.isAuthenticated()) {
+                    const consolidated = new Map();
+                    for (const item of this.state.currentDoc.items) {
+                        if (item.productId) {
+                            const qty = parseInt(item.qty) || 0;
+                            const prev = consolidated.get(item.productId) || 0;
+                            consolidated.set(item.productId, prev + qty);
+                        }
+                    }
+                    
+                    // Deduct stock for each product
+                    for (const [productId, totalQty] of consolidated.entries()) {
+                        await ApiClient.fetch('/api/inventory/movements', {
+                            method: 'POST',
+                            body: { productId, type: 'out', quantity: totalQty, note: 'PDF generated - manual deduction' }
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Inventory deduction failed:', err);
+                if (!confirm('Failed to update inventory. Continue generating PDF anyway?')) {
+                    return;
+                }
+            }
+            
             const fullDoc = { ...this.state.currentDoc, business: this.state.settings };
             PdfGenerator.generate(fullDoc);
+            alert('PDF generated and inventory updated!');
         });
 
         document.getElementById('btn-save-settings').addEventListener('click', async () => {
@@ -159,17 +187,29 @@ class App {
     renderLineItems() {
         const tbody = document.getElementById('line-items-body');
         tbody.innerHTML = '';
+        
+        // Check for duplicates
+        const duplicateProducts = new Set();
+        const productCounts = {};
+        this.state.currentDoc.items.forEach(item => {
+            if (item.productId) {
+                productCounts[item.productId] = (productCounts[item.productId] || 0) + 1;
+                if (productCounts[item.productId] > 1) {
+                    duplicateProducts.add(item.productId);
+                }
+            }
+        });
+        
         this.state.currentDoc.items.forEach((item, index) => {
             const tr = document.createElement('tr');
-            const productOptions = this.state.products.map(p => 
-                `<option value="${p.name}" data-id="${p.id}" data-price="${p.unit_price}" data-stock="${p.quantity}">${p.name} (Stock: ${p.quantity})</option>`
-            ).join('');
             const stockBadge = item.productId ? 
                 this.state.products.find(p => p.id === item.productId)?.quantity || 0 : '';
+            const isDuplicate = item.productId && duplicateProducts.has(item.productId);
             tr.innerHTML = `
                 <td>
-                    <input type="text" value="${item.name}" data-idx="${index}" data-field="name" list="products-list-${index}" placeholder="Search product..." class="line-item-input">
-                    <datalist id="products-list-${index}">${productOptions}</datalist>
+                    <input type="text" value="${item.name}" data-idx="${index}" data-field="name" placeholder="Type product name..." class="line-item-input ${isDuplicate ? 'duplicate-warning' : ''}" autocomplete="off">
+                    <div class="product-suggestions" id="suggestions-${index}"></div>
+                    ${isDuplicate ? `<small class="duplicate-badge">⚠️ Duplicate item - consider merging</small>` : ''}
                     ${stockBadge !== '' ? `<small class="stock-badge">Available: ${stockBadge}</small>` : ''}
                 </td>
                 <td><input type="number" value="${item.qty}" data-idx="${index}" data-field="qty" min="1" class="line-item-input"></td>
@@ -180,25 +220,100 @@ class App {
             tbody.appendChild(tr);
         });
 
-        // Product name auto-fill
+        // Product name auto-fill with live suggestions
         tbody.querySelectorAll('input[data-field="name"]').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const idx = e.target.dataset.idx;
-                const selectedName = e.target.value;
-                const product = this.state.products.find(p => p.name === selectedName);
-                if (product) {
-                    this.state.currentDoc.items[idx].productId = product.id;
-                    this.state.currentDoc.items[idx].name = product.name;
-                    this.state.currentDoc.items[idx].price = product.unit_price;
-                    e.target.value = product.name;
-                    const priceInput = tbody.querySelector(`input[data-idx="${idx}"][data-field="price"]`);
-                    if (priceInput) priceInput.value = product.unit_price;
-                    this.renderLineItems();
-                    this.calculateTotals();
-                } else {
-                    this.state.currentDoc.items[idx].name = selectedName;
-                    delete this.state.currentDoc.items[idx].productId;
+            const idx = input.dataset.idx;
+            const suggestionsDiv = document.getElementById(`suggestions-${idx}`);
+            
+            // Show suggestions on input
+            input.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                if (!query) {
+                    suggestionsDiv.innerHTML = '';
+                    suggestionsDiv.style.display = 'none';
+                    return;
                 }
+                
+                const matches = this.state.products.filter(p => 
+                    p.name.toLowerCase().includes(query)
+                ).slice(0, 5);
+                
+                if (matches.length > 0) {
+                    suggestionsDiv.innerHTML = matches.map(p => 
+                        `<div class="suggestion-item" data-id="${p.id}" data-name="${p.name}" data-price="${p.unit_price}">
+                            <strong>${p.name}</strong>
+                            <span class="suggestion-stock">Stock: ${p.quantity}</span>
+                            <span class="suggestion-price">LKR ${Number(p.unit_price).toFixed(2)}</span>
+                        </div>`
+                    ).join('');
+                    suggestionsDiv.style.display = 'block';
+                } else {
+                    suggestionsDiv.innerHTML = '';
+                    suggestionsDiv.style.display = 'none';
+                }
+            });
+            
+            // Select suggestion
+            input.addEventListener('click', (e) => {
+                if (this.state.products.length > 0 && !e.target.value) {
+                    const matches = this.state.products.slice(0, 5);
+                    suggestionsDiv.innerHTML = matches.map(p => 
+                        `<div class="suggestion-item" data-id="${p.id}" data-name="${p.name}" data-price="${p.unit_price}">
+                            <strong>${p.name}</strong>
+                            <span class="suggestion-stock">Stock: ${p.quantity}</span>
+                            <span class="suggestion-price">LKR ${Number(p.unit_price).toFixed(2)}</span>
+                        </div>`
+                    ).join('');
+                    suggestionsDiv.style.display = 'block';
+                }
+            });
+            
+            // Handle suggestion click
+            suggestionsDiv.addEventListener('click', (e) => {
+                const item = e.target.closest('.suggestion-item');
+                if (!item) return;
+                
+                const productId = item.dataset.id;
+                const productName = item.dataset.name;
+                const productPrice = item.dataset.price;
+                
+                // Check for duplicates
+                const existingIndex = this.state.currentDoc.items.findIndex((i, index) => 
+                    index !== parseInt(idx) && i.productId === productId
+                );
+                
+                if (existingIndex !== -1) {
+                    const confirmMerge = confirm(`This product is already added in line ${existingIndex + 1}. Do you want to merge quantities?`);
+                    if (confirmMerge) {
+                        this.state.currentDoc.items[existingIndex].qty = 
+                            (parseInt(this.state.currentDoc.items[existingIndex].qty) || 0) + 
+                            (parseInt(this.state.currentDoc.items[idx].qty) || 1);
+                        this.state.currentDoc.items.splice(idx, 1);
+                        this.renderLineItems();
+                        this.calculateTotals();
+                        return;
+                    }
+                }
+                
+                this.state.currentDoc.items[idx].productId = productId;
+                this.state.currentDoc.items[idx].name = productName;
+                this.state.currentDoc.items[idx].price = productPrice;
+                input.value = productName;
+                suggestionsDiv.innerHTML = '';
+                suggestionsDiv.style.display = 'none';
+                
+                const priceInput = tbody.querySelector(`input[data-idx="${idx}"][data-field="price"]`);
+                if (priceInput) priceInput.value = productPrice;
+                
+                this.renderLineItems();
+                this.calculateTotals();
+            });
+            
+            // Hide suggestions on blur (with delay for click to register)
+            input.addEventListener('blur', () => {
+                setTimeout(() => {
+                    suggestionsDiv.style.display = 'none';
+                }, 200);
             });
         });
 
