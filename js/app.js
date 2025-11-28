@@ -239,13 +239,14 @@ class App {
                 ).slice(0, 5);
                 
                 if (matches.length > 0) {
-                    suggestionsDiv.innerHTML = matches.map(p => 
-                        `<div class="suggestion-item" data-id="${p.id}" data-name="${p.name}" data-price="${p.unit_price}">
+                    suggestionsDiv.innerHTML = matches.map(p => {
+                        const price = Number(p.unit_price).toFixed(2);
+                        return `<div class="suggestion-item" data-product-id="${p.id}" data-product-name="${p.name}" data-product-price="${p.unit_price}">
                             <strong>${p.name}</strong>
                             <span class="suggestion-stock">Stock: ${p.quantity}</span>
-                            <span class="suggestion-price">LKR ${Number(p.unit_price).toFixed(2)}</span>
-                        </div>`
-                    ).join('');
+                            <span class="suggestion-price">LKR ${price}</span>
+                        </div>`;
+                    }).join('');
                     suggestionsDiv.style.display = 'block';
                 } else {
                     suggestionsDiv.innerHTML = '';
@@ -257,13 +258,14 @@ class App {
             input.addEventListener('click', (e) => {
                 if (this.state.products.length > 0 && !e.target.value) {
                     const matches = this.state.products.slice(0, 5);
-                    suggestionsDiv.innerHTML = matches.map(p => 
-                        `<div class="suggestion-item" data-id="${p.id}" data-name="${p.name}" data-price="${p.unit_price}">
+                    suggestionsDiv.innerHTML = matches.map(p => {
+                        const price = Number(p.unit_price).toFixed(2);
+                        return `<div class="suggestion-item" data-product-id="${p.id}" data-product-name="${p.name}" data-product-price="${p.unit_price}">
                             <strong>${p.name}</strong>
                             <span class="suggestion-stock">Stock: ${p.quantity}</span>
-                            <span class="suggestion-price">LKR ${Number(p.unit_price).toFixed(2)}</span>
-                        </div>`
-                    ).join('');
+                            <span class="suggestion-price">LKR ${price}</span>
+                        </div>`;
+                    }).join('');
                     suggestionsDiv.style.display = 'block';
                 }
             });
@@ -273,9 +275,9 @@ class App {
                 const item = e.target.closest('.suggestion-item');
                 if (!item) return;
                 
-                const productId = item.dataset.id;
-                const productName = item.dataset.name;
-                const productPrice = item.dataset.price;
+                const productId = item.dataset.productId;
+                const productName = item.dataset.productName;
+                const productPrice = item.dataset.productPrice;
                 
                 // Check for duplicates
                 const existingIndex = this.state.currentDoc.items.findIndex((i, index) => 
