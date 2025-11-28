@@ -2,13 +2,24 @@ import { sql } from '@vercel/postgres';
 import jwt from 'jsonwebtoken';
 
 function verifyToken(authHeader) {
-  if (!authHeader) throw new Error('Missing Authorization header');
+  if (!authHeader) throw new Error('No token provided');
   const token = authHeader.replace('Bearer ', '');
   const payload = jwt.verify(token, process.env.JWT_SECRET);
   return payload; // { userId, username }
 }
 
 export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   try {
     const { userId } = verifyToken(req.headers.authorization);
     const method = req.method;
@@ -22,17 +33,17 @@ export default async function handler(req, res) {
     }
 
     if (method === 'POST') {
-      const { name, sku, description, unitPrice, quantity, lowStockThreshold } = await req.json?.() || req.body || {};
+      const { name, sku, description, unitPrice, quantity, lowStockThreshold } = req.body || {};
       if (!name) return res.status(400).json({ error: 'name is required' });
       const { rows } = await sql`
         INSERT INTO products (user_id, name, sku, description, unit_price, quantity, low_stock_threshold)
-        VALUES (${userId}, ${name}, ${sku || null}, ${description || null}, ${unitPrice || 0}, ${quantity || 0}, ${lowStockThreshold || 0})
+        VALUES (${userId}, ${name}, ${sku || null}, ${description || null}, ${unitPrice ?? 0}, ${quantity ?? 0}, ${lowStockThreshold ?? 0})
         RETURNING id`;
       return res.status(201).json({ id: rows[0].id });
     }
 
     if (method === 'PUT') {
-      const { id, name, sku, description, unitPrice, quantity, lowStockThreshold } = await req.json?.() || req.body || {};
+      const { id, name, sku, description, unitPrice, quantity, lowStockThreshold } = req.body || {};
       if (!id) return res.status(400).json({ error: 'id is required' });
       await sql`
         UPDATE products SET
@@ -47,7 +58,7 @@ export default async function handler(req, res) {
     }
 
     if (method === 'DELETE') {
-      const { id } = await req.json?.() || req.body || {};
+      const { id } = req.body || {};
       if (!id) return res.status(400).json({ error: 'id is required' });
       await sql`DELETE FROM products WHERE id = ${id} AND user_id = ${userId}`;
       return res.status(200).json({ ok: true });
@@ -57,6 +68,7 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Inventory products error:', err);
     const msg = err.message || 'Unexpected error';
-    return res.status(401).json({ error: msg });
+    const status = msg === 'No token provided' ? 401 : 500;
+    return res.status(status).json({ error: msg });
   }
 }

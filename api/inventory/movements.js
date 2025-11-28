@@ -2,13 +2,24 @@ import { sql } from '@vercel/postgres';
 import jwt from 'jsonwebtoken';
 
 function verifyToken(authHeader) {
-  if (!authHeader) throw new Error('Missing Authorization header');
+  if (!authHeader) throw new Error('No token provided');
   const token = authHeader.replace('Bearer ', '');
   const payload = jwt.verify(token, process.env.JWT_SECRET);
   return payload; // { userId, username }
 }
 
 export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   try {
     const { userId } = verifyToken(req.headers.authorization);
     const method = req.method;
@@ -24,8 +35,8 @@ export default async function handler(req, res) {
     }
 
     if (method === 'POST') {
-      const { productId, type, quantity, note } = await req.json?.() || req.body || {};
-      if (!productId || !type || !quantity) {
+      const { productId, type, quantity, note } = req.body || {};
+      if (!productId || !type || quantity === undefined) {
         return res.status(400).json({ error: 'productId, type, quantity required' });
       }
       await sql`
@@ -38,6 +49,7 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Inventory movements error:', err);
     const msg = err.message || 'Unexpected error';
-    return res.status(401).json({ error: msg });
+    const status = msg === 'No token provided' ? 401 : 500;
+    return res.status(status).json({ error: msg });
   }
 }
