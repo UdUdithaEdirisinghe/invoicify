@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory - Invoicify</title>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="brand"><i class="ph ph-hexagon-fill"></i> Invoicify</div>
+      <nav>
+        <a href="/dashboard.html" class="nav-link"><i class="ph ph-squares-four"></i> Dashboard</a>
+        <a href="/index.html#editor" class="nav-link"><i class="ph ph-plus-circle"></i> New Invoice</a>
+        <a href="/inventory.html" class="nav-link active"><i class="ph ph-package"></i> Inventory</a>
+        <a href="/index.html#settings" class="nav-link"><i class="ph ph-gear"></i> Settings</a>
+      </nav>
+      <div style="padding: 20px; margin-top: auto;">
+        <button class="logout-btn" style="width: 100%; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">
+          <i class="ph ph-sign-out"></i> Logout
+        </button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="view-header">
+        <h1>Inventory</h1>
+        <div id="user-info" style="color:#64748b"></div>
+      </header>
+
+      <div class="card" style="margin-bottom:20px;">
+        <h3>Add Product</h3>
+        <form id="product-form" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px;">
+          <input type="text" id="name" placeholder="Name" required />
+          <input type="text" id="sku" placeholder="SKU" />
+          <input type="number" id="unitPrice" placeholder="Unit Price" step="0.01" />
+          <input type="number" id="quantity" placeholder="Initial Quantity" />
+          <input type="number" id="lowStockThreshold" placeholder="Low Stock Threshold" />
+          <input type="text" id="description" placeholder="Description" />
+          <button type="submit" class="primary-btn">Create</button>
+        </form>
+      </div>
+
+      <div class="table-container card">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>SKU</th>
+              <th>Price</th>
+              <th>Qty</th>
+              <th>Low</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody">
+            <tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">Loading products...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAuth, getCurrentUser, setupLogout } from './js/auth.js';
+    import ApiClient from './js/api-client.js';
+
+    if (!requireAuth()) throw new Error('Not authenticated');
+    setupLogout();
+
+    const tbody = document.getElementById('products-tbody');
+    const form = document.getElementById('product-form');
+
+    async function loadProducts() {
+      try {
+        const { products } = await ApiClient.fetch('/api/inventory/products');
+        if (!products || products.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">No products yet</td></tr>';
+          return;
+        }
+        tbody.innerHTML = products.map(p => `
+          <tr>
+            <td>${p.name}</td>
+            <td>${p.sku || ''}</td>
+            <td>LKR ${Number(p.unit_price).toFixed(2)}</td>
+            <td>${p.quantity}</td>
+            <td>${p.low_stock_threshold}</td>
+            <td>
+              <button class="secondary-btn" data-id="${p.id}" data-action="in">Stock In</button>
+              <button class="secondary-btn" data-id="${p.id}" data-action="out">Stock Out</button>
+              <button class="secondary-btn" data-id="${p.id}" data-action="adjust">Adjust</button>
+              <button class="danger-btn" data-id="${p.id}" data-action="delete">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+
+        tbody.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const id = e.target.dataset.id;
+            const action = e.target.dataset.action;
+            if (action === 'delete') {
+              if (!confirm('Delete product?')) return;
+              await ApiClient.fetch('/api/inventory/products', { method: 'DELETE', body: { id } });
+              loadProducts();
+              return;
+            }
+            const qtyStr = prompt(action === 'adjust' ? 'Set quantity to:' : 'Quantity:');
+            if (!qtyStr) return;
+            const quantity = parseInt(qtyStr, 10);
+            if (Number.isNaN(quantity) || quantity < 0) return alert('Invalid quantity');
+            await ApiClient.fetch('/api/inventory/movements', { method: 'POST', body: { productId: id, type: action, quantity } });
+            loadProducts();
+          });
+        });
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#ef4444;">Failed to load products</td></tr>';
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = {
+        name: document.getElementById('name').value.trim(),
+        sku: document.getElementById('sku').value.trim(),
+        unitPrice: parseFloat(document.getElementById('unitPrice').value || '0'),
+        quantity: parseInt(document.getElementById('quantity').value || '0', 10),
+        lowStockThreshold: parseInt(document.getElementById('lowStockThreshold').value || '0', 10),
+        description: document.getElementById('description').value.trim()
+      };
+      if (!body.name) return alert('Name is required');
+      await ApiClient.fetch('/api/inventory/products', { method: 'POST', body });
+      form.reset();
+      loadProducts();
+    });
+
+    (async () => {
+      const user = await getCurrentUser();
+      if (user) document.getElementById('user-info').textContent = `Logged in as: ${user.username}`;
+      loadProducts();
+    })();
+  </script>
+</body>
+</html>
