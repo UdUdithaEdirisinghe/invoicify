@@ -7,7 +7,8 @@ class App {
     constructor() {
         this.state = {
             currentDoc: this.getEmptyDoc(),
-            settings: Store.getSettings()
+            settings: Store.getSettings(),
+            products: []
         };
         this.applyTheme(this.state.settings.themeColor);
         this.router = new Router(null, (hash) => this.handleRouteChange(hash));
@@ -17,6 +18,19 @@ class App {
     init() {
         this.setupEventListeners();
         this.loadCustomers();
+        this.loadProducts();
+    }
+
+    async loadProducts() {
+        try {
+            if (ApiClient.isAuthenticated()) {
+                const { products } = await ApiClient.fetch('/api/inventory/products');
+                this.state.products = products || [];
+            }
+        } catch (err) {
+            console.warn('Failed to load products:', err);
+            this.state.products = [];
+        }
     }
 
     applyTheme(color) {
@@ -61,7 +75,7 @@ class App {
             });
 
         document.getElementById('btn-add-row').addEventListener('click', () => {
-            this.state.currentDoc.items.push({ name: '', qty: 1, price: 0, tax: 0, total: 0 });
+            this.state.currentDoc.items.push({ name: '', qty: 1, price: 0, tax: 0, total: 0, productId: null });
             this.renderLineItems();
             this.calculateTotals();
         });
@@ -147,16 +161,48 @@ class App {
         tbody.innerHTML = '';
         this.state.currentDoc.items.forEach((item, index) => {
             const tr = document.createElement('tr');
+            const productOptions = this.state.products.map(p => 
+                `<option value="${p.name}" data-id="${p.id}" data-price="${p.unit_price}" data-stock="${p.quantity}">${p.name} (Stock: ${p.quantity})</option>`
+            ).join('');
+            const stockBadge = item.productId ? 
+                this.state.products.find(p => p.id === item.productId)?.quantity || 0 : '';
             tr.innerHTML = `
-                <td><input type="text" value="${item.name}" data-idx="${index}" data-field="name"></td>
-                <td><input type="number" value="${item.qty}" data-idx="${index}" data-field="qty"></td>
-                <td><input type="number" value="${item.price}" data-idx="${index}" data-field="price"></td>
-                <td><input type="number" value="${item.tax}" data-idx="${index}" data-field="tax"></td>
-                <td><span class="text-danger" data-idx="${index}">&times;</span></td>
+                <td>
+                    <input type="text" value="${item.name}" data-idx="${index}" data-field="name" list="products-list-${index}" placeholder="Search product..." class="line-item-input">
+                    <datalist id="products-list-${index}">${productOptions}</datalist>
+                    ${stockBadge !== '' ? `<small class="stock-badge">Available: ${stockBadge}</small>` : ''}
+                </td>
+                <td><input type="number" value="${item.qty}" data-idx="${index}" data-field="qty" min="1" class="line-item-input"></td>
+                <td><input type="number" value="${item.price}" data-idx="${index}" data-field="price" step="0.01" min="0" class="line-item-input"></td>
+                <td><input type="number" value="${item.tax}" data-idx="${index}" data-field="tax" step="0.01" min="0" class="line-item-input"></td>
+                <td><button class="btn-delete-line" data-idx="${index}" title="Remove"><i class="ph ph-trash"></i></button></td>
             `;
             tbody.appendChild(tr);
         });
-        tbody.querySelectorAll('input').forEach(input => {
+
+        // Product name auto-fill
+        tbody.querySelectorAll('input[data-field="name"]').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const idx = e.target.dataset.idx;
+                const selectedName = e.target.value;
+                const product = this.state.products.find(p => p.name === selectedName);
+                if (product) {
+                    this.state.currentDoc.items[idx].productId = product.id;
+                    this.state.currentDoc.items[idx].name = product.name;
+                    this.state.currentDoc.items[idx].price = product.unit_price;
+                    e.target.value = product.name;
+                    const priceInput = tbody.querySelector(`input[data-idx="${idx}"][data-field="price"]`);
+                    if (priceInput) priceInput.value = product.unit_price;
+                    this.renderLineItems();
+                    this.calculateTotals();
+                } else {
+                    this.state.currentDoc.items[idx].name = selectedName;
+                    delete this.state.currentDoc.items[idx].productId;
+                }
+            });
+        });
+
+        tbody.querySelectorAll('input[data-field="qty"], input[data-field="price"], input[data-field="tax"]').forEach(input => {
             input.addEventListener('input', (e) => {
                 const idx = e.target.dataset.idx;
                 const field = e.target.dataset.field;
@@ -164,9 +210,10 @@ class App {
                 this.calculateTotals();
             });
         });
-        tbody.querySelectorAll('.text-danger').forEach(btn => {
+
+        tbody.querySelectorAll('.btn-delete-line').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const idx = e.target.dataset.idx;
+                const idx = e.currentTarget.dataset.idx;
                 this.state.currentDoc.items.splice(idx, 1);
                 this.renderLineItems();
                 this.calculateTotals();

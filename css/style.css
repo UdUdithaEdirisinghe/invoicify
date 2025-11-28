@@ -57,8 +57,42 @@ th { text-align: left; font-size: 0.8rem; text-transform: uppercase; color: var(
 td { padding: 0.8rem 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
 
 .editor-items-table th { background: #f9fafb; padding: 8px; border-bottom: 2px solid var(--border); }
-.editor-items-table td { padding: 8px 4px; border: none; }
+.editor-items-table td { padding: 8px 4px; border: none; vertical-align: top; }
 .editor-items-table input { padding: 0.4rem; font-size: 0.9rem; }
+.line-item-input { 
+    width: 100%; 
+    padding: 0.5rem; 
+    border: 1px solid var(--border); 
+    border-radius: 4px; 
+    transition: all 0.2s;
+}
+.line-item-input:focus {
+    outline: 2px solid var(--primary);
+    border-color: transparent;
+}
+.stock-badge {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 2px 8px;
+    background: #dbeafe;
+    color: #1e40af;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.btn-delete-line {
+    background: transparent;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-size: 1.2rem;
+}
+.btn-delete-line:hover {
+    background: #fee2e2;
+}
 
 .editor-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; height: calc(100vh - 100px); }
 .editor-form { overflow-y: auto; padding-right: 10px; display: flex; flex-direction: column; gap: 1rem; }
