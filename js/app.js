@@ -225,9 +225,18 @@ class App {
             const idx = input.dataset.idx;
             const suggestionsDiv = document.getElementById(`suggestions-${idx}`);
             
-            // Show suggestions on input
+            // Show suggestions on input and keep state in sync
             input.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
+                const raw = e.target.value || '';
+                // Persist typed name so re-render doesn't clear it
+                this.state.currentDoc.items[idx].name = raw;
+                // If user edits name away from selected product, clear productId link
+                const selectedProd = this.state.products.find(p => p.id === this.state.currentDoc.items[idx].productId);
+                if (selectedProd && selectedProd.name !== raw) {
+                    delete this.state.currentDoc.items[idx].productId;
+                }
+
+                const query = raw.toLowerCase();
                 if (!query) {
                     suggestionsDiv.innerHTML = '';
                     suggestionsDiv.style.display = 'none';
@@ -270,8 +279,9 @@ class App {
                 }
             });
             
-            // Handle suggestion click
-            suggestionsDiv.addEventListener('click', (e) => {
+            // Handle suggestion selection before input blur
+            suggestionsDiv.addEventListener('mousedown', (e) => {
+                e.preventDefault();
                 const item = e.target.closest('.suggestion-item');
                 if (!item) return;
                 
