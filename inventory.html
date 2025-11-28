@@ -80,12 +80,14 @@
           tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">No products yet</td></tr>';
           return;
         }
-        tbody.innerHTML = products.map(p => `
-          <tr>
+        tbody.innerHTML = products.map(p => {
+          const isLow = Number(p.quantity) <= Number(p.low_stock_threshold || 0);
+          return `
+          <tr class="${isLow ? 'low-stock' : ''}">
             <td>${p.name}</td>
             <td>${p.sku || ''}</td>
             <td>LKR ${Number(p.unit_price).toFixed(2)}</td>
-            <td>${p.quantity}</td>
+            <td>${isLow ? `<span class=\"qty-low\">${p.quantity}</span>` : p.quantity}</td>
             <td>${p.low_stock_threshold}</td>
             <td>
               <button class="secondary-btn" data-id="${p.id}" data-action="in">Stock In</button>
@@ -93,8 +95,8 @@
               <button class="secondary-btn" data-id="${p.id}" data-action="adjust">Adjust</button>
               <button class="danger-btn" data-id="${p.id}" data-action="delete">Delete</button>
             </td>
-          </tr>
-        `).join('');
+          </tr>`;
+        }).join('');
 
         tbody.querySelectorAll('button').forEach(btn => {
           btn.addEventListener('click', async (e) => {

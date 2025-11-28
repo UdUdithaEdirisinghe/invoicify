@@ -84,6 +84,14 @@ th { text-align: left; font-size: 0.8rem; text-transform: uppercase; color: var(
 td { padding: 0.8rem 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
 tbody tr:hover { background: #f9fafb; }
 
+/* Low stock highlighting for inventory table */
+tbody tr.low-stock { 
+    background: #fff7ed; /* amber-50 */
+    box-shadow: inset 3px 0 0 #f59e0b; /* amber-500 left accent */
+}
+tbody tr.low-stock:hover { background: #ffedd5; /* amber-100 */ }
+.qty-low { color: #b45309; font-weight: 600; }
+
 .editor-items-table th { background: #f9fafb; padding: 8px; border-bottom: 2px solid var(--border); }
 .editor-items-table td { padding: 8px 4px; border: none; vertical-align: top; }
 .editor-items-table input { padding: 0.4rem; font-size: 0.9rem; }
