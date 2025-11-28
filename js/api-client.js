@@ -5,6 +5,16 @@ class ApiClient {
     this.baseURL = window.location.origin;
   }
 
+  // Generic fetch alias used across pages
+  async fetch(endpoint, options = {}) {
+    // Ensure JSON body is stringified
+    const opts = { ...options };
+    if (opts.body && typeof opts.body !== 'string') {
+      opts.body = JSON.stringify(opts.body);
+    }
+    return this.request(endpoint, opts);
+  }
+
   getToken() {
     return localStorage.getItem('auth_token');
   }
