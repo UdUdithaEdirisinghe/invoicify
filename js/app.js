@@ -295,16 +295,23 @@ class App {
                     }
                 }
                 
+                // Update state
                 this.state.currentDoc.items[idx].productId = productId;
                 this.state.currentDoc.items[idx].name = productName;
-                this.state.currentDoc.items[idx].price = productPrice;
+                this.state.currentDoc.items[idx].price = parseFloat(productPrice) || 0;
+                
+                // Update UI
                 input.value = productName;
                 suggestionsDiv.innerHTML = '';
                 suggestionsDiv.style.display = 'none';
                 
+                // Update price input directly in DOM before re-render
                 const priceInput = tbody.querySelector(`input[data-idx="${idx}"][data-field="price"]`);
-                if (priceInput) priceInput.value = productPrice;
+                if (priceInput) {
+                    priceInput.value = productPrice;
+                }
                 
+                // Re-render to show stock badge and recalculate
                 this.renderLineItems();
                 this.calculateTotals();
             });
