@@ -70,6 +70,7 @@ export function setupRegisterForm() {
     e.preventDefault();
     
     const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
     
@@ -82,15 +83,12 @@ export function setupRegisterForm() {
     const themeColor = document.getElementById('theme-color').value;
     const logoFile = document.getElementById('logo-upload').files[0];
 
-    if (!username || !password || !confirmPassword) {
-      showError('Please fill in all account fields');
+    if (!username || !email || !password || !confirmPassword) {
+      showError('Please fill in username, email and password fields');
       return;
     }
     
-    if (!businessName || !businessAddress || !businessEmail) {
-      showError('Please fill in all required business fields');
-      return;
-    }
+    // Business info is optional except name/address can be enforced if desired
 
     if (password !== confirmPassword) {
       showError('Passwords do not match');
@@ -107,7 +105,11 @@ export function setupRegisterForm() {
       submitBtn.textContent = 'Creating account...';
       errorDiv.style.display = 'none';
 
-      await ApiClient.register(username, password);
+      await ApiClient.register(username, email, password, {
+        businessName,
+        businessAddress,
+        phone: businessPhone
+      });
       
       // Handle logo upload
       let logoUrl = '';
@@ -124,7 +126,7 @@ export function setupRegisterForm() {
         businessName,
         address: businessAddress,
         phone: businessPhone,
-        email: businessEmail,
+        email: businessEmail || email,
         currency: currency || 'LKR',
         themeColor: themeColor || '#2563eb',
         logoUrl: logoUrl,
@@ -142,7 +144,7 @@ export function setupRegisterForm() {
         name: businessName,
         address: businessAddress,
         phone: businessPhone,
-        email: businessEmail,
+        email: businessEmail || email,
         currency: currency || 'LKR',
         themeColor: themeColor || '#2563eb',
         logoUrl: logoUrl,
