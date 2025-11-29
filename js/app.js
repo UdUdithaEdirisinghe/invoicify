@@ -391,7 +391,7 @@ class App {
         if (id === 'cust-email') doc.customer.email = val;
         if (id === 'cust-phone') doc.customer.phone = val;
         if (id === 'cust-address') doc.customer.address = val;
-        if (id === 'discount-val' || id === 'discount-type') this.calculateTotals();
+        if (id === 'discount-val' || id === 'discount-type' || id === 'shipping-val') this.calculateTotals();
         this.renderPreview();
     }
 
