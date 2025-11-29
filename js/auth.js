@@ -79,6 +79,8 @@ export function setupRegisterForm() {
     const businessPhone = document.getElementById('business-phone').value.trim();
     const businessEmail = document.getElementById('business-email').value.trim();
     const currency = document.getElementById('currency').value.trim();
+    const themeColor = document.getElementById('theme-color').value;
+    const logoFile = document.getElementById('logo-upload').files[0];
 
     if (!username || !password || !confirmPassword) {
       showError('Please fill in all account fields');
@@ -107,6 +109,16 @@ export function setupRegisterForm() {
 
       await ApiClient.register(username, password);
       
+      // Handle logo upload
+      let logoUrl = '';
+      if (logoFile) {
+        const reader = new FileReader();
+        logoUrl = await new Promise((resolve) => {
+          reader.onload = (e) => resolve(e.target.result);
+          reader.readAsDataURL(logoFile);
+        });
+      }
+      
       // Save business settings to localStorage with correct key and field names
       const settings = {
         name: businessName,
@@ -114,7 +126,8 @@ export function setupRegisterForm() {
         phone: businessPhone,
         email: businessEmail,
         currency: currency || 'LKR',
-        themeColor: '#2563eb',
+        themeColor: themeColor || '#2563eb',
+        logoUrl: logoUrl,
         showBankDetails: true
       };
       localStorage.setItem('invoicify_settings', JSON.stringify(settings));

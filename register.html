@@ -240,6 +240,22 @@
                     <input type="text" id="currency" name="currency" value="LKR" required maxlength="10" placeholder="e.g. LKR, USD, EUR">
                 </div>
             </div>
+            
+            <div class="form-section">
+                <h3><i class="ph ph-paint-brush"></i> Branding</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="logo-upload">Logo (Optional)</label>
+                        <input type="file" id="logo-upload" name="logo-upload" accept="image/*">
+                        <div class="password-requirements">Will appear on invoices</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="theme-color">Theme Color</label>
+                        <input type="color" id="theme-color" name="theme-color" value="#2563eb" style="height: 45px; width: 100%; cursor: pointer;">
+                    </div>
+                </div>
+            </div>
 
             <button type="submit" class="submit-btn" id="submit-btn">Create Account</button>
         </form>
