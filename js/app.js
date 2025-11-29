@@ -42,81 +42,12 @@ class App {
             } else {
                 // Fallback to local inventory when offline/not authenticated
                 this.state.products = Store.getProducts();
-                        // Enhance product loading to render error/empty states gracefully
-                        const productsState = {
-                            products: [],
-                            loaded: false,
-                            error: null,
-                        };
-
-                        const productsContainer = document.getElementById('product-suggestions');
-                        const errorBanner = document.getElementById('product-error');
-                        const emptyState = document.getElementById('product-empty');
-
-                        function normalizeProducts(resp) {
-                            if (!resp) return [];
-                            if (Array.isArray(resp)) return resp;
-                            if (Array.isArray(resp.data)) return resp.data;
-                            if (Array.isArray(resp.products)) return resp.products;
-                            return [];
-                        }
-
-                        async function loadProducts() {
-                            try {
-                                productsState.error = null;
-                                if (errorBanner) errorBanner.style.display = 'none';
-                                if (emptyState) emptyState.style.display = 'none';
-
-                                const token = localStorage.getItem('token');
-                                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-                                const resp = await fetch('/api/products', { headers });
-                                if (!resp.ok) {
-                                    if (resp.status === 401) {
-                                        productsState.error = 'Your session expired. Please log in again.';
-                                    } else {
-                                        const text = await resp.text();
-                                        productsState.error = text || `Failed to load products (${resp.status}).`;
-                                    }
-                                    throw new Error(productsState.error);
-                                }
-                                const json = await resp.json().catch(() => ({}));
-                                const products = normalizeProducts(json);
-                                productsState.products = products;
-                                productsState.loaded = true;
-                                renderProducts();
-                            } catch (e) {
-                                productsState.loaded = true;
-                                if (errorBanner) {
-                                    errorBanner.textContent = productsState.error || 'Unable to load products.';
-                                    errorBanner.style.display = 'block';
-                                }
-                                if (emptyState) {
-                                    emptyState.style.display = 'block';
-                                }
-                                // Render minimal UI so editor isn’t blank
-                                renderProducts([]);
-                            }
-                        }
-
-                        function renderProducts(list) {
-                            const items = typeof list !== 'undefined' ? list : productsState.products;
-                            if (!productsContainer) return;
-                            productsContainer.innerHTML = '';
-                            if (!items || items.length === 0) {
-                                return;
-                            }
-                            const frag = document.createDocumentFragment();
-                            items.forEach(p => {
-                                const div = document.createElement('div');
-                                div.className = 'suggestion-item';
-                                div.dataset.productId = p.id;
-                                div.textContent = `${p.name} (${p.current_quantity ?? 0} in stock)`;
-                                frag.appendChild(div);
-                            });
-                            productsContainer.appendChild(frag);
-                        }
-
-                        document.addEventListener('DOMContentLoaded', loadProducts);
+                // Toggle error/empty banners based on products loaded
+                const errorBanner = document.getElementById('product-error');
+                const emptyState = document.getElementById('product-empty');
+                if (errorBanner) errorBanner.style.display = 'none';
+                if (emptyState) emptyState.style.display = this.state.products.length ? 'none' : 'block';
+            }
         } catch (err) {
             console.warn('Failed to load products:', err);
             this.state.products = Store.getProducts();
@@ -727,7 +658,13 @@ class App {
         const docs = await Store.getDocumentsAsync();
         const settings = Store.getSettings();
         const currency = settings.currency || 'LKR';
-        document.querySelector('#docs-table tbody').innerHTML = docs.map((d) => `<tr><td>${d.number}</td><td>${d.type}</td><td>${d.customer.name}</td><td>${d.date}</td><td>${currency} ${d.totals.grandTotal.toFixed(2)}</td><td><button class="btn btn-sm btn-secondary" onclick="window.editDoc('${d.id}')">Edit</button></td></tr>`).join('');
+        const tbody = document.querySelector('#docs-table tbody');
+        if (!tbody) return;
+        if (!docs || docs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 12px; color:#666;">No documents yet. Click + New to create one.</td></tr>`;
+        } else {
+            tbody.innerHTML = docs.map((d) => `<tr><td>${d.number}</td><td>${d.type}</td><td>${d.customer.name}</td><td>${d.date}</td><td>${currency} ${d.totals.grandTotal.toFixed(2)}</td><td><button class="btn btn-sm btn-secondary" onclick="window.editDoc('${d.id}')">Edit</button></td></tr>`).join('');
+        }
         window.editDoc = (id) => {
             const doc = docs.find(d => d.id === id);
             if(doc) {
