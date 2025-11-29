@@ -148,7 +148,7 @@
             if (!qtyStr) return;
             const delta = parseInt(qtyStr, 10);
             if (Number.isNaN(delta) || delta <= 0) return alert('Invalid quantity');
-            let newQty = current.current_quantity || 0;
+            let newQty = parseInt(current.current_quantity || 0, 10);
             newQty = action === 'in' ? newQty + delta : Math.max(0, newQty - delta);
             try {
               await ApiClient.updateProduct(id, {
