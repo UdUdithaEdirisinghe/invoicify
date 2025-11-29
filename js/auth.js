@@ -107,16 +107,17 @@ export function setupRegisterForm() {
 
       await ApiClient.register(username, password);
       
-      // Save business settings to localStorage
+      // Save business settings to localStorage with correct key and field names
       const settings = {
-        businessName,
+        name: businessName,
         address: businessAddress,
         phone: businessPhone,
         email: businessEmail,
         currency: currency || 'LKR',
-        themeColor: '#2563eb'
+        themeColor: '#2563eb',
+        showBankDetails: true
       };
-      localStorage.setItem('invoice_settings', JSON.stringify(settings));
+      localStorage.setItem('invoicify_settings', JSON.stringify(settings));
       
       // Redirect to dashboard
       window.location.href = '/dashboard.html';
