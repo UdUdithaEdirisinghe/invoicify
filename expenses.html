@@ -502,7 +502,10 @@
 
         const response = await ApiClient.getExpenses(params);
         const expenses = response.expenses || response.data || [];
-        const pagination = response.pagination || { total: expenses.length, hasMore: false, totalAmount: 0 };
+        const total = (typeof response.total === 'number') ? response.total : expenses.length;
+        const hasMore = (currentPage + 1) * currentLimit < total;
+        const totalAmount = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+        const pagination = { total, hasMore, totalAmount };
 
         if (expenses.length === 0 && currentPage === 0 && !currentSearch && !currentStatus && !currentCategory) {
           emptyState.style.display = 'flex';
@@ -539,16 +542,21 @@
         const endOfToday = today.toISOString().split('T')[0];
 
         const [monthData, yearData, pendingData, paidData] = await Promise.all([
-          ApiClient.getExpenses({ startDate: thisMonth, endDate: endOfToday, limit: 1 }).catch(() => ({ pagination: { totalAmount: 0 }})),
-          ApiClient.getExpenses({ startDate: thisYear, endDate: endOfToday, limit: 1 }).catch(() => ({ pagination: { totalAmount: 0 }})),
-          ApiClient.getExpenses({ status: 'pending', limit: 1 }).catch(() => ({ pagination: { totalAmount: 0 }})),
-          ApiClient.getExpenses({ status: 'paid', limit: 1 }).catch(() => ({ pagination: { totalAmount: 0 }}))
+          ApiClient.getExpenses({ startDate: thisMonth, endDate: endOfToday, limit: 10000 }).catch(() => ({ data: [] })),
+          ApiClient.getExpenses({ startDate: thisYear, endDate: endOfToday, limit: 10000 }).catch(() => ({ data: [] })),
+          ApiClient.getExpenses({ status: 'pending', limit: 10000 }).catch(() => ({ data: [] })),
+          ApiClient.getExpenses({ status: 'paid', limit: 10000 }).catch(() => ({ data: [] }))
         ]);
 
-        document.getElementById('stat-this-month').textContent = formatCurrency(monthData.pagination?.totalAmount || 0);
-        document.getElementById('stat-this-year').textContent = formatCurrency(yearData.pagination?.totalAmount || 0);
-        document.getElementById('stat-pending').textContent = formatCurrency(pendingData.pagination?.totalAmount || 0);
-        document.getElementById('stat-paid').textContent = formatCurrency(paidData.pagination?.totalAmount || 0);
+        const sumMonth = (monthData.data || monthData.expenses || []).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+        const sumYear = (yearData.data || yearData.expenses || []).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+        const sumPending = (pendingData.data || pendingData.expenses || []).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+        const sumPaid = (paidData.data || paidData.expenses || []).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+
+        document.getElementById('stat-this-month').textContent = formatCurrency(sumMonth);
+        document.getElementById('stat-this-year').textContent = formatCurrency(sumYear);
+        document.getElementById('stat-pending').textContent = formatCurrency(sumPending);
+        document.getElementById('stat-paid').textContent = formatCurrency(sumPaid);
       } catch (error) {
         console.error('Failed to load stats:', error);
         document.getElementById('stat-this-month').textContent = formatCurrency(0);
@@ -600,7 +608,7 @@
       if (pagination.total > currentLimit) {
         paginationDiv.style.display = 'flex';
         const totalPages = Math.ceil(pagination.total / currentLimit);
-        pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages} (Total: ${formatCurrency(pagination.totalAmount)})`;
+        pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages} (Page Sum: ${formatCurrency(pagination.totalAmount || 0)})`;
         
         btnPrev.disabled = currentPage === 0;
         btnNext.disabled = !pagination.hasMore;
@@ -635,7 +643,7 @@
 
         document.getElementById('expense-title').value = expense.title || '';
         document.getElementById('expense-amount').value = expense.amount || '';
-        document.getElementById('expense-category').value = expense.category_id || '';
+        document.getElementById('expense-category').value = expense.expense_category_id || '';
         document.getElementById('expense-date').value = expense.expense_date || '';
         document.getElementById('expense-payment-method').value = expense.payment_method || '';
         document.getElementById('expense-status').value = expense.status || 'pending';
