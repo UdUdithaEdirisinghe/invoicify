@@ -1,5 +1,5 @@
-import pool from './db.js';
-import { verifyToken } from './auth/middleware.js';
+import pool from '../lib/db.js';
+import { verifyToken } from '../lib/auth.js';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
