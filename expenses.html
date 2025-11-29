@@ -460,8 +460,8 @@
 
     async function loadCategories() {
       try {
-        const response = await ApiClient.getExpenseCategories();
-        categories = response.categories || [];
+        const response = await ApiClient.getExpenseCategories().catch(() => ({ categories: [] }));
+        categories = response.categories || response.data || [];
         
         const categoryFilter = document.getElementById('category-filter');
         const expenseCategory = document.getElementById('expense-category');
@@ -475,6 +475,7 @@
         });
       } catch (error) {
         console.error('Failed to load categories:', error);
+        // Keep default empty options even on error
       }
     }
 
@@ -500,10 +501,18 @@
         if (currentEndDate) params.endDate = currentEndDate;
 
         const response = await ApiClient.getExpenses(params);
-        const { expenses, pagination } = response;
+        const expenses = response.expenses || response.data || [];
+        const pagination = response.pagination || { total: expenses.length, hasMore: false, totalAmount: 0 };
 
         if (expenses.length === 0 && currentPage === 0 && !currentSearch && !currentStatus && !currentCategory) {
           emptyState.style.display = 'flex';
+          loading.style.display = 'none';
+          return;
+        }
+
+        if (expenses.length === 0 && (currentSearch || currentStatus || currentCategory)) {
+          table.style.display = 'block';
+          document.getElementById('expenses-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#64748b;">No expenses found matching your filters</td></tr>';
           loading.style.display = 'none';
           return;
         }
@@ -516,6 +525,8 @@
       } catch (error) {
         console.error('Failed to load expenses:', error);
         loading.style.display = 'none';
+        table.style.display = 'block';
+        document.getElementById('expenses-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#ef4444;">Failed to load expenses. Please try again.</td></tr>';
         showToast('Failed to load expenses', 'error');
       }
     }
@@ -528,18 +539,22 @@
         const endOfToday = today.toISOString().split('T')[0];
 
         const [monthData, yearData, pendingData, paidData] = await Promise.all([
-          ApiClient.getExpenses({ startDate: thisMonth, endDate: endOfToday, limit: 1 }),
-          ApiClient.getExpenses({ startDate: thisYear, endDate: endOfToday, limit: 1 }),
-          ApiClient.getExpenses({ status: 'pending', limit: 1 }),
-          ApiClient.getExpenses({ status: 'paid', limit: 1 })
+          ApiClient.getExpenses({ startDate: thisMonth, endDate: endOfToday, limit: 1 }).catch(() => ({ pagination: { totalAmount: 0 }})),
+          ApiClient.getExpenses({ startDate: thisYear, endDate: endOfToday, limit: 1 }).catch(() => ({ pagination: { totalAmount: 0 }})),
+          ApiClient.getExpenses({ status: 'pending', limit: 1 }).catch(() => ({ pagination: { totalAmount: 0 }})),
+          ApiClient.getExpenses({ status: 'paid', limit: 1 }).catch(() => ({ pagination: { totalAmount: 0 }}))
         ]);
 
-        document.getElementById('stat-this-month').textContent = formatCurrency(monthData.pagination.totalAmount);
-        document.getElementById('stat-this-year').textContent = formatCurrency(yearData.pagination.totalAmount);
-        document.getElementById('stat-pending').textContent = formatCurrency(pendingData.pagination.totalAmount);
-        document.getElementById('stat-paid').textContent = formatCurrency(paidData.pagination.totalAmount);
+        document.getElementById('stat-this-month').textContent = formatCurrency(monthData.pagination?.totalAmount || 0);
+        document.getElementById('stat-this-year').textContent = formatCurrency(yearData.pagination?.totalAmount || 0);
+        document.getElementById('stat-pending').textContent = formatCurrency(pendingData.pagination?.totalAmount || 0);
+        document.getElementById('stat-paid').textContent = formatCurrency(paidData.pagination?.totalAmount || 0);
       } catch (error) {
         console.error('Failed to load stats:', error);
+        document.getElementById('stat-this-month').textContent = formatCurrency(0);
+        document.getElementById('stat-this-year').textContent = formatCurrency(0);
+        document.getElementById('stat-pending').textContent = formatCurrency(0);
+        document.getElementById('stat-paid').textContent = formatCurrency(0);
       }
     }
 

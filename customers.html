@@ -308,7 +308,15 @@
     async function checkAuth() {
       if (!ApiClient.isAuthenticated()) {
         window.location.href = '/login.html';
-        return;
+        return false;
+      }
+      try {
+        await ApiClient.verifyToken();
+        return true;
+      } catch (err) {
+        console.error('Auth verification failed:', err);
+        ApiClient.logout();
+        return false;
       }
     }
 
@@ -386,10 +394,18 @@
         if (currentStatus) params.status = currentStatus;
 
         const response = await ApiClient.getCustomers(params);
-        const { customers, pagination } = response;
+        const customers = response.customers || response.data || [];
+        const pagination = response.pagination || { total: customers.length, hasMore: false };
 
         if (customers.length === 0 && currentPage === 0 && !currentSearch && !currentStatus) {
           emptyState.style.display = 'flex';
+          loading.style.display = 'none';
+          return;
+        }
+
+        if (customers.length === 0 && (currentSearch || currentStatus)) {
+          table.style.display = 'block';
+          document.getElementById('customers-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#64748b;">No customers found matching your filters</td></tr>';
           loading.style.display = 'none';
           return;
         }

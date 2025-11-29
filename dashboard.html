@@ -226,40 +226,54 @@
                 const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
                 const [invoicesRes, productsRes, expensesRes] = await Promise.all([
-                    ApiClient.getInvoices(),
-                    ApiClient.getProducts(),
-                    ApiClient.getExpenses({ startDate: firstDayOfMonth, endDate: lastDayOfMonth })
+                    ApiClient.getInvoices().catch(() => ({ data: [] })),
+                    ApiClient.getProducts().catch(() => ({ data: [] })),
+                    ApiClient.getExpenses({ startDate: firstDayOfMonth, endDate: lastDayOfMonth }).catch(() => ({ data: [] }))
                 ]);
 
+                // Normalize responses
+                const invoices = invoicesRes.data || invoicesRes.invoices || [];
+                const products = productsRes.data || productsRes.products || [];
+                const expenses = expensesRes.data || expensesRes.expenses || [];
+
                 // Sales this month
-                const thisMonthInvoices = (invoicesRes.data || []).filter(inv => {
-                    const invDate = new Date(inv.invoice_date);
+                const thisMonthInvoices = invoices.filter(inv => {
+                    const invDate = inv.invoice_date ? new Date(inv.invoice_date) : new Date(inv.date);
                     return invDate >= new Date(firstDayOfMonth) && invDate <= new Date(lastDayOfMonth);
                 });
-                const salesTotal = thisMonthInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+                const salesTotal = thisMonthInvoices.reduce((sum, inv) => sum + (inv.total || inv.totals?.grandTotal || 0), 0);
                 document.getElementById('statSales').textContent = formatCurrency(salesTotal);
 
                 // Outstanding invoices
-                const unpaidInvoices = (invoicesRes.data || []).filter(inv => inv.status === 'unpaid' || inv.status === 'pending');
+                const unpaidInvoices = invoices.filter(inv => inv.status === 'unpaid' || inv.status === 'pending');
                 document.getElementById('statOutstanding').textContent = unpaidInvoices.length;
 
                 // Low stock items (at or below threshold)
-                const lowStockItems = (productsRes.data || []).filter(p => p.current_quantity <= p.stock_threshold);
+                const lowStockItems = products.filter(p => {
+                    const qty = parseInt(p.current_quantity || 0);
+                    const threshold = parseInt(p.stock_threshold || 0);
+                    return qty <= threshold;
+                });
                 document.getElementById('statLowStock').textContent = lowStockItems.length;
 
                 // Expenses this month
-                const expensesTotal = (expensesRes.data || []).reduce((sum, exp) => sum + (exp.amount || 0), 0);
+                const expensesTotal = expenses.reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
                 document.getElementById('statExpenses').textContent = formatCurrency(expensesTotal);
 
             } catch (error) {
                 console.error('Failed to load metrics:', error);
+                // Show zeros on error
+                document.getElementById('statSales').textContent = formatCurrency(0);
+                document.getElementById('statOutstanding').textContent = '0';
+                document.getElementById('statLowStock').textContent = '0';
+                document.getElementById('statExpenses').textContent = formatCurrency(0);
             }
         }
 
         async function loadSalesTrend() {
             try {
-                const response = await ApiClient.getInvoices();
-                const invoices = response.data || [];
+                const response = await ApiClient.getInvoices().catch(() => ({ data: [] }));
+                const invoices = response.data || response.invoices || [];
 
                 // Get last 6 months
                 const months = [];
@@ -275,13 +289,14 @@
 
                 const salesData = months.map(month => {
                     const monthInvoices = invoices.filter(inv => {
-                        const invDate = new Date(inv.invoice_date);
+                        const invDate = inv.invoice_date ? new Date(inv.invoice_date) : new Date(inv.date);
                         return invDate >= month.start && invDate <= month.end;
                     });
-                    return monthInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+                    return monthInvoices.reduce((sum, inv) => sum + (inv.total || inv.totals?.grandTotal || 0), 0);
                 });
 
                 const ctx = document.getElementById('salesChart');
+                if (salesChart) salesChart.destroy();
                 salesChart = new Chart(ctx, {
                     type: 'line',
                     data: {

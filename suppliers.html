@@ -397,9 +397,42 @@
 
         loading.style.display = 'none';
         table.style.display = 'block';
+      try {
+        const params = {
+          limit: currentLimit,
+          offset: currentPage * currentLimit
+        };
+
+        if (currentSearch) params.search = currentSearch;
+        if (currentStatus) params.status = currentStatus;
+
+        const response = await ApiClient.getSuppliers(params);
+        const suppliers = response.suppliers || response.data || [];
+        const pagination = response.pagination || { total: suppliers.length, hasMore: false };
+
+        if (suppliers.length === 0 && currentPage === 0 && !currentSearch && !currentStatus) {
+          emptyState.style.display = 'flex';
+          loading.style.display = 'none';
+          return;
+        }
+
+        if (suppliers.length === 0 && (currentSearch || currentStatus)) {
+          table.style.display = 'block';
+          document.getElementById('suppliers-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#64748b;">No suppliers found matching your filters</td></tr>';
+          loading.style.display = 'none';
+          return;
+        }
+
+        renderSuppliers(suppliers);
+        updatePagination(pagination);
+
+        loading.style.display = 'none';
+        table.style.display = 'block';
       } catch (error) {
         console.error('Failed to load suppliers:', error);
         loading.style.display = 'none';
+        table.style.display = 'block';
+        document.getElementById('suppliers-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:#ef4444;">Failed to load suppliers. Please try again.</td></tr>';
         showToast('Failed to load suppliers', 'error');
       }
     }
