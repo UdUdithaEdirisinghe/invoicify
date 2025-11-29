@@ -116,6 +116,7 @@ class App {
 
         document.getElementById('btn-generate-pdf').addEventListener('click', async () => {
             // Deduct inventory before generating PDF
+            let inventoryUpdated = false;
             try {
                 // Build consolidated deductions, matching by productId or exact name
                 const buildConsolidated = () => {
@@ -153,7 +154,9 @@ class App {
                     }
                     // Refresh remote inventory
                     const data = await ApiClient.getProducts();
-                    this.state.products = (data && (data.products || data)) || [];
+                    const arr = (data && (data.data || data.products)) || (Array.isArray(data) ? data : []);
+                    this.state.products = arr || [];
+                    inventoryUpdated = true;
                 } else {
                     // Local-only deduction
                     this.state.products = (this.state.products || []).map(p => {
@@ -165,17 +168,16 @@ class App {
                         return p;
                     });
                     Store.saveProducts(this.state.products);
+                    inventoryUpdated = true;
                 }
             } catch (err) {
                 console.error('Inventory deduction failed:', err);
-                if (!confirm('Failed to update inventory. Continue generating PDF anyway?')) {
-                    return;
-                }
+                alert('Failed to update inventory: ' + (err.message || 'Unknown error') + '. PDF will be generated without inventory update.');
             }
             
             const fullDoc = { ...this.state.currentDoc, business: this.state.settings };
             PdfGenerator.generate(fullDoc);
-            alert('PDF generated and inventory updated!');
+            alert(inventoryUpdated ? 'PDF generated and inventory updated!' : 'PDF generated (inventory update failed)');
         });
 
         document.getElementById('btn-save-settings').addEventListener('click', async () => {
@@ -677,9 +679,23 @@ class App {
     }
 
     renderCustomers() {
-        const customers = Store.getCustomers();
-        document.querySelector('#customers-table tbody').innerHTML = customers.map(c => `<tr><td>${c.name}</td><td>${c.email}</td></tr>`).join('');
-        document.getElementById('customer-list').innerHTML = customers.map(c => `<option value="${c.name}">`).join('');
+        try {
+            const customers = Store.getCustomers();
+            const tbody = document.querySelector('#customers-table tbody');
+            const datalist = document.getElementById('customer-list');
+            if (tbody) {
+                if (!customers || customers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:20px; color:#666;">No customers yet</td></tr>';
+                } else {
+                    tbody.innerHTML = customers.map(c => `<tr><td>${c.name}</td><td>${c.email}</td></tr>`).join('');
+                }
+            }
+            if (datalist) {
+                datalist.innerHTML = customers.map(c => `<option value="${c.name}">`).join('');
+            }
+        } catch (err) {
+            console.error('Failed to load customers:', err);
+        }
     }
 
     renderSettings() {
@@ -696,7 +712,13 @@ class App {
         document.getElementById('show-bank-details').checked = s.showBankDetails !== false;
         if(s.logoUrl) document.getElementById('logo-preview').src = s.logoUrl;
     }
-    loadCustomers() { this.renderCustomers(); }
+    async loadCustomers() { 
+        try {
+            this.renderCustomers(); 
+        } catch (err) {
+            console.warn('Failed to load customers:', err);
+        }
+    }
 }
 
 const app = new App();

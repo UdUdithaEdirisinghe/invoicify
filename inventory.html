@@ -124,7 +124,34 @@
               if (qtyStr === null) return;
               const newQty = parseInt(qtyStr, 10);
               if (Number.isNaN(newQty) || newQty < 0) return alert('Invalid quantity');
-              await ApiClient.updateProduct(id, { 
+              try {
+                await ApiClient.updateProduct(id, { 
+                  name: current.name,
+                  sku: current.sku,
+                  description: current.description,
+                  product_category_id: current.product_category_id,
+                  unit_price: current.unit_price,
+                  cost_price: current.cost_price,
+                  current_quantity: newQty,
+                  stock_threshold: current.stock_threshold
+                });
+                await loadProducts();
+                alert(`Quantity adjusted successfully! New quantity: ${newQty}`);
+              } catch (err) {
+                console.error('Adjust failed:', err);
+                alert('Failed to adjust quantity: ' + (err.message || 'Unknown error'));
+              }
+              return;
+            }
+            // Stock In / Out
+            const qtyStr = prompt(action === 'in' ? 'Add quantity:' : 'Remove quantity:');
+            if (!qtyStr) return;
+            const delta = parseInt(qtyStr, 10);
+            if (Number.isNaN(delta) || delta <= 0) return alert('Invalid quantity');
+            let newQty = current.current_quantity || 0;
+            newQty = action === 'in' ? newQty + delta : Math.max(0, newQty - delta);
+            try {
+              await ApiClient.updateProduct(id, {
                 name: current.name,
                 sku: current.sku,
                 description: current.description,
@@ -135,26 +162,11 @@
                 stock_threshold: current.stock_threshold
               });
               await loadProducts();
-              return;
+              alert(`Stock ${action === 'in' ? 'added' : 'removed'} successfully! New quantity: ${newQty}`);
+            } catch (err) {
+              console.error('Stock update failed:', err);
+              alert('Failed to update stock: ' + (err.message || 'Unknown error'));
             }
-            // Stock In / Out
-            const qtyStr = prompt(action === 'in' ? 'Add quantity:' : 'Remove quantity:');
-            if (!qtyStr) return;
-            const delta = parseInt(qtyStr, 10);
-            if (Number.isNaN(delta) || delta <= 0) return alert('Invalid quantity');
-            let newQty = current.current_quantity || 0;
-            newQty = action === 'in' ? newQty + delta : Math.max(0, newQty - delta);
-            await ApiClient.updateProduct(id, {
-              name: current.name,
-              sku: current.sku,
-              description: current.description,
-              product_category_id: current.product_category_id,
-              unit_price: current.unit_price,
-              cost_price: current.cost_price,
-              current_quantity: newQty,
-              stock_threshold: current.stock_threshold
-            });
-            await loadProducts();
           });
         });
       } catch (err) {
