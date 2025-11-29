@@ -35,8 +35,9 @@ class App {
     async loadProducts() {
         try {
             if (ApiClient.isAuthenticated()) {
-                const { products } = await ApiClient.fetch('/api/inventory/products');
-                this.state.products = products || [];
+                const data = await ApiClient.getProducts();
+                // Support either { products: [...] } or direct array
+                this.state.products = (data && (data.products || data)) || [];
             } else {
                 // Fallback to local inventory when offline/not authenticated
                 this.state.products = Store.getProducts();
@@ -108,36 +109,45 @@ class App {
         document.getElementById('btn-generate-pdf').addEventListener('click', async () => {
             // Deduct inventory before generating PDF
             try {
-                if (ApiClient.isAuthenticated()) {
-                    const consolidated = new Map();
+                // Build consolidated deductions, matching by productId or exact name
+                const buildConsolidated = () => {
+                    const map = new Map();
                     for (const item of this.state.currentDoc.items) {
-                        if (item.productId) {
+                        let pid = item.productId;
+                        if (!pid && item.name) {
+                            const match = this.state.products.find(p => (p.name || '').toLowerCase() === item.name.toLowerCase());
+                            if (match) {
+                                pid = match.id;
+                                item.productId = match.id; // link for future consistency
+                                if ((!item.price || Number(item.price) === 0) && match.unit_price) {
+                                    item.price = parseFloat(match.unit_price);
+                                }
+                            }
+                        }
+                        if (pid) {
                             const qty = parseInt(item.qty) || 0;
-                            const prev = consolidated.get(item.productId) || 0;
-                            consolidated.set(item.productId, prev + qty);
+                            const prev = map.get(pid) || 0;
+                            map.set(pid, prev + qty);
                         }
                     }
-                    
-                    // Deduct stock for each product
+                    return map;
+                };
+
+                const consolidated = buildConsolidated();
+
+                if (ApiClient.isAuthenticated()) {
+                    // Deduct stock remotely by updating product quantity
                     for (const [productId, totalQty] of consolidated.entries()) {
-                        await ApiClient.fetch('/api/inventory/movements', {
-                            method: 'POST',
-                            body: { productId, type: 'out', quantity: totalQty, note: 'PDF generated - manual deduction' }
-                        });
+                        const prod = this.state.products.find(p => String(p.id) === String(productId));
+                        const currentQty = prod ? (parseInt(prod.quantity) || 0) : 0;
+                        const newQty = Math.max(0, currentQty - totalQty);
+                        await ApiClient.updateProduct(productId, { quantity: newQty });
                     }
                     // Refresh remote inventory
-                    const { products } = await ApiClient.fetch('/api/inventory/products');
-                    this.state.products = products || [];
+                    const data = await ApiClient.getProducts();
+                    this.state.products = (data && (data.products || data)) || [];
                 } else {
                     // Local-only deduction
-                    const consolidated = new Map();
-                    for (const item of this.state.currentDoc.items) {
-                        if (item.productId) {
-                            const qty = parseInt(item.qty) || 0;
-                            const prev = consolidated.get(item.productId) || 0;
-                            consolidated.set(item.productId, prev + qty);
-                        }
-                    }
                     this.state.products = (this.state.products || []).map(p => {
                         const deduct = consolidated.get(String(p.id)) || consolidated.get(p.id) || 0;
                         if (deduct > 0) {
