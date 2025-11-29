@@ -62,10 +62,10 @@ class ApiClient {
   }
 
   // Auth endpoints
-  async register(username, password) {
-    const data = await this.request('/api/auth/register', {
+  async register(username, email, password, businessDetails = {}) {
+    const data = await this.request('/api/auth?action=register', {
       method: 'POST',
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, email, password, ...businessDetails })
     });
     
     if (data.token) {
@@ -75,10 +75,10 @@ class ApiClient {
     return data;
   }
 
-  async login(username, password) {
-    const data = await this.request('/api/auth/login', {
+  async login(email, password) {
+    const data = await this.request('/api/auth?action=login', {
       method: 'POST',
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ email, password })
     });
     
     if (data.token) {
@@ -90,8 +90,8 @@ class ApiClient {
 
   async verifyToken() {
     try {
-      return await this.request('/api/auth/verify', {
-        method: 'GET'
+      return await this.request('/api/auth?action=me', {
+        method: 'POST'
       });
     } catch (error) {
       this.removeToken();
@@ -282,32 +282,78 @@ class ApiClient {
 
   // Expense Category endpoints
   async getExpenseCategories() {
-    return await this.request('/api/expense-categories', {
+    return await this.request('/api/expenses?categories=true', {
       method: 'GET'
     });
   }
 
   async createExpenseCategory(categoryData) {
-    return await this.request('/api/expense-categories', {
+    return await this.request('/api/expenses?categories=true', {
       method: 'POST',
       body: JSON.stringify(categoryData)
     });
   }
 
-  async updateExpenseCategory(id, categoryData) {
-    return await this.request(`/api/expense-categories?id=${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(categoryData)
-    });
-  }
-
   async deleteExpenseCategory(id) {
-    return await this.request(`/api/expense-categories?id=${id}`, {
+    return await this.request(`/api/expenses?categories=true&id=${id}`, {
       method: 'DELETE'
     });
   }
 
-  // Payment endpoints
+  // Product/Inventory endpoints
+  async getProducts(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return await this.request(`/api/products${queryString ? '?' + queryString : ''}`, {
+      method: 'GET'
+    });
+  }
+
+  async getProduct(id) {
+    return await this.request(`/api/products?id=${id}`, {
+      method: 'GET'
+    });
+  }
+
+  async createProduct(productData) {
+    return await this.request('/api/products', {
+      method: 'POST',
+      body: JSON.stringify(productData)
+    });
+  }
+
+  async updateProduct(id, productData) {
+    return await this.request(`/api/products?id=${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(productData)
+    });
+  }
+
+  async deleteProduct(id) {
+    return await this.request(`/api/products?id=${id}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async getProductCategories() {
+    return await this.request('/api/products?categories=true', {
+      method: 'GET'
+    });
+  }
+
+  async createProductCategory(categoryData) {
+    return await this.request('/api/products?categories=true', {
+      method: 'POST',
+      body: JSON.stringify(categoryData)
+    });
+  }
+
+  async deleteProductCategory(id) {
+    return await this.request(`/api/products?categories=true&id=${id}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // Payment endpoints (kept for future use)
   async getPayments(params = {}) {
     const queryString = new URLSearchParams(params).toString();
     return await this.request(`/api/payments${queryString ? '?' + queryString : ''}`, {
