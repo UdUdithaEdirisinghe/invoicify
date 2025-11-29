@@ -112,15 +112,15 @@ CREATE INDEX IF NOT EXISTS idx_categories_user_id ON product_categories(user_id)
 CREATE TABLE IF NOT EXISTS products (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  category_id INTEGER REFERENCES product_categories(id) ON DELETE SET NULL,
+  product_category_id INTEGER REFERENCES product_categories(id) ON DELETE SET NULL,
   sku VARCHAR(100) UNIQUE,
   name VARCHAR(255) NOT NULL,
   description TEXT,
   unit_price NUMERIC(12,2) NOT NULL DEFAULT 0,
   cost_price NUMERIC(12,2) DEFAULT 0,
-  quantity INTEGER NOT NULL DEFAULT 0,
+  current_quantity INTEGER NOT NULL DEFAULT 0,
   unit VARCHAR(50) DEFAULT 'pcs',
-  low_stock_threshold INTEGER NOT NULL DEFAULT 10,
+  stock_threshold INTEGER NOT NULL DEFAULT 10,
   reorder_level INTEGER DEFAULT 0,
   barcode VARCHAR(100),
   image_url TEXT,
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 CREATE INDEX IF NOT EXISTS idx_products_user_id ON products(user_id);
-CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(product_category_id);
 CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);
 CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
 
@@ -251,7 +251,7 @@ CREATE INDEX IF NOT EXISTS idx_expense_categories_user_id ON expense_categories(
 CREATE TABLE IF NOT EXISTS expenses (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  category_id INTEGER REFERENCES expense_categories(id) ON DELETE SET NULL,
+  expense_category_id INTEGER REFERENCES expense_categories(id) ON DELETE SET NULL,
   supplier_id INTEGER REFERENCES suppliers(id) ON DELETE SET NULL,
   expense_number VARCHAR(50) UNIQUE,
   title VARCHAR(255) NOT NULL,
@@ -267,7 +267,7 @@ CREATE TABLE IF NOT EXISTS expenses (
 );
 
 CREATE INDEX IF NOT EXISTS idx_expenses_user_id ON expenses(user_id);
-CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(category_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(expense_category_id);
 CREATE INDEX IF NOT EXISTS idx_expenses_supplier ON expenses(supplier_id);
 CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(expense_date DESC);
 CREATE INDEX IF NOT EXISTS idx_expenses_status ON expenses(status);
