@@ -118,12 +118,54 @@ export default async function handler(req, res) {
 
             const { name, sku, description, product_category_id, unit_price, cost_price, current_quantity, stock_threshold } = req.body;
 
-            const result = await pool.query(
-                `UPDATE products SET name = $1, sku = $2, description = $3, product_category_id = $4, 
-                 unit_price = $5, cost_price = $6, current_quantity = $7, stock_threshold = $8, updated_at = CURRENT_TIMESTAMP
-                 WHERE id = $9 AND user_id = $10 RETURNING *`,
-                [name, sku, description, product_category_id, unit_price, cost_price, current_quantity, stock_threshold, id, userId]
-            );
+            // Build dynamic UPDATE query to only set provided fields
+            const updates = [];
+            const values = [];
+            let paramCount = 1;
+
+            if (name !== undefined) {
+                updates.push(`name = $${paramCount++}`);
+                values.push(name);
+            }
+            if (sku !== undefined) {
+                updates.push(`sku = $${paramCount++}`);
+                values.push(sku);
+            }
+            if (description !== undefined) {
+                updates.push(`description = $${paramCount++}`);
+                values.push(description);
+            }
+            if (product_category_id !== undefined) {
+                updates.push(`product_category_id = $${paramCount++}`);
+                values.push(product_category_id);
+            }
+            if (unit_price !== undefined) {
+                updates.push(`unit_price = $${paramCount++}`);
+                values.push(unit_price);
+            }
+            if (cost_price !== undefined) {
+                updates.push(`cost_price = $${paramCount++}`);
+                values.push(cost_price);
+            }
+            if (current_quantity !== undefined) {
+                updates.push(`current_quantity = $${paramCount++}`);
+                values.push(parseInt(current_quantity, 10));
+            }
+            if (stock_threshold !== undefined) {
+                updates.push(`stock_threshold = $${paramCount++}`);
+                values.push(stock_threshold);
+            }
+
+            if (updates.length === 0) {
+                return res.status(400).json({ error: 'No fields to update' });
+            }
+
+            updates.push(`updated_at = CURRENT_TIMESTAMP`);
+            values.push(id, userId);
+
+            const query = `UPDATE products SET ${updates.join(', ')} WHERE id = $${paramCount++} AND user_id = $${paramCount++} RETURNING *`;
+
+            const result = await pool.query(query, values);
 
             if (result.rows.length === 0) {
                 return res.status(404).json({ error: 'Product not found' });
