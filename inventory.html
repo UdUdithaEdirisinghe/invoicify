@@ -82,8 +82,8 @@
           return;
         }
         tbody.innerHTML = list.map(p => {
-          const qty = Number(p.current_quantity || 0);
-          const threshold = Number(p.stock_threshold || 0);
+          const qty = Number(p.quantity || 0);
+          const threshold = Number(p.low_stock_threshold || 0);
           let qtyCell = `${qty}`;
           if (qty === 0) {
             qtyCell = `${qty} <span class="badge badge-out"><i class="ph ph-x-circle"></i>Out of Stock</span>`;
@@ -120,7 +120,7 @@
             const current = list.find(x => String(x.id) === String(id));
             if (!current) return;
             if (action === 'adjust') {
-              const qtyStr = prompt('Set quantity to:', current.current_quantity);
+              const qtyStr = prompt('Set quantity to:', current.quantity);
               if (qtyStr === null) return;
               const newQty = parseInt(qtyStr, 10);
               if (Number.isNaN(newQty) || newQty < 0) return alert('Invalid quantity');
@@ -128,11 +128,11 @@
                 name: current.name,
                 sku: current.sku,
                 description: current.description,
-                product_category_id: current.product_category_id,
+                category_id: current.category_id,
                 unit_price: current.unit_price,
                 cost_price: current.cost_price,
-                current_quantity: newQty,
-                stock_threshold: current.stock_threshold
+                quantity: newQty,
+                low_stock_threshold: current.low_stock_threshold
               });
               await loadProducts();
               return;
@@ -142,17 +142,17 @@
             if (!qtyStr) return;
             const delta = parseInt(qtyStr, 10);
             if (Number.isNaN(delta) || delta <= 0) return alert('Invalid quantity');
-            let newQty = current.current_quantity || 0;
+            let newQty = current.quantity || 0;
             newQty = action === 'in' ? newQty + delta : Math.max(0, newQty - delta);
             await ApiClient.updateProduct(id, {
               name: current.name,
               sku: current.sku,
               description: current.description,
-              product_category_id: current.product_category_id,
+              category_id: current.category_id,
               unit_price: current.unit_price,
               cost_price: current.cost_price,
-              current_quantity: newQty,
-              stock_threshold: current.stock_threshold
+              quantity: newQty,
+              low_stock_threshold: current.low_stock_threshold
             });
             await loadProducts();
           });
