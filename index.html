@@ -15,22 +15,7 @@
 
     <div class="app-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="brand">
-                <i class="ph ph-hexagon-fill"></i> Invoicify
-            </div>
-            <nav>
-                <a href="/dashboard.html" class="nav-link"><i class="ph ph-squares-four"></i> Dashboard</a>
-                <a href="#editor" class="nav-link" data-link="editor"><i class="ph ph-plus-circle"></i> New Invoice</a>
-                <a href="/inventory.html" class="nav-link"><i class="ph ph-package"></i> Inventory</a>
-                <a href="#settings" class="nav-link" data-link="settings"><i class="ph ph-gear"></i> Settings</a>
-            </nav>
-            <div style="padding: 20px; margin-top: auto;">
-                <button class="logout-btn" style="width: 100%; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                    <i class="ph ph-sign-out"></i> Logout
-                </button>
-            </div>
-        </aside>
+        <aside class="sidebar"><!-- Unified sidebar injected by layout.js --></aside>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -198,11 +183,12 @@
         // Protect this page - redirect to login if not authenticated
         import ApiClient from './js/api-client.js';
         import { setupLogout } from './js/auth.js';
+        import './js/layout.js';
         
         if (!ApiClient.isAuthenticated()) {
             window.location.href = '/login.html';
         }
-        setupLogout();
+        setupLogout(); // ensure logout binding even if layout injection delayed
     </script>
     <script type="module" src="js/app.js"></script>
 </body>

@@ -64,38 +64,39 @@
   </div>
 
   <script type="module">
-    import { requireAuth, getCurrentUser, setupLogout } from './js/auth.js';
+    import { requireAuth, getCurrentUser } from './js/auth.js';
     import ApiClient from './js/api-client.js';
+    import './js/layout.js';
 
     if (!requireAuth()) throw new Error('Not authenticated');
-    setupLogout();
 
     const tbody = document.getElementById('products-tbody');
     const form = document.getElementById('product-form');
 
     async function loadProducts() {
       try {
-        const { products } = await ApiClient.fetch('/api/inventory/products');
-        if (!products || products.length === 0) {
+        const response = await ApiClient.getProducts();
+        const list = response.data || response; // handler returns {data: [...]} or array
+        if (!list || list.length === 0) {
           tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#94a3b8;">No products yet</td></tr>';
           return;
         }
-        tbody.innerHTML = products.map(p => {
-          const qty = Number(p.quantity);
-          const threshold = Number(p.low_stock_threshold || 0);
-          let qtyCell = `${p.quantity}`;
+        tbody.innerHTML = list.map(p => {
+          const qty = Number(p.current_quantity || 0);
+          const threshold = Number(p.stock_threshold || 0);
+          let qtyCell = `${qty}`;
           if (qty === 0) {
-            qtyCell = `${p.quantity} <span class="badge badge-out"><i class="ph ph-x-circle"></i>Out of Stock</span>`;
+            qtyCell = `${qty} <span class="badge badge-out"><i class="ph ph-x-circle"></i>Out of Stock</span>`;
           } else if (qty <= threshold) {
-            qtyCell = `${p.quantity} <span class="badge badge-low"><i class="ph ph-warning"></i>Low</span>`;
+            qtyCell = `${qty} <span class="badge badge-low"><i class="ph ph-warning"></i>Low</span>`;
           }
           return `
           <tr>
             <td>${p.name}</td>
             <td>${p.sku || ''}</td>
-            <td>LKR ${Number(p.unit_price).toFixed(2)}</td>
+            <td>LKR ${Number(p.unit_price || 0).toFixed(2)}</td>
             <td>${qtyCell}</td>
-            <td>${p.low_stock_threshold}</td>
+            <td>${threshold}</td>
             <td>
               <button class="secondary-btn" data-id="${p.id}" data-action="in">Stock In</button>
               <button class="secondary-btn" data-id="${p.id}" data-action="out">Stock Out</button>
@@ -105,22 +106,55 @@
           </tr>`;
         }).join('');
 
+        // Delegate actions
         tbody.querySelectorAll('button').forEach(btn => {
           btn.addEventListener('click', async (e) => {
-            const id = e.target.dataset.id;
-            const action = e.target.dataset.action;
+            const id = e.currentTarget.dataset.id;
+            const action = e.currentTarget.dataset.action;
             if (action === 'delete') {
               if (!confirm('Delete product?')) return;
-              await ApiClient.fetch('/api/inventory/products', { method: 'DELETE', body: { id } });
-              loadProducts();
+              await ApiClient.deleteProduct(id);
+              await loadProducts();
               return;
             }
-            const qtyStr = prompt(action === 'adjust' ? 'Set quantity to:' : 'Quantity:');
+            const current = list.find(x => String(x.id) === String(id));
+            if (!current) return;
+            if (action === 'adjust') {
+              const qtyStr = prompt('Set quantity to:', current.current_quantity);
+              if (qtyStr === null) return;
+              const newQty = parseInt(qtyStr, 10);
+              if (Number.isNaN(newQty) || newQty < 0) return alert('Invalid quantity');
+              await ApiClient.updateProduct(id, { 
+                name: current.name,
+                sku: current.sku,
+                description: current.description,
+                categoryId: current.product_category_id,
+                unitPrice: current.unit_price,
+                costPrice: current.cost_price,
+                currentQuantity: newQty,
+                stockThreshold: current.stock_threshold
+              });
+              await loadProducts();
+              return;
+            }
+            // Stock In / Out
+            const qtyStr = prompt(action === 'in' ? 'Add quantity:' : 'Remove quantity:');
             if (!qtyStr) return;
-            const quantity = parseInt(qtyStr, 10);
-            if (Number.isNaN(quantity) || quantity < 0) return alert('Invalid quantity');
-            await ApiClient.fetch('/api/inventory/movements', { method: 'POST', body: { productId: id, type: action, quantity } });
-            loadProducts();
+            const delta = parseInt(qtyStr, 10);
+            if (Number.isNaN(delta) || delta <= 0) return alert('Invalid quantity');
+            let newQty = current.current_quantity || 0;
+            newQty = action === 'in' ? newQty + delta : Math.max(0, newQty - delta);
+            await ApiClient.updateProduct(id, {
+              name: current.name,
+              sku: current.sku,
+              description: current.description,
+              categoryId: current.product_category_id,
+              unitPrice: current.unit_price,
+              costPrice: current.cost_price,
+              currentQuantity: newQty,
+              stockThreshold: current.stock_threshold
+            });
+            await loadProducts();
           });
         });
       } catch (err) {
@@ -135,20 +169,20 @@
         name: document.getElementById('name').value.trim(),
         sku: document.getElementById('sku').value.trim(),
         unitPrice: parseFloat(document.getElementById('unitPrice').value || '0'),
-        quantity: parseInt(document.getElementById('quantity').value || '0', 10),
-        lowStockThreshold: parseInt(document.getElementById('lowStockThreshold').value || '0', 10),
+        currentQuantity: parseInt(document.getElementById('quantity').value || '0', 10),
+        stockThreshold: parseInt(document.getElementById('lowStockThreshold').value || '0', 10),
         description: document.getElementById('description').value.trim()
       };
       if (!body.name) return alert('Name is required');
-      await ApiClient.fetch('/api/inventory/products', { method: 'POST', body });
+      await ApiClient.createProduct(body);
       form.reset();
-      loadProducts();
+      await loadProducts();
     });
 
     (async () => {
       const user = await getCurrentUser();
       if (user) document.getElementById('user-info').textContent = `Logged in as: ${user.username}`;
-      loadProducts();
+      await loadProducts();
     })();
   </script>
 </body>
