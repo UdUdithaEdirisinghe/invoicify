@@ -27,8 +27,52 @@
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 420px;
+            max-width: 550px;
             padding: 40px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+        
+        .form-section h3 {
+            font-size: 18px;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .brand {
@@ -141,27 +185,60 @@
         <div class="brand">
             <i class="ph ph-hexagon-fill"></i>
             <h1>Invoicify</h1>
-            <p>Create your account to get started.</p>
+            <p>Create your account and setup your business.</p>
         </div>
 
         <div id="error-message" class="error-message"></div>
 
         <form id="register-form">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required autocomplete="username" minlength="3" maxlength="50">
-                <div class="password-requirements">3-50 characters</div>
-            </div>
+            <div class="form-section">
+                <h3><i class="ph ph-user"></i> Account</h3>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username" minlength="3" maxlength="50">
+                    <div class="password-requirements">3-50 characters</div>
+                </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required autocomplete="new-password" minlength="6">
-                <div class="password-requirements">At least 6 characters</div>
-            </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="new-password" minlength="6">
+                    <div class="password-requirements">At least 6 characters</div>
+                </div>
 
-            <div class="form-group">
-                <label for="confirm-password">Confirm Password</label>
-                <input type="password" id="confirm-password" name="confirm-password" required autocomplete="new-password" minlength="6">
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required autocomplete="new-password" minlength="6">
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3><i class="ph ph-buildings"></i> Business Info</h3>
+                <div class="form-group">
+                    <label for="business-name">Business Name</label>
+                    <input type="text" id="business-name" name="business-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="business-address">Address</label>
+                    <textarea id="business-address" name="business-address" required></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="business-phone">Phone</label>
+                        <input type="tel" id="business-phone" name="business-phone" placeholder="+94 XX XXX XXXX">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="business-email">Email</label>
+                        <input type="email" id="business-email" name="business-email" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="currency">Currency</label>
+                    <input type="text" id="currency" name="currency" value="LKR" required maxlength="10" placeholder="e.g. LKR, USD, EUR">
+                </div>
             </div>
 
             <button type="submit" class="submit-btn" id="submit-btn">Create Account</button>

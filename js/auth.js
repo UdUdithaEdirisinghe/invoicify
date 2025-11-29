@@ -72,9 +72,21 @@ export function setupRegisterForm() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
+    
+    // Business details
+    const businessName = document.getElementById('business-name').value.trim();
+    const businessAddress = document.getElementById('business-address').value.trim();
+    const businessPhone = document.getElementById('business-phone').value.trim();
+    const businessEmail = document.getElementById('business-email').value.trim();
+    const currency = document.getElementById('currency').value.trim();
 
     if (!username || !password || !confirmPassword) {
-      showError('Please fill in all fields');
+      showError('Please fill in all account fields');
+      return;
+    }
+    
+    if (!businessName || !businessAddress || !businessEmail) {
+      showError('Please fill in all required business fields');
       return;
     }
 
@@ -95,10 +107,21 @@ export function setupRegisterForm() {
 
       await ApiClient.register(username, password);
       
+      // Save business settings to localStorage
+      const settings = {
+        businessName,
+        address: businessAddress,
+        phone: businessPhone,
+        email: businessEmail,
+        currency: currency || 'LKR',
+        themeColor: '#2563eb'
+      };
+      localStorage.setItem('invoice_settings', JSON.stringify(settings));
+      
       // Redirect to dashboard
       window.location.href = '/dashboard.html';
     } catch (error) {
-      showError(error.message || 'Registration failed. Please try again.');
+      showError(error.message || 'Registration failed. Username may already exist.');
       submitBtn.disabled = false;
       submitBtn.textContent = 'Create Account';
     }
@@ -109,6 +132,8 @@ export function setupRegisterForm() {
     errorDiv.style.display = 'block';
   }
 }
+
+// Logout handler
 
 // Logout handler
 export function setupLogout() {
