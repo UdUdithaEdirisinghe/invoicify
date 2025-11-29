@@ -139,9 +139,9 @@ class App {
                     // Deduct stock remotely by updating product quantity
                     for (const [productId, totalQty] of consolidated.entries()) {
                         const prod = this.state.products.find(p => String(p.id) === String(productId));
-                        const currentQty = prod ? (parseInt(prod.quantity) || 0) : 0;
+                        const currentQty = prod ? (parseInt(prod.current_quantity || prod.quantity) || 0) : 0;
                         const newQty = Math.max(0, currentQty - totalQty);
-                        await ApiClient.updateProduct(productId, { quantity: newQty });
+                        await ApiClient.updateProduct(productId, { current_quantity: newQty });
                     }
                     // Refresh remote inventory
                     const data = await ApiClient.getProducts();
@@ -151,8 +151,8 @@ class App {
                     this.state.products = (this.state.products || []).map(p => {
                         const deduct = consolidated.get(String(p.id)) || consolidated.get(p.id) || 0;
                         if (deduct > 0) {
-                            const newQty = Math.max(0, (parseInt(p.quantity) || 0) - deduct);
-                            return { ...p, quantity: newQty };
+                            const newQty = Math.max(0, (parseInt(p.current_quantity || p.quantity) || 0) - deduct);
+                            return { ...p, current_quantity: newQty, quantity: newQty };
                         }
                         return p;
                     });
@@ -250,7 +250,7 @@ class App {
         this.state.currentDoc.items.forEach((item, index) => {
             const tr = document.createElement('tr');
             const product = item.productId ? this.state.products.find(p => String(p.id) === String(item.productId)) : null;
-            const qtyAvail = product ? (parseInt(product.quantity) || 0) : '';
+            const qtyAvail = product ? (parseInt(product.current_quantity || product.quantity) || 0) : '';
             const stockState = typeof qtyAvail === 'number' ? (qtyAvail <= 0 ? 'out' : (qtyAvail <= LOW_STOCK_THRESHOLD ? 'low' : 'ok')) : null;
             const isDuplicate = item.productId && duplicateProducts.has(item.productId);
             tr.innerHTML = `
@@ -302,7 +302,7 @@ class App {
                 if (matches.length > 0) {
                     suggestionsDiv.innerHTML = matches.map(p => {
                         const price = Number(p.unit_price).toFixed(2);
-                        const qty = parseInt(p.quantity) || 0;
+                        const qty = parseInt(p.current_quantity || p.quantity) || 0;
                         const status = qty <= 0 ? 'out' : (qty <= LOW_STOCK_THRESHOLD ? 'low' : 'ok');
                         const statusEl = status === 'out' 
                             ? `<span class="badge badge-out"><i class="ph ph-warning"></i> Out</span>`
@@ -329,7 +329,7 @@ class App {
                     const matches = this.state.products.slice(0, 5);
                     suggestionsDiv.innerHTML = matches.map(p => {
                         const price = Number(p.unit_price).toFixed(2);
-                        const qty = parseInt(p.quantity) || 0;
+                        const qty = parseInt(p.current_quantity || p.quantity) || 0;
                         const status = qty <= 0 ? 'out' : (qty <= LOW_STOCK_THRESHOLD ? 'low' : 'ok');
                         const statusEl = status === 'out' 
                             ? `<span class="badge badge-out"><i class="ph ph-warning"></i> Out</span>`
