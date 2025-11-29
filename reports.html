@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Invoice App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="module" src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>InvoiceApp</h1>
+                <p class="sidebar-subtitle">Business ERP System</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Dashboard</div>
+                    <a href="./dashboard.html" class="nav-item">
+                        <i class="ph ph-house"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Sales</div>
+                    <a href="./index.html" class="nav-item">
+                        <i class="ph ph-file-text"></i>
+                        <span>Invoices</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Customers</div>
+                    <a href="./customers.html" class="nav-item">
+                        <i class="ph ph-users"></i>
+                        <span>Customers</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Purchases</div>
+                    <a href="./suppliers.html" class="nav-item">
+                        <i class="ph ph-handshake"></i>
+                        <span>Suppliers</span>
+                    </a>
+                    <a href="./purchase-orders.html" class="nav-item">
+                        <i class="ph ph-shopping-cart"></i>
+                        <span>Purchase Orders</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Inventory</div>
+                    <a href="./inventory.html" class="nav-item">
+                        <i class="ph ph-package"></i>
+                        <span>Products</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Accounting</div>
+                    <a href="./expenses.html" class="nav-item">
+                        <i class="ph ph-receipt"></i>
+                        <span>Expenses</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Reports</div>
+                    <a href="./reports.html" class="nav-item active">
+                        <i class="ph ph-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="./settings.html" class="nav-item">
+                        <i class="ph ph-gear"></i>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn btn-secondary btn-block">
+                    <i class="ph ph-sign-out"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Business Reports</h1>
+                    <p class="page-subtitle">Analyze your business performance with detailed reports</p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div class="form-group">
+                            <label>Report Type</label>
+                            <select id="reportType" class="filter-select" style="width: 100%;">
+                                <option value="sales">Sales Report</option>
+                                <option value="purchases">Purchase Report</option>
+                                <option value="profitloss">Profit & Loss</option>
+                                <option value="inventory">Inventory Valuation</option>
+                                <option value="aging">Accounts Receivable Aging</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="date" id="startDate" class="filter-select" style="width: 100%;">
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="date" id="endDate" class="filter-select" style="width: 100%;">
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button onclick="generateReport()" class="btn btn-primary" style="width: 100%;">
+                                <i class="ph ph-file-text"></i>
+                                Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="reportContainer"></div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+        import ApiClient from './js/api-client.js';
+
+        // Set default dates (last 30 days)
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        document.getElementById('startDate').valueAsDate = thirtyDaysAgo;
+        document.getElementById('endDate').valueAsDate = now;
+
+        let currentChart = null;
+
+        window.generateReport = async () => {
+            const type = document.getElementById('reportType').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                showToast('Please select date range', 'error');
+                return;
+            }
+
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
+
+            const container = document.getElementById('reportContainer');
+            container.innerHTML = '<div class="loading-state"><i class="ph ph-circle-notch spin"></i><p>Generating report...</p></div>';
+
+            try {
+                switch (type) {
+                    case 'sales':
+                        await generateSalesReport(startDate, endDate, container);
+                        break;
+                    case 'purchases':
+                        await generatePurchaseReport(startDate, endDate, container);
+                        break;
+                    case 'profitloss':
+                        await generateProfitLossReport(startDate, endDate, container);
+                        break;
+                    case 'inventory':
+                        await generateInventoryReport(container);
+                        break;
+                    case 'aging':
+                        await generateAgingReport(container);
+                        break;
+                }
+            } catch (error) {
+                console.error('Failed to generate report:', error);
+                container.innerHTML = '<div class="empty-state"><h3>Failed to generate report</h3><p>Please try again</p></div>';
+                showToast('Failed to generate report', 'error');
+            }
+        };
+
+        async function generateSalesReport(startDate, endDate, container) {
+            const [invoicesRes, customersRes] = await Promise.all([
+                ApiClient.getInvoices(),
+                ApiClient.getCustomers()
+            ]);
+
+            const invoices = (invoicesRes.data || []).filter(inv => {
+                const invDate = new Date(inv.invoice_date);
+                return invDate >= new Date(startDate) && invDate <= new Date(endDate);
+            });
+
+            const customerSales = {};
+            invoices.forEach(inv => {
+                const custId = inv.customer_id;
+                if (!customerSales[custId]) {
+                    customerSales[custId] = { count: 0, total: 0 };
+                }
+                customerSales[custId].count++;
+                customerSales[custId].total += inv.total || 0;
+            });
+
+            const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+            const avgInvoiceValue = invoices.length > 0 ? totalRevenue / invoices.length : 0;
+
+            let tableRows = '';
+            Object.entries(customerSales).forEach(([custId, data]) => {
+                const customer = (customersRes.data || []).find(c => c.id == custId);
+                tableRows += `
+                    <tr>
+                        <td>${escapeHtml(customer?.name || 'Unknown')}</td>
+                        <td>${data.count}</td>
+                        <td>${formatCurrency(data.total)}</td>
+                        <td>${formatCurrency(data.total / data.count)}</td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">Sales Report</h3>
+                        <span style="color: var(--text-muted);">${formatDate(new Date(startDate))} - ${formatDate(new Date(endDate))}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid" style="margin-bottom: 24px;">
+                            <div class="stat-card">
+                                <div class="stat-content">
+                                    <div class="stat-label">Total Invoices</div>
+                                    <div class="stat-value">${invoices.length}</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-content">
+                                    <div class="stat-label">Total Revenue</div>
+                                    <div class="stat-value">${formatCurrency(totalRevenue)}</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-content">
+                                    <div class="stat-label">Avg Invoice Value</div>
+                                    <div class="stat-value">${formatCurrency(avgInvoiceValue)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 style="margin-bottom: 12px;">Sales by Customer</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Invoices</th>
+                                    <th>Total Sales</th>
+                                    <th>Avg Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRows || '<tr><td colspan="4" style="text-align: center;">No data</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function generatePurchaseReport(startDate, endDate, container) {
+            const [posRes, suppliersRes] = await Promise.all([
+                ApiClient.getPurchaseOrders(),
+                ApiClient.getSuppliers()
+            ]);
+
+            const pos = (posRes.data || []).filter(po => {
+                const poDate = new Date(po.order_date);
+                return poDate >= new Date(startDate) && poDate <= new Date(endDate);
+            });
+
+            const supplierPurchases = {};
+            pos.forEach(po => {
+                const suppId = po.supplier_id;
+                if (!supplierPurchases[suppId]) {
+                    supplierPurchases[suppId] = { count: 0, total: 0 };
+                }
+                supplierPurchases[suppId].count++;
+                supplierPurchases[suppId].total += po.total_amount || 0;
+            });
+
+            const totalSpend = pos.reduce((sum, po) => sum + (po.total_amount || 0), 0);
+            const avgPOValue = pos.length > 0 ? totalSpend / pos.length : 0;
+
+            let tableRows = '';
+            Object.entries(supplierPurchases).forEach(([suppId, data]) => {
+                const supplier = (suppliersRes.data || []).find(s => s.id == suppId);
+                tableRows += `
+                    <tr>
+                        <td>${escapeHtml(supplier?.name || 'Unknown')}</td>
+                        <td>${data.count}</td>
+                        <td>${formatCurrency(data.total)}</td>
+                        <td>${formatCurrency(data.total / data.count)}</td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">Purchase Report</h3>
+                        <span style="color: var(--text-muted);">${formatDate(new Date(startDate))} - ${formatDate(new Date(endDate))}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid" style="margin-bottom: 24px;">
+                            <div class="stat-card">
+                                <div class="stat-content">
+                                    <div class="stat-label">Total POs</div>
+                                    <div class="stat-value">${pos.length}</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-content">
+                                    <div class="stat-label">Total Spend</div>
+                                    <div class="stat-value">${formatCurrency(totalSpend)}</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-content">
+                                    <div class="stat-label">Avg PO Value</div>
+                                    <div class="stat-value">${formatCurrency(avgPOValue)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 style="margin-bottom: 12px;">Purchases by Supplier</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Supplier</th>
+                                    <th>Purchase Orders</th>
+                                    <th>Total Spend</th>
+                                    <th>Avg Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRows || '<tr><td colspan="4" style="text-align: center;">No data</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function generateProfitLossReport(startDate, endDate, container) {
+            const [invoicesRes, expensesRes] = await Promise.all([
+                ApiClient.getInvoices(),
+                ApiClient.getExpenses()
+            ]);
+
+            const invoices = (invoicesRes.data || []).filter(inv => {
+                const invDate = new Date(inv.invoice_date);
+                return invDate >= new Date(startDate) && invDate <= new Date(endDate);
+            });
+
+            const expenses = (expensesRes.data || []).filter(exp => {
+                const expDate = new Date(exp.expense_date);
+                return expDate >= new Date(startDate) && expDate <= new Date(endDate);
+            });
+
+            const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+            const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);
+            const netProfit = totalRevenue - totalExpenses;
+            const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">Profit & Loss Statement</h3>
+                        <span style="color: var(--text-muted);">${formatDate(new Date(startDate))} - ${formatDate(new Date(endDate))}</span>
+                    </div>
+                    <div class="card-body">
+                        <div style="max-width: 600px; margin: 0 auto;">
+                            <div style="padding: 20px; background: var(--bg); border-radius: var(--radius-lg); margin-bottom: 24px;">
+                                <div style="display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border);">
+                                    <span style="font-weight: 600;">Revenue</span>
+                                    <span style="color: var(--success); font-weight: 600;">${formatCurrency(totalRevenue)}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border);">
+                                    <span style="font-weight: 600;">Expenses</span>
+                                    <span style="color: var(--danger); font-weight: 600;">${formatCurrency(totalExpenses)}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; padding: 16px; border-bottom: 2px solid var(--border); margin-bottom: 16px;">
+                                    <span style="font-size: 1.2rem; font-weight: 700;">Net Profit</span>
+                                    <span style="font-size: 1.2rem; font-weight: 700; color: ${netProfit >= 0 ? 'var(--success)' : 'var(--danger)'};">
+                                        ${formatCurrency(netProfit)}
+                                    </span>
+                                </div>
+                                <div style="text-align: center; padding: 16px; background: ${netProfit >= 0 ? '#d1fae5' : '#fee2e2'}; border-radius: var(--radius); color: ${netProfit >= 0 ? 'var(--success)' : 'var(--danger)'};">
+                                    <div style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Profit Margin</div>
+                                    <div style="font-size: 2rem; font-weight: 700; margin-top: 4px;">${profitMargin.toFixed(1)}%</div>
+                                </div>
+                            </div>
+                            <canvas id="plChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Create chart
+            const ctx = document.getElementById('plChart');
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Revenue', 'Expenses', 'Net Profit'],
+                    datasets: [{
+                        data: [totalRevenue, totalExpenses, netProfit],
+                        backgroundColor: ['#10b981', '#ef4444', netProfit >= 0 ? '#2563eb' : '#f59e0b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: value => 'Rs. ' + value.toLocaleString() }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function generateInventoryReport(container) {
+            const response = await ApiClient.getProducts();
+            const products = response.data || [];
+
+            const totalValue = products.reduce((sum, p) => sum + (p.current_quantity * p.cost_price), 0);
+            const lowStockItems = products.filter(p => p.current_quantity <= p.stock_threshold);
+
+            let tableRows = products.map(p => `
+                <tr>
+                    <td>${escapeHtml(p.name)}</td>
+                    <td>${p.current_quantity}</td>
+                    <td>${formatCurrency(p.cost_price)}</td>
+                    <td><strong>${formatCurrency(p.current_quantity * p.cost_price)}</strong></td>
+                    <td>${p.current_quantity <= p.stock_threshold ? '<span class="badge" style="background: #fee2e2; color: #991b1b;">Low Stock</span>' : '<span class="badge" style="background: #d1fae5; color: #065f46;">Normal</span>'}</td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">Inventory Valuation Report</h3>
+                        <span style="color: var(--text-muted);">As of ${formatDate(new Date())}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid" style="margin-bottom: 24px;">
+                            <div class="stat-card">
+                                <div class="stat-content">
+                                    <div class="stat-label">Total Products</div>
+                                    <div class="stat-value">${products.length}</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-content">
+                                    <div class="stat-label">Total Value</div>
+                                    <div class="stat-value">${formatCurrency(totalValue)}</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-content">
+                                    <div class="stat-label">Low Stock Items</div>
+                                    <div class="stat-value" style="color: var(--danger);">${lowStockItems.length}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Cost Price</th>
+                                    <th>Total Value</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRows || '<tr><td colspan="5" style="text-align: center;">No products</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function generateAgingReport(container) {
+            const response = await ApiClient.getInvoices();
+            const unpaidInvoices = (response.data || []).filter(inv => inv.status === 'unpaid' || inv.status === 'pending');
+
+            const now = new Date();
+            const buckets = {
+                current: { label: '0-30 days', invoices: [], total: 0 },
+                thirty: { label: '31-60 days', invoices: [], total: 0 },
+                sixty: { label: '61-90 days', invoices: [], total: 0 },
+                ninety: { label: '90+ days', invoices: [], total: 0 }
+            };
+
+            unpaidInvoices.forEach(inv => {
+                const dueDate = new Date(inv.due_date);
+                const daysOverdue = Math.floor((now - dueDate) / (1000 * 60 * 60 * 24));
+
+                if (daysOverdue <= 30) {
+                    buckets.current.invoices.push(inv);
+                    buckets.current.total += inv.total;
+                } else if (daysOverdue <= 60) {
+                    buckets.thirty.invoices.push(inv);
+                    buckets.thirty.total += inv.total;
+                } else if (daysOverdue <= 90) {
+                    buckets.sixty.invoices.push(inv);
+                    buckets.sixty.total += inv.total;
+                } else {
+                    buckets.ninety.invoices.push(inv);
+                    buckets.ninety.total += inv.total;
+                }
+            });
+
+            const totalOutstanding = unpaidInvoices.reduce((sum, inv) => sum + inv.total, 0);
+
+            let bucketsHtml = Object.values(buckets).map(bucket => `
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-label">${bucket.label}</div>
+                        <div class="stat-value">${formatCurrency(bucket.total)}</div>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">${bucket.invoices.length} invoices</div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">Accounts Receivable Aging Report</h3>
+                        <span style="color: var(--text-muted);">As of ${formatDate(now)}</span>
+                    </div>
+                    <div class="card-body">
+                        <div style="padding: 20px; background: var(--bg); border-radius: var(--radius-lg); text-align: center; margin-bottom: 24px;">
+                            <div style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Total Outstanding</div>
+                            <div style="font-size: 2.5rem; font-weight: 700; margin-top: 8px; color: var(--danger);">${formatCurrency(totalOutstanding)}</div>
+                            <div style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">${unpaidInvoices.length} unpaid invoices</div>
+                        </div>
+                        <div class="stats-grid">${bucketsHtml}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.logout = () => {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                window.location.href = './login.html';
+            }
+        };
+
+        function formatCurrency(amount) {
+            return 'Rs. ' + parseFloat(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast toast-${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>

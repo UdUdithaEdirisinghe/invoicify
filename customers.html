@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers - Invoicify ERP</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>Invoicify</h1>
+        <p class="sidebar-subtitle">ERP System</p>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">
+          <i class="ph ph-house"></i>
+          <span>Dashboard</span>
+        </a>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Sales</div>
+          <a href="/index.html" class="nav-item">
+            <i class="ph ph-file-text"></i>
+            <span>Invoices</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Customers</div>
+          <a href="/customers.html" class="nav-item active">
+            <i class="ph ph-users"></i>
+            <span>Customers</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Purchases</div>
+          <a href="/suppliers.html" class="nav-item">
+            <i class="ph ph-truck"></i>
+            <span>Suppliers</span>
+          </a>
+          <a href="/purchase-orders.html" class="nav-item">
+            <i class="ph ph-shopping-cart"></i>
+            <span>Purchase Orders</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Inventory</div>
+          <a href="/inventory.html" class="nav-item">
+            <i class="ph ph-package"></i>
+            <span>Products</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Accounting</div>
+          <a href="/expenses.html" class="nav-item">
+            <i class="ph ph-receipt"></i>
+            <span>Expenses</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Reports</div>
+          <a href="/reports.html" class="nav-item">
+            <i class="ph ph-chart-line"></i>
+            <span>Reports</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">System</div>
+          <a href="/settings.html" class="nav-item">
+            <i class="ph ph-gear"></i>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="btn-logout" class="btn btn-secondary btn-block">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Customers</h1>
+          <p class="page-subtitle">Manage your customer database</p>
+        </div>
+        <button id="btn-add-customer" class="btn btn-primary">
+          <i class="ph ph-plus"></i>
+          <span>Add Customer</span>
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="filters-row">
+          <div class="search-box" style="flex: 1; max-width: 400px;">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Search customers..." />
+          </div>
+          
+          <select id="status-filter" class="filter-select">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+
+          <button id="btn-refresh" class="btn btn-secondary">
+            <i class="ph ph-arrows-clockwise"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Customers Table -->
+      <div class="card">
+        <div id="loading" class="loading-state" style="display: none;">
+          <i class="ph ph-spinner spinner"></i>
+          <p>Loading customers...</p>
+        </div>
+
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <i class="ph ph-users" style="font-size: 64px; opacity: 0.3;"></i>
+          <h3>No customers yet</h3>
+          <p>Add your first customer to get started</p>
+          <button class="btn btn-primary" onclick="document.getElementById('btn-add-customer').click()">
+            <i class="ph ph-plus"></i>
+            <span>Add Customer</span>
+          </button>
+        </div>
+
+        <div id="customers-table" style="display: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Contact</th>
+                <th>Location</th>
+                <th>Credit Limit</th>
+                <th>Outstanding</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customers-tbody">
+              <!-- Rows will be inserted here -->
+            </tbody>
+          </table>
+
+          <div class="pagination" id="pagination" style="display: none;">
+            <button id="btn-prev" class="btn btn-secondary" disabled>
+              <i class="ph ph-caret-left"></i>
+              <span>Previous</span>
+            </button>
+            <span id="page-info" class="pagination-info">Page 1 of 1</span>
+            <button id="btn-next" class="btn btn-secondary" disabled>
+              <span>Next</span>
+              <i class="ph ph-caret-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Customer Modal -->
+  <div id="customer-modal" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Customer</h2>
+        <button class="modal-close" onclick="closeCustomerModal()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <form id="customer-form">
+        <div class="modal-body">
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="ph ph-user"></i>
+              Basic Information
+            </h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Customer Name *</label>
+                <input type="text" id="customer-name" required />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="customer-email" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="customer-phone" />
+              </div>
+              <div class="form-group">
+                <label>Tax ID</label>
+                <input type="text" id="customer-tax-id" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="ph ph-map-pin"></i>
+              Address
+            </h3>
+            <div class="form-group">
+              <label>Street Address</label>
+              <textarea id="customer-address" rows="2"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>City</label>
+                <input type="text" id="customer-city" />
+              </div>
+              <div class="form-group">
+                <label>State/Province</label>
+                <input type="text" id="customer-state" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Country</label>
+                <input type="text" id="customer-country" value="Sri Lanka" />
+              </div>
+              <div class="form-group">
+                <label>Postal Code</label>
+                <input type="text" id="customer-postal" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="ph ph-currency-circle-dollar"></i>
+              Financial Details
+            </h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Credit Limit</label>
+                <input type="number" id="customer-credit-limit" value="0" step="0.01" min="0" />
+              </div>
+              <div class="form-group">
+                <label>Status</label>
+                <select id="customer-status">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="ph ph-note"></i>
+              Notes
+            </h3>
+            <div class="form-group">
+              <label>Additional Notes</label>
+              <textarea id="customer-notes" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCustomerModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="ph ph-check"></i>
+            <span id="btn-submit-text">Save Customer</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import ApiClient from './js/api-client.js';
+
+    let currentPage = 0;
+    let currentLimit = 50;
+    let currentSearch = '';
+    let currentStatus = '';
+    let editingCustomerId = null;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      await checkAuth();
+      await loadCustomers();
+      setupEventListeners();
+    });
+
+    async function checkAuth() {
+      if (!ApiClient.isAuthenticated()) {
+        window.location.href = '/login.html';
+        return;
+      }
+    }
+
+    function setupEventListeners() {
+      // Search
+      const searchInput = document.getElementById('search-input');
+      let searchTimeout;
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          currentSearch = e.target.value;
+          currentPage = 0;
+          loadCustomers();
+        }, 300);
+      });
+
+      // Status filter
+      document.getElementById('status-filter').addEventListener('change', (e) => {
+        currentStatus = e.target.value;
+        currentPage = 0;
+        loadCustomers();
+      });
+
+      // Refresh button
+      document.getElementById('btn-refresh').addEventListener('click', loadCustomers);
+
+      // Add customer button
+      document.getElementById('btn-add-customer').addEventListener('click', openAddCustomerModal);
+
+      // Form submit
+      document.getElementById('customer-form').addEventListener('submit', handleSubmit);
+
+      // Pagination
+      document.getElementById('btn-prev').addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          loadCustomers();
+        }
+      });
+
+      document.getElementById('btn-next').addEventListener('click', () => {
+        currentPage++;
+        loadCustomers();
+      });
+
+      // Logout
+      document.getElementById('btn-logout').addEventListener('click', () => {
+        ApiClient.logout();
+      });
+
+      // Close modal on outside click
+      document.getElementById('customer-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'customer-modal') {
+          closeCustomerModal();
+        }
+      });
+    }
+
+    async function loadCustomers() {
+      const loading = document.getElementById('loading');
+      const emptyState = document.getElementById('empty-state');
+      const table = document.getElementById('customers-table');
+
+      loading.style.display = 'flex';
+      emptyState.style.display = 'none';
+      table.style.display = 'none';
+
+      try {
+        const params = {
+          limit: currentLimit,
+          offset: currentPage * currentLimit
+        };
+
+        if (currentSearch) params.search = currentSearch;
+        if (currentStatus) params.status = currentStatus;
+
+        const response = await ApiClient.getCustomers(params);
+        const { customers, pagination } = response;
+
+        if (customers.length === 0 && currentPage === 0 && !currentSearch && !currentStatus) {
+          emptyState.style.display = 'flex';
+          loading.style.display = 'none';
+          return;
+        }
+
+        renderCustomers(customers);
+        updatePagination(pagination);
+
+        loading.style.display = 'none';
+        table.style.display = 'block';
+      } catch (error) {
+        console.error('Failed to load customers:', error);
+        loading.style.display = 'none';
+        showToast('Failed to load customers', 'error');
+      }
+    }
+
+    function renderCustomers(customers) {
+      const tbody = document.getElementById('customers-tbody');
+      tbody.innerHTML = '';
+
+      customers.forEach(customer => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><code>${customer.customer_code || '-'}</code></td>
+          <td>
+            <div class="customer-name">
+              <strong>${escapeHtml(customer.name)}</strong>
+            </div>
+          </td>
+          <td>
+            <div class="contact-info">
+              ${customer.email ? `<div><i class="ph ph-envelope"></i> ${escapeHtml(customer.email)}</div>` : ''}
+              ${customer.phone ? `<div><i class="ph ph-phone"></i> ${escapeHtml(customer.phone)}</div>` : ''}
+              ${!customer.email && !customer.phone ? '-' : ''}
+            </div>
+          </td>
+          <td>
+            ${customer.city || customer.country ? 
+              `<div>${[customer.city, customer.country].filter(Boolean).join(', ')}</div>` : 
+              '-'}
+          </td>
+          <td>${formatCurrency(customer.credit_limit)}</td>
+          <td>${formatCurrency(customer.outstanding_balance)}</td>
+          <td>
+            <span class="badge ${customer.status === 'active' ? 'badge-success' : 'badge-secondary'}">
+              ${customer.status}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon" onclick="editCustomer(${customer.id})" title="Edit">
+                <i class="ph ph-pencil"></i>
+              </button>
+              <button class="btn-icon btn-icon-danger" onclick="deleteCustomer(${customer.id}, '${escapeHtml(customer.name)}')" title="Delete">
+                <i class="ph ph-trash"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updatePagination(pagination) {
+      const paginationDiv = document.getElementById('pagination');
+      const pageInfo = document.getElementById('page-info');
+      const btnPrev = document.getElementById('btn-prev');
+      const btnNext = document.getElementById('btn-next');
+
+      if (pagination.total > currentLimit) {
+        paginationDiv.style.display = 'flex';
+        const totalPages = Math.ceil(pagination.total / currentLimit);
+        pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages} (${pagination.total} total)`;
+        
+        btnPrev.disabled = currentPage === 0;
+        btnNext.disabled = !pagination.hasMore;
+      } else {
+        paginationDiv.style.display = 'none';
+      }
+    }
+
+    function openAddCustomerModal() {
+      editingCustomerId = null;
+      document.getElementById('modal-title').textContent = 'Add Customer';
+      document.getElementById('btn-submit-text').textContent = 'Save Customer';
+      document.getElementById('customer-form').reset();
+      document.getElementById('customer-status').value = 'active';
+      document.getElementById('customer-country').value = 'Sri Lanka';
+      document.getElementById('customer-modal').classList.add('active');
+    }
+
+    window.editCustomer = async function(id) {
+      editingCustomerId = id;
+      document.getElementById('modal-title').textContent = 'Edit Customer';
+      document.getElementById('btn-submit-text').textContent = 'Update Customer';
+
+      try {
+        const response = await ApiClient.getCustomers({ limit: 1000 });
+        const customer = response.customers.find(c => c.id === id);
+
+        if (!customer) {
+          showToast('Customer not found', 'error');
+          return;
+        }
+
+        document.getElementById('customer-name').value = customer.name || '';
+        document.getElementById('customer-email').value = customer.email || '';
+        document.getElementById('customer-phone').value = customer.phone || '';
+        document.getElementById('customer-tax-id').value = customer.tax_id || '';
+        document.getElementById('customer-address').value = customer.address || '';
+        document.getElementById('customer-city').value = customer.city || '';
+        document.getElementById('customer-state').value = customer.state || '';
+        document.getElementById('customer-country').value = customer.country || '';
+        document.getElementById('customer-postal').value = customer.postal_code || '';
+        document.getElementById('customer-credit-limit').value = customer.credit_limit || 0;
+        document.getElementById('customer-status').value = customer.status || 'active';
+        document.getElementById('customer-notes').value = customer.notes || '';
+
+        document.getElementById('customer-modal').classList.add('active');
+      } catch (error) {
+        console.error('Failed to load customer:', error);
+        showToast('Failed to load customer details', 'error');
+      }
+    };
+
+    window.deleteCustomer = async function(id, name) {
+      if (!confirm(`Are you sure you want to delete customer "${name}"?\n\nThis will set their status to inactive.`)) {
+        return;
+      }
+
+      try {
+        await ApiClient.deleteCustomer(id);
+        showToast('Customer deleted successfully', 'success');
+        await loadCustomers();
+      } catch (error) {
+        console.error('Failed to delete customer:', error);
+        showToast('Failed to delete customer', 'error');
+      }
+    };
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+
+      const customerData = {
+        name: document.getElementById('customer-name').value.trim(),
+        email: document.getElementById('customer-email').value.trim(),
+        phone: document.getElementById('customer-phone').value.trim(),
+        taxId: document.getElementById('customer-tax-id').value.trim(),
+        address: document.getElementById('customer-address').value.trim(),
+        city: document.getElementById('customer-city').value.trim(),
+        state: document.getElementById('customer-state').value.trim(),
+        country: document.getElementById('customer-country').value.trim(),
+        postalCode: document.getElementById('customer-postal').value.trim(),
+        creditLimit: parseFloat(document.getElementById('customer-credit-limit').value) || 0,
+        status: document.getElementById('customer-status').value,
+        notes: document.getElementById('customer-notes').value.trim()
+      };
+
+      try {
+        if (editingCustomerId) {
+          await ApiClient.updateCustomer(editingCustomerId, customerData);
+          showToast('Customer updated successfully', 'success');
+        } else {
+          await ApiClient.createCustomer(customerData);
+          showToast('Customer created successfully', 'success');
+        }
+
+        closeCustomerModal();
+        await loadCustomers();
+      } catch (error) {
+        console.error('Failed to save customer:', error);
+        showToast(error.message || 'Failed to save customer', 'error');
+      }
+    }
+
+    window.closeCustomerModal = function() {
+      document.getElementById('customer-modal').classList.remove('active');
+      document.getElementById('customer-form').reset();
+      editingCustomerId = null;
+    };
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-LK', {
+        style: 'currency',
+        currency: 'LKR',
+        minimumFractionDigits: 2
+      }).format(amount || 0);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showToast(message, type = 'info') {
+      // Simple toast notification
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#2563eb'};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: var(--shadow-lg);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .contact-info {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .contact-info i {
+      font-size: 12px;
+      opacity: 0.6;
+      margin-right: 4px;
+    }
+
+    .badge-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+  </style>
+</body>
+</html>

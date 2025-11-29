@@ -3,201 +3,545 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Invoicify</title>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Dashboard - Invoice App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="module" src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="brand">
-                <i class="ph ph-hexagon-fill"></i> Invoicify
+            <div class="sidebar-header">
+                <h1>InvoiceApp</h1>
+                <p class="sidebar-subtitle">Business ERP System</p>
             </div>
-            <nav>
-                <a href="/dashboard.html" class="nav-link active"><i class="ph ph-squares-four"></i> Dashboard</a>
-                <a href="/index.html#editor" class="nav-link"><i class="ph ph-plus-circle"></i> New Invoice</a>
-                <a href="/inventory.html" class="nav-link"><i class="ph ph-package"></i> Inventory</a>
-                <a href="/index.html#settings" class="nav-link"><i class="ph ph-gear"></i> Settings</a>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Dashboard</div>
+                    <a href="./dashboard.html" class="nav-item active">
+                        <i class="ph ph-house"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Sales</div>
+                    <a href="./index.html" class="nav-item">
+                        <i class="ph ph-file-text"></i>
+                        <span>Invoices</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Customers</div>
+                    <a href="./customers.html" class="nav-item">
+                        <i class="ph ph-users"></i>
+                        <span>Customers</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Purchases</div>
+                    <a href="./suppliers.html" class="nav-item">
+                        <i class="ph ph-handshake"></i>
+                        <span>Suppliers</span>
+                    </a>
+                    <a href="./purchase-orders.html" class="nav-item">
+                        <i class="ph ph-shopping-cart"></i>
+                        <span>Purchase Orders</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Inventory</div>
+                    <a href="./inventory.html" class="nav-item">
+                        <i class="ph ph-package"></i>
+                        <span>Products</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Accounting</div>
+                    <a href="./expenses.html" class="nav-item">
+                        <i class="ph ph-receipt"></i>
+                        <span>Expenses</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Reports</div>
+                    <a href="./reports.html" class="nav-item">
+                        <i class="ph ph-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="./settings.html" class="nav-item">
+                        <i class="ph ph-gear"></i>
+                        <span>Settings</span>
+                    </a>
+                </div>
             </nav>
-            <div style="padding: 20px; margin-top: auto;">
-                <button class="logout-btn" style="width: 100%; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                    <i class="ph ph-sign-out"></i> Logout
+
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn btn-secondary btn-block">
+                    <i class="ph ph-sign-out"></i>
+                    <span>Logout</span>
                 </button>
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <header class="view-header">
-                <h1>Dashboard</h1>
-                <div id="user-info" style="color: #64748b;"></div>
-            </header>
-
-            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                <div class="card stat-card">
-                    <h3>Total Invoices</h3>
-                    <p id="total-count" style="font-size: 32px; font-weight: bold; color: #2563eb;">0</p>
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Welcome back! Here's an overview of your business</p>
                 </div>
-                <div class="card stat-card">
-                    <h3>Total Revenue</h3>
-                    <p id="total-revenue" style="font-size: 32px; font-weight: bold; color: #059669;">LKR 0.00</p>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="window.location.href='./index.html'" class="btn btn-primary">
+                        <i class="ph ph-file-text"></i>
+                        New Invoice
+                    </button>
+                    <button onclick="window.location.href='./expenses.html'" class="btn btn-secondary">
+                        <i class="ph ph-receipt"></i>
+                        Record Expense
+                    </button>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2>Your Invoices</h2>
-                <button id="new-invoice-btn" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                    <i class="ph ph-plus"></i> New Invoice
-                </button>
+            <!-- Key Metrics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #dbeafe; color: #2563eb;">
+                        <i class="ph-fill ph-currency-circle-dollar"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Sales This Month</div>
+                        <div class="stat-value" id="statSales">Rs. 0.00</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fee2e2; color: #ef4444;">
+                        <i class="ph-fill ph-warning-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Outstanding Invoices</div>
+                        <div class="stat-value" id="statOutstanding">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fef3c7; color: #f59e0b;">
+                        <i class="ph-fill ph-package"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Low Stock Items</div>
+                        <div class="stat-value" id="statLowStock">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #d1fae5; color: #10b981;">
+                        <i class="ph-fill ph-receipt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Expenses This Month</div>
+                        <div class="stat-value" id="statExpenses">Rs. 0.00</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="table-container card">
-                <table id="invoices-table">
-                    <thead>
-                        <tr>
-                            <th>Invoice #</th>
-                            <th>Customer</th>
-                            <th>Date</th>
-                            <th>Total</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="invoices-tbody">
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
-                                Loading invoices...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Charts Section -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">Sales Trend (Last 6 Months)</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="salesChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">Expense Breakdown</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="expenseChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities & Top Customers -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">Recent Activities</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="activitiesContainer"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">Top 5 Customers</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="customersChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
             </div>
         </main>
-    </div>
+    <div id="toast" class="toast"></div>
 
     <script type="module">
         import { requireAuth, getCurrentUser, setupLogout } from './js/auth.js';
         import ApiClient from './js/api-client.js';
 
-        // Protect this page
-        if (!requireAuth()) {
-            throw new Error('Not authenticated');
-        }
-
+        requireAuth();
+        const user = getCurrentUser();
         setupLogout();
 
-        // Load user info and invoices
-        async function init() {
-            try {
-                // Get current user
-                const user = await getCurrentUser();
-                if (user) {
-                    document.getElementById('user-info').textContent = `Logged in as: ${user.username}`;
-                }
+        let salesChart, expenseChart, customersChart;
 
-                // Load invoices
-                await loadInvoices();
+        async function init() {
+            await Promise.all([
+                loadKeyMetrics(),
+                loadSalesTrend(),
+                loadExpenseBreakdown(),
+                loadTopCustomers(),
+                loadRecentActivities()
+            ]);
+        }
+
+        async function loadKeyMetrics() {
+            try {
+                const now = new Date();
+                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+                const [invoicesRes, productsRes, expensesRes] = await Promise.all([
+                    ApiClient.getInvoices(),
+                    ApiClient.getProducts(),
+                    ApiClient.getExpenses({ startDate: firstDayOfMonth, endDate: lastDayOfMonth })
+                ]);
+
+                // Sales this month
+                const thisMonthInvoices = (invoicesRes.data || []).filter(inv => {
+                    const invDate = new Date(inv.invoice_date);
+                    return invDate >= new Date(firstDayOfMonth) && invDate <= new Date(lastDayOfMonth);
+                });
+                const salesTotal = thisMonthInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+                document.getElementById('statSales').textContent = formatCurrency(salesTotal);
+
+                // Outstanding invoices
+                const unpaidInvoices = (invoicesRes.data || []).filter(inv => inv.status === 'unpaid' || inv.status === 'pending');
+                document.getElementById('statOutstanding').textContent = unpaidInvoices.length;
+
+                // Low stock items (at or below threshold)
+                const lowStockItems = (productsRes.data || []).filter(p => p.current_quantity <= p.stock_threshold);
+                document.getElementById('statLowStock').textContent = lowStockItems.length;
+
+                // Expenses this month
+                const expensesTotal = (expensesRes.data || []).reduce((sum, exp) => sum + (exp.amount || 0), 0);
+                document.getElementById('statExpenses').textContent = formatCurrency(expensesTotal);
+
             } catch (error) {
-                console.error('Failed to initialize:', error);
+                console.error('Failed to load metrics:', error);
             }
         }
 
-        async function loadInvoices() {
+        async function loadSalesTrend() {
             try {
                 const response = await ApiClient.getInvoices();
-                const invoices = response.invoices || [];
+                const invoices = response.data || [];
 
-                const tbody = document.getElementById('invoices-tbody');
-                
-                if (invoices.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
-                                No invoices yet. Create your first invoice!
-                            </td>
-                        </tr>
-                    `;
-                    updateStats(0, 0);
-                    return;
+                // Get last 6 months
+                const months = [];
+                const now = new Date();
+                for (let i = 5; i >= 0; i--) {
+                    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    months.push({
+                        label: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+                        start: new Date(date.getFullYear(), date.getMonth(), 1),
+                        end: new Date(date.getFullYear(), date.getMonth() + 1, 0)
+                    });
                 }
 
-                // Calculate stats
-                const totalRevenue = invoices.reduce((sum, inv) => {
-                    return sum + (inv.data?.totals?.grandTotal || 0);
-                }, 0);
+                const salesData = months.map(month => {
+                    const monthInvoices = invoices.filter(inv => {
+                        const invDate = new Date(inv.invoice_date);
+                        return invDate >= month.start && invDate <= month.end;
+                    });
+                    return monthInvoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+                });
 
-                updateStats(invoices.length, totalRevenue);
-
-                // Render table
-                tbody.innerHTML = invoices.map(invoice => {
-                    const data = invoice.data;
-                    const date = new Date(invoice.createdAt).toLocaleDateString();
-                    const total = data?.totals?.grandTotal || 0;
-                    const currency = data?.settings?.currency || 'LKR';
-                    
-                    return `
-                        <tr>
-                            <td>${data?.number || 'N/A'}</td>
-                            <td>${data?.customer?.name || 'Unknown'}</td>
-                            <td>${date}</td>
-                            <td>${currency} ${total.toFixed(2)}</td>
-                            <td>
-                                <button class="view-btn" data-id="${invoice.id}" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px;">
-                                    View
-                                </button>
-                                <button class="delete-btn" data-id="${invoice.id}" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-
-                // Add event listeners
-                document.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const id = e.target.dataset.id;
-                        if (confirm('Are you sure you want to delete this invoice?')) {
-                            try {
-                                await ApiClient.deleteInvoice(id);
-                                await loadInvoices(); // Reload
-                            } catch (error) {
-                                alert('Failed to delete invoice: ' + error.message);
+                const ctx = document.getElementById('salesChart');
+                salesChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months.map(m => m.label),
+                        datasets: [{
+                            label: 'Sales',
+                            data: salesData,
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: value => 'Rs. ' + value.toLocaleString()
+                                }
                             }
                         }
-                    });
+                    }
                 });
-
-                document.querySelectorAll('.view-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const id = e.target.dataset.id;
-                        window.location.href = `/index.html#editor?id=${id}`;
-                    });
-                });
-
             } catch (error) {
-                console.error('Failed to load invoices:', error);
-                document.getElementById('invoices-tbody').innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 40px; color: #ef4444;">
-                            Failed to load invoices. Please try again.
-                        </td>
-                    </tr>
-                `;
+                console.error('Failed to load sales trend:', error);
             }
         }
 
-        function updateStats(count, revenue) {
-            document.getElementById('total-count').textContent = count;
-            document.getElementById('total-revenue').textContent = `LKR ${revenue.toFixed(2)}`;
+        async function loadExpenseBreakdown() {
+            try {
+                const [expensesRes, categoriesRes] = await Promise.all([
+                    ApiClient.getExpenses(),
+                    ApiClient.getExpenseCategories()
+                ]);
+
+                const expenses = expensesRes.data || [];
+                const categories = categoriesRes.data || [];
+
+                const categoryTotals = {};
+                expenses.forEach(exp => {
+                    const catId = exp.expense_category_id;
+                    categoryTotals[catId] = (categoryTotals[catId] || 0) + (exp.amount || 0);
+                });
+
+                const sortedCategories = Object.entries(categoryTotals)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                const labels = sortedCategories.map(([catId]) => {
+                    const cat = categories.find(c => c.id == catId);
+                    return cat?.name || 'Unknown';
+                });
+
+                const data = sortedCategories.map(([, total]) => total);
+
+                const colors = ['#2563eb', '#7c3aed', '#f59e0b', '#10b981', '#ef4444'];
+
+                const ctx = document.getElementById('expenseChart');
+                expenseChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to load expense breakdown:', error);
+            }
         }
 
-        // New invoice button
-        document.getElementById('new-invoice-btn').addEventListener('click', () => {
-            window.location.href = '/index.html#editor';
-        });
+        async function loadTopCustomers() {
+            try {
+                const [invoicesRes, customersRes] = await Promise.all([
+                    ApiClient.getInvoices(),
+                    ApiClient.getCustomers()
+                ]);
 
-        // Initialize
+                const invoices = invoicesRes.data || [];
+                const customers = customersRes.data || [];
+
+                const customerTotals = {};
+                invoices.forEach(inv => {
+                    const custId = inv.customer_id;
+                    if (custId) {
+                        customerTotals[custId] = (customerTotals[custId] || 0) + (inv.total || 0);
+                    }
+                });
+
+                const sortedCustomers = Object.entries(customerTotals)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                const labels = sortedCustomers.map(([custId]) => {
+                    const cust = customers.find(c => c.id == custId);
+                    return cust?.name || 'Unknown';
+                });
+
+                const data = sortedCustomers.map(([, total]) => total);
+
+                const ctx = document.getElementById('customersChart');
+                customersChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Sales',
+                            data: data,
+                            backgroundColor: '#2563eb'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: value => 'Rs. ' + value.toLocaleString()
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to load top customers:', error);
+            }
+        }
+
+        async function loadRecentActivities() {
+            try {
+                const [invoicesRes, expensesRes, posRes] = await Promise.all([
+                    ApiClient.getInvoices({ limit: 5 }),
+                    ApiClient.getExpenses({ limit: 5 }),
+                    ApiClient.getPurchaseOrders({ limit: 5 })
+                ]);
+
+                const activities = [];
+
+                (invoicesRes.data || []).forEach(inv => {
+                    activities.push({
+                        type: 'invoice',
+                        icon: 'ph-file-text',
+                        color: '#2563eb',
+                        title: `Invoice ${inv.invoice_number}`,
+                        description: inv.customer_name || 'Customer',
+                        amount: inv.total,
+                        date: new Date(inv.invoice_date)
+                    });
+                });
+
+                (expensesRes.data || []).forEach(exp => {
+                    activities.push({
+                        type: 'expense',
+                        icon: 'ph-receipt',
+                        color: '#ef4444',
+                        title: exp.title,
+                        description: exp.category_name || 'Expense',
+                        amount: -exp.amount,
+                        date: new Date(exp.expense_date)
+                    });
+                });
+
+                (posRes.data || []).forEach(po => {
+                    activities.push({
+                        type: 'po',
+                        icon: 'ph-shopping-cart',
+                        color: '#7c3aed',
+                        title: `PO ${po.po_number}`,
+                        description: po.supplier_name || 'Supplier',
+                        amount: -po.total_amount,
+                        date: new Date(po.order_date)
+                    });
+                });
+
+                activities.sort((a, b) => b.date - a.date);
+                const recentActivities = activities.slice(0, 10);
+
+                const container = document.getElementById('activitiesContainer');
+                if (recentActivities.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 32px;">No recent activities</p>';
+                } else {
+                    container.innerHTML = recentActivities.map(activity => `
+                        <div style="display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border);">
+                            <div style="width: 40px; height: 40px; border-radius: var(--radius); background: ${activity.color}15; color: ${activity.color}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i class="ph ${activity.icon}" style="font-size: 20px;"></i>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-weight: 600; color: var(--text);">${escapeHtml(activity.title)}</div>
+                                <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">${escapeHtml(activity.description)}</div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">${formatDate(activity.date)}</div>
+                            </div>
+                            <div style="font-weight: 600; color: ${activity.amount >= 0 ? 'var(--success)' : 'var(--danger)'}; white-space: nowrap;">
+                                ${activity.amount >= 0 ? '+' : ''}${formatCurrency(activity.amount)}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load recent activities:', error);
+            }
+        }
+
+        window.logout = () => {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                window.location.href = './login.html';
+            }
+        };
+
+        function formatCurrency(amount) {
+            return 'Rs. ' + parseFloat(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function formatDate(date) {
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (days === 0) return 'Today';
+            if (days === 1) return 'Yesterday';
+            if (days < 7) return `${days} days ago`;
+            
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast toast-${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
         init();
     </script>
 </body>

@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expenses - Invoicify ERP</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar (same as previous pages) -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>Invoicify</h1>
+        <p class="sidebar-subtitle">ERP System</p>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">
+          <i class="ph ph-house"></i>
+          <span>Dashboard</span>
+        </a>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Sales</div>
+          <a href="/index.html" class="nav-item">
+            <i class="ph ph-file-text"></i>
+            <span>Invoices</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Customers</div>
+          <a href="/customers.html" class="nav-item">
+            <i class="ph ph-users"></i>
+            <span>Customers</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Purchases</div>
+          <a href="/suppliers.html" class="nav-item">
+            <i class="ph ph-truck"></i>
+            <span>Suppliers</span>
+          </a>
+          <a href="/purchase-orders.html" class="nav-item">
+            <i class="ph ph-shopping-cart"></i>
+            <span>Purchase Orders</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Inventory</div>
+          <a href="/inventory.html" class="nav-item">
+            <i class="ph ph-package"></i>
+            <span>Products</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Accounting</div>
+          <a href="/expenses.html" class="nav-item active">
+            <i class="ph ph-receipt"></i>
+            <span>Expenses</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Reports</div>
+          <a href="/reports.html" class="nav-item">
+            <i class="ph ph-chart-line"></i>
+            <span>Reports</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">System</div>
+          <a href="/settings.html" class="nav-item">
+            <i class="ph ph-gear"></i>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="btn-logout" class="btn btn-secondary btn-block">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Expenses</h1>
+          <p class="page-subtitle">Track and manage business expenses</p>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button id="btn-manage-categories" class="btn btn-secondary">
+            <i class="ph ph-folders"></i>
+            <span>Categories</span>
+          </button>
+          <button id="btn-add-expense" class="btn btn-primary">
+            <i class="ph ph-plus"></i>
+            <span>Add Expense</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="stats-grid" id="expense-stats">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">
+            <i class="ph ph-coins"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">This Month</div>
+            <div class="stat-value" id="stat-this-month">LKR 0.00</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+            <i class="ph ph-calendar"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">This Year</div>
+            <div class="stat-value" id="stat-this-year">LKR 0.00</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #dbeafe; color: #2563eb;">
+            <i class="ph ph-chart-bar"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Pending</div>
+            <div class="stat-value" id="stat-pending">LKR 0.00</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #d1fae5; color: #059669;">
+            <i class="ph ph-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Paid</div>
+            <div class="stat-value" id="stat-paid">LKR 0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="filters-row">
+          <div class="search-box" style="flex: 1; max-width: 300px;">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Search expenses..." />
+          </div>
+          
+          <select id="category-filter" class="filter-select">
+            <option value="">All Categories</option>
+          </select>
+
+          <select id="status-filter" class="filter-select">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+          </select>
+
+          <input type="date" id="start-date-filter" class="filter-input" />
+          <input type="date" id="end-date-filter" class="filter-input" />
+
+          <button id="btn-refresh" class="btn btn-secondary">
+            <i class="ph ph-arrows-clockwise"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Expenses Table -->
+      <div class="card">
+        <div id="loading" class="loading-state" style="display: none;">
+          <i class="ph ph-spinner spinner"></i>
+          <p>Loading expenses...</p>
+        </div>
+
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <i class="ph ph-receipt" style="font-size: 64px; opacity: 0.3;"></i>
+          <h3>No expenses recorded</h3>
+          <p>Start tracking your business expenses</p>
+          <button class="btn btn-primary" onclick="document.getElementById('btn-add-expense').click()">
+            <i class="ph ph-plus"></i>
+            <span>Add Expense</span>
+          </button>
+        </div>
+
+        <div id="expenses-table" style="display: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Number</th>
+                <th>Date</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Payment Method</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-tbody">
+            </tbody>
+          </table>
+
+          <div class="pagination" id="pagination" style="display: none;">
+            <button id="btn-prev" class="btn btn-secondary" disabled>
+              <i class="ph ph-caret-left"></i>
+              <span>Previous</span>
+            </button>
+            <span id="page-info" class="pagination-info">Page 1 of 1</span>
+            <button id="btn-next" class="btn btn-secondary" disabled>
+              <span>Next</span>
+              <i class="ph ph-caret-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Expense Modal -->
+  <div id="expense-modal" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Expense</h2>
+        <button class="modal-close" onclick="closeExpenseModal()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <form id="expense-form">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Title *</label>
+              <input type="text" id="expense-title" required />
+            </div>
+            <div class="form-group">
+              <label>Amount *</label>
+              <input type="number" id="expense-amount" step="0.01" min="0" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="expense-category" required>
+                <option value="">Select Category</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Date *</label>
+              <input type="date" id="expense-date" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select id="expense-payment-method">
+                <option value="">Select Method</option>
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Credit Card">Credit Card</option>
+                <option value="Debit Card">Debit Card</option>
+                <option value="Check">Check</option>
+                <option value="Online Payment">Online Payment</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="expense-status">
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="expense-description" rows="3"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Notes</label>
+            <textarea id="expense-notes" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="ph ph-check"></i>
+            <span id="btn-submit-text">Save Expense</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Categories Modal -->
+  <div id="categories-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Expense Categories</h2>
+        <button class="modal-close" onclick="closeCategoriesModal()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div style="margin-bottom: 16px;">
+          <button id="btn-add-category" class="btn btn-primary btn-block">
+            <i class="ph ph-plus"></i>
+            <span>Add Category</span>
+          </button>
+        </div>
+
+        <div id="categories-list">
+          <!-- Categories will be loaded here -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCategoriesModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import ApiClient from './js/api-client.js';
+
+    let currentPage = 0;
+    let currentLimit = 50;
+    let currentSearch = '';
+    let currentStatus = '';
+    let currentCategory = '';
+    let currentStartDate = '';
+    let currentEndDate = '';
+    let editingExpenseId = null;
+    let categories = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await checkAuth();
+      await loadCategories();
+      await loadExpenses();
+      await loadStats();
+      setupEventListeners();
+      setDefaultDates();
+    });
+
+    async function checkAuth() {
+      if (!ApiClient.isAuthenticated()) {
+        window.location.href = '/login.html';
+        return;
+      }
+    }
+
+    function setDefaultDates() {
+      const today = new Date();
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      
+      document.getElementById('start-date-filter').value = firstDay.toISOString().split('T')[0];
+      document.getElementById('end-date-filter').value = today.toISOString().split('T')[0];
+      
+      currentStartDate = firstDay.toISOString().split('T')[0];
+      currentEndDate = today.toISOString().split('T')[0];
+      
+      document.getElementById('expense-date').value = today.toISOString().split('T')[0];
+    }
+
+    function setupEventListeners() {
+      const searchInput = document.getElementById('search-input');
+      let searchTimeout;
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          currentSearch = e.target.value;
+          currentPage = 0;
+          loadExpenses();
+        }, 300);
+      });
+
+      document.getElementById('category-filter').addEventListener('change', (e) => {
+        currentCategory = e.target.value;
+        currentPage = 0;
+        loadExpenses();
+      });
+
+      document.getElementById('status-filter').addEventListener('change', (e) => {
+        currentStatus = e.target.value;
+        currentPage = 0;
+        loadExpenses();
+        loadStats();
+      });
+
+      document.getElementById('start-date-filter').addEventListener('change', (e) => {
+        currentStartDate = e.target.value;
+        currentPage = 0;
+        loadExpenses();
+        loadStats();
+      });
+
+      document.getElementById('end-date-filter').addEventListener('change', (e) => {
+        currentEndDate = e.target.value;
+        currentPage = 0;
+        loadExpenses();
+        loadStats();
+      });
+
+      document.getElementById('btn-refresh').addEventListener('click', () => {
+        loadExpenses();
+        loadStats();
+      });
+
+      document.getElementById('btn-add-expense').addEventListener('click', openAddExpenseModal);
+      document.getElementById('btn-manage-categories').addEventListener('click', openCategoriesModal);
+      document.getElementById('expense-form').addEventListener('submit', handleSubmit);
+
+      document.getElementById('btn-prev').addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          loadExpenses();
+        }
+      });
+
+      document.getElementById('btn-next').addEventListener('click', () => {
+        currentPage++;
+        loadExpenses();
+      });
+
+      document.getElementById('btn-logout').addEventListener('click', () => {
+        ApiClient.logout();
+      });
+
+      document.getElementById('expense-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'expense-modal') {
+          closeExpenseModal();
+        }
+      });
+
+      document.getElementById('categories-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'categories-modal') {
+          closeCategoriesModal();
+        }
+      });
+
+      document.getElementById('btn-add-category').addEventListener('click', addCategory);
+    }
+
+    async function loadCategories() {
+      try {
+        const response = await ApiClient.getExpenseCategories();
+        categories = response.categories || [];
+        
+        const categoryFilter = document.getElementById('category-filter');
+        const expenseCategory = document.getElementById('expense-category');
+        
+        categoryFilter.innerHTML = '<option value="">All Categories</option>';
+        expenseCategory.innerHTML = '<option value="">Select Category</option>';
+        
+        categories.forEach(cat => {
+          categoryFilter.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`;
+          expenseCategory.innerHTML += `<option value="${cat.id}">${escapeHtml(cat.name)}</option>`;
+        });
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+      }
+    }
+
+    async function loadExpenses() {
+      const loading = document.getElementById('loading');
+      const emptyState = document.getElementById('empty-state');
+      const table = document.getElementById('expenses-table');
+
+      loading.style.display = 'flex';
+      emptyState.style.display = 'none';
+      table.style.display = 'none';
+
+      try {
+        const params = {
+          limit: currentLimit,
+          offset: currentPage * currentLimit
+        };
+
+        if (currentSearch) params.search = currentSearch;
+        if (currentStatus) params.status = currentStatus;
+        if (currentCategory) params.categoryId = currentCategory;
+        if (currentStartDate) params.startDate = currentStartDate;
+        if (currentEndDate) params.endDate = currentEndDate;
+
+        const response = await ApiClient.getExpenses(params);
+        const { expenses, pagination } = response;
+
+        if (expenses.length === 0 && currentPage === 0 && !currentSearch && !currentStatus && !currentCategory) {
+          emptyState.style.display = 'flex';
+          loading.style.display = 'none';
+          return;
+        }
+
+        renderExpenses(expenses);
+        updatePagination(pagination);
+
+        loading.style.display = 'none';
+        table.style.display = 'block';
+      } catch (error) {
+        console.error('Failed to load expenses:', error);
+        loading.style.display = 'none';
+        showToast('Failed to load expenses', 'error');
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const today = new Date();
+        const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+        const thisYear = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0];
+        const endOfToday = today.toISOString().split('T')[0];
+
+        const [monthData, yearData, pendingData, paidData] = await Promise.all([
+          ApiClient.getExpenses({ startDate: thisMonth, endDate: endOfToday, limit: 1 }),
+          ApiClient.getExpenses({ startDate: thisYear, endDate: endOfToday, limit: 1 }),
+          ApiClient.getExpenses({ status: 'pending', limit: 1 }),
+          ApiClient.getExpenses({ status: 'paid', limit: 1 })
+        ]);
+
+        document.getElementById('stat-this-month').textContent = formatCurrency(monthData.pagination.totalAmount);
+        document.getElementById('stat-this-year').textContent = formatCurrency(yearData.pagination.totalAmount);
+        document.getElementById('stat-pending').textContent = formatCurrency(pendingData.pagination.totalAmount);
+        document.getElementById('stat-paid').textContent = formatCurrency(paidData.pagination.totalAmount);
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
+    }
+
+    function renderExpenses(expenses) {
+      const tbody = document.getElementById('expenses-tbody');
+      tbody.innerHTML = '';
+
+      expenses.forEach(expense => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><code>${expense.expense_number || '-'}</code></td>
+          <td>${formatDate(expense.expense_date)}</td>
+          <td><strong>${escapeHtml(expense.title)}</strong></td>
+          <td>${expense.category_name ? `<span class="badge">${escapeHtml(expense.category_name)}</span>` : '-'}</td>
+          <td><strong>${formatCurrency(expense.amount)}</strong></td>
+          <td>${expense.payment_method || '-'}</td>
+          <td>
+            <span class="badge ${expense.status === 'paid' ? 'badge-success' : 'badge-warning'}">
+              ${expense.status}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon" onclick="editExpense(${expense.id})" title="Edit">
+                <i class="ph ph-pencil"></i>
+              </button>
+              <button class="btn-icon btn-icon-danger" onclick="deleteExpense(${expense.id}, '${escapeHtml(expense.title)}')" title="Delete">
+                <i class="ph ph-trash"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updatePagination(pagination) {
+      const paginationDiv = document.getElementById('pagination');
+      const pageInfo = document.getElementById('page-info');
+      const btnPrev = document.getElementById('btn-prev');
+      const btnNext = document.getElementById('btn-next');
+
+      if (pagination.total > currentLimit) {
+        paginationDiv.style.display = 'flex';
+        const totalPages = Math.ceil(pagination.total / currentLimit);
+        pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages} (Total: ${formatCurrency(pagination.totalAmount)})`;
+        
+        btnPrev.disabled = currentPage === 0;
+        btnNext.disabled = !pagination.hasMore;
+      } else {
+        paginationDiv.style.display = 'none';
+      }
+    }
+
+    function openAddExpenseModal() {
+      editingExpenseId = null;
+      document.getElementById('modal-title').textContent = 'Add Expense';
+      document.getElementById('btn-submit-text').textContent = 'Save Expense';
+      document.getElementById('expense-form').reset();
+      document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('expense-status').value = 'pending';
+      document.getElementById('expense-modal').classList.add('active');
+    }
+
+    window.editExpense = async function(id) {
+      editingExpenseId = id;
+      document.getElementById('modal-title').textContent = 'Edit Expense';
+      document.getElementById('btn-submit-text').textContent = 'Update Expense';
+
+      try {
+        const response = await ApiClient.getExpenses({ limit: 1000 });
+        const expense = response.expenses.find(e => e.id === id);
+
+        if (!expense) {
+          showToast('Expense not found', 'error');
+          return;
+        }
+
+        document.getElementById('expense-title').value = expense.title || '';
+        document.getElementById('expense-amount').value = expense.amount || '';
+        document.getElementById('expense-category').value = expense.category_id || '';
+        document.getElementById('expense-date').value = expense.expense_date || '';
+        document.getElementById('expense-payment-method').value = expense.payment_method || '';
+        document.getElementById('expense-status').value = expense.status || 'pending';
+        document.getElementById('expense-description').value = expense.description || '';
+        document.getElementById('expense-notes').value = expense.notes || '';
+
+        document.getElementById('expense-modal').classList.add('active');
+      } catch (error) {
+        console.error('Failed to load expense:', error);
+        showToast('Failed to load expense details', 'error');
+      }
+    };
+
+    window.deleteExpense = async function(id, title) {
+      if (!confirm(`Are you sure you want to delete expense "${title}"?`)) {
+        return;
+      }
+
+      try {
+        await ApiClient.deleteExpense(id);
+        showToast('Expense deleted successfully', 'success');
+        await loadExpenses();
+        await loadStats();
+      } catch (error) {
+        console.error('Failed to delete expense:', error);
+        showToast('Failed to delete expense', 'error');
+      }
+    };
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+
+      const expenseData = {
+        title: document.getElementById('expense-title').value.trim(),
+        amount: parseFloat(document.getElementById('expense-amount').value),
+        categoryId: document.getElementById('expense-category').value || null,
+        expenseDate: document.getElementById('expense-date').value,
+        paymentMethod: document.getElementById('expense-payment-method').value,
+        status: document.getElementById('expense-status').value,
+        description: document.getElementById('expense-description').value.trim(),
+        notes: document.getElementById('expense-notes').value.trim()
+      };
+
+      try {
+        if (editingExpenseId) {
+          await ApiClient.updateExpense(editingExpenseId, expenseData);
+          showToast('Expense updated successfully', 'success');
+        } else {
+          await ApiClient.createExpense(expenseData);
+          showToast('Expense created successfully', 'success');
+        }
+
+        closeExpenseModal();
+        await loadExpenses();
+        await loadStats();
+      } catch (error) {
+        console.error('Failed to save expense:', error);
+        showToast(error.message || 'Failed to save expense', 'error');
+      }
+    }
+
+    window.closeExpenseModal = function() {
+      document.getElementById('expense-modal').classList.remove('active');
+      document.getElementById('expense-form').reset();
+      editingExpenseId = null;
+    };
+
+    function openCategoriesModal() {
+      renderCategories();
+      document.getElementById('categories-modal').classList.add('active');
+    }
+
+    window.closeCategoriesModal = function() {
+      document.getElementById('categories-modal').classList.remove('active');
+    };
+
+    function renderCategories() {
+      const list = document.getElementById('categories-list');
+      list.innerHTML = '';
+
+      if (categories.length === 0) {
+        list.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 24px;">No categories yet</p>';
+        return;
+      }
+
+      categories.forEach(cat => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;';
+        div.innerHTML = `
+          <div>
+            <strong>${escapeHtml(cat.name)}</strong>
+            ${cat.description ? `<div style="font-size: 13px; color: #6b7280;">${escapeHtml(cat.description)}</div>` : ''}
+          </div>
+          <button class="btn-icon btn-icon-danger" onclick="deleteCategory(${cat.id}, '${escapeHtml(cat.name)}')" title="Delete">
+            <i class="ph ph-trash"></i>
+          </button>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    async function addCategory() {
+      const name = prompt('Enter category name:');
+      if (!name || !name.trim()) return;
+
+      const description = prompt('Enter description (optional):');
+
+      try {
+        await ApiClient.createExpenseCategory({ name: name.trim(), description: description?.trim() });
+        showToast('Category created successfully', 'success');
+        await loadCategories();
+        renderCategories();
+      } catch (error) {
+        console.error('Failed to create category:', error);
+        showToast('Failed to create category', 'error');
+      }
+    }
+
+    window.deleteCategory = async function(id, name) {
+      if (!confirm(`Delete category "${name}"?`)) return;
+
+      try {
+        await ApiClient.deleteExpenseCategory(id);
+        showToast('Category deleted successfully', 'success');
+        await loadCategories();
+        renderCategories();
+      } catch (error) {
+        console.error('Failed to delete category:', error);
+        showToast(error.message || 'Failed to delete category', 'error');
+      }
+    };
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-LK', {
+        style: 'currency',
+        currency: 'LKR',
+        minimumFractionDigits: 2
+      }).format(amount || 0);
+    }
+
+    function formatDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#2563eb'};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: var(--shadow-lg);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(400px); opacity: 0; }
+    }
+
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .filter-input {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+    }
+
+    .filter-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+  </style>
+</body>
+</html>

@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Orders - Invoice App</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="module" src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>InvoiceApp</h1>
+                <p class="sidebar-subtitle">Business ERP System</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Dashboard</div>
+                    <a href="./dashboard.html" class="nav-item">
+                        <i class="ph ph-house"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Sales</div>
+                    <a href="./index.html" class="nav-item">
+                        <i class="ph ph-file-text"></i>
+                        <span>Invoices</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Customers</div>
+                    <a href="./customers.html" class="nav-item">
+                        <i class="ph ph-users"></i>
+                        <span>Customers</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Purchases</div>
+                    <a href="./suppliers.html" class="nav-item">
+                        <i class="ph ph-handshake"></i>
+                        <span>Suppliers</span>
+                    </a>
+                    <a href="./purchase-orders.html" class="nav-item active">
+                        <i class="ph ph-shopping-cart"></i>
+                        <span>Purchase Orders</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Inventory</div>
+                    <a href="./inventory.html" class="nav-item">
+                        <i class="ph ph-package"></i>
+                        <span>Products</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Accounting</div>
+                    <a href="./expenses.html" class="nav-item">
+                        <i class="ph ph-receipt"></i>
+                        <span>Expenses</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Reports</div>
+                    <a href="./reports.html" class="nav-item">
+                        <i class="ph ph-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">System</div>
+                    <a href="./settings.html" class="nav-item">
+                        <i class="ph ph-gear"></i>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn btn-secondary btn-block">
+                    <i class="ph ph-sign-out"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Purchase Orders</h1>
+                    <p class="page-subtitle">Manage purchase orders and supplier orders</p>
+                </div>
+                <button onclick="openAddPOModal()" class="btn btn-primary">
+                    <i class="ph ph-plus"></i>
+                    Create Purchase Order
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #dbeafe; color: #2563eb;">
+                        <i class="ph-fill ph-file-text"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Draft</div>
+                        <div class="stat-value" id="statDraft">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fef3c7; color: #f59e0b;">
+                        <i class="ph-fill ph-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Pending Approval</div>
+                        <div class="stat-value" id="statPending">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #ddd6fe; color: #7c3aed;">
+                        <i class="ph-fill ph-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Approved</div>
+                        <div class="stat-value" id="statApproved">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #d1fae5; color: #10b981;">
+                        <i class="ph-fill ph-package"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Received</div>
+                        <div class="stat-value" id="statReceived">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 style="margin: 0;">All Purchase Orders</h3>
+                </div>
+
+                <div class="card-body">
+                    <div class="filters-row" style="margin-bottom: 20px;">
+                        <div class="search-box" style="max-width: 300px;">
+                            <i class="ph ph-magnifying-glass"></i>
+                            <input type="text" id="searchInput" placeholder="Search purchase orders...">
+                        </div>
+
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="draft">Draft</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="approved">Approved</option>
+                            <option value="received">Received</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+
+                        <select id="supplierFilter" class="filter-select">
+                            <option value="">All Suppliers</option>
+                        </select>
+                    </div>
+
+                    <div id="loadingState" class="loading-state" style="display: none;">
+                        <i class="ph ph-circle-notch spin"></i>
+                        <p>Loading purchase orders...</p>
+                    </div>
+
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        <i class="ph ph-shopping-cart" style="font-size: 64px; color: var(--text-muted);"></i>
+                        <h3>No purchase orders yet</h3>
+                        <p>Create your first purchase order to get started</p>
+                        <button onclick="openAddPOModal()" class="btn btn-primary">
+                            <i class="ph ph-plus"></i>
+                            Create Purchase Order
+                        </button>
+                    </div>
+
+                    <div id="tableContainer" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>PO Number</th>
+                                    <th>Supplier</th>
+                                    <th>Order Date</th>
+                                    <th>Expected Date</th>
+                                    <th>Total Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="poTableBody"></tbody>
+                        </table>
+
+                        <div class="pagination">
+                            <div class="pagination-info" id="paginationInfo"></div>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="previousPage()" class="btn btn-secondary" id="prevBtn">Previous</button>
+                                <button onclick="nextPage()" class="btn btn-secondary" id="nextBtn">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit PO Modal -->
+    <div id="poModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="modalTitle">Create Purchase Order</h2>
+                <button onclick="closePOModal()" class="modal-close">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <form id="poForm" onsubmit="handleSubmit(event)">
+                <div class="modal-body">
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="ph ph-info"></i>
+                            Basic Information
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Supplier *</label>
+                                <select id="supplierId" required>
+                                    <option value="">Select Supplier</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Order Date *</label>
+                                <input type="date" id="orderDate" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Expected Delivery Date</label>
+                                <input type="date" id="expectedDate">
+                            </div>
+                            <div class="form-group">
+                                <label>Status *</label>
+                                <select id="status" required>
+                                    <option value="draft">Draft</option>
+                                    <option value="submitted">Submitted</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="received">Received</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="ph ph-list"></i>
+                            Line Items
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <button type="button" onclick="addLineItem()" class="btn btn-secondary btn-sm">
+                                <i class="ph ph-plus"></i>
+                                Add Item
+                            </button>
+                        </div>
+                        <div id="lineItemsContainer"></div>
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); text-align: right;">
+                            <strong style="font-size: 1.25rem;">Total: <span id="totalAmount">Rs. 0.00</span></strong>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="ph ph-note"></i>
+                            Additional Details
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Notes</label>
+                            <textarea id="notes" rows="3" placeholder="Additional notes or comments"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closePOModal()" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ph ph-check"></i>
+                        Save Purchase Order
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View PO Details Modal -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Purchase Order Details</h2>
+                <button onclick="closeViewModal()" class="modal-close">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="viewModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeViewModal()" class="btn btn-secondary">Close</button>
+                <button type="button" id="approveBtn" onclick="approvePO()" class="btn" style="background: #7c3aed; color: white; display: none;">
+                    <i class="ph ph-check-circle"></i>
+                    Approve
+                </button>
+                <button type="button" id="receiveBtn" onclick="receivePO()" class="btn btn-success" style="display: none;">
+                    <i class="ph ph-package"></i>
+                    Mark as Received
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+        import ApiClient from './js/api-client.js';
+
+        let currentPage = 0;
+        const currentLimit = 50;
+        let currentSearch = '';
+        let currentStatus = '';
+        let currentSupplier = '';
+        let editingPOId = null;
+        let viewingPOId = null;
+        let lineItems = [];
+        let suppliers = [];
+        let products = [];
+        let lineItemCounter = 0;
+
+        // Initialize
+        async function init() {
+            await loadSuppliers();
+            await loadProducts();
+            await loadStats();
+            await loadPurchaseOrders();
+
+            // Search debounce
+            let searchTimeout;
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    currentSearch = e.target.value;
+                    currentPage = 0;
+                    loadPurchaseOrders();
+                }, 300);
+            });
+
+            // Status filter
+            document.getElementById('statusFilter').addEventListener('change', (e) => {
+                currentStatus = e.target.value;
+                currentPage = 0;
+                loadPurchaseOrders();
+            });
+
+            // Supplier filter
+            document.getElementById('supplierFilter').addEventListener('change', (e) => {
+                currentSupplier = e.target.value;
+                currentPage = 0;
+                loadPurchaseOrders();
+            });
+
+            // Set default order date to today
+            document.getElementById('orderDate').valueAsDate = new Date();
+        }
+
+        async function loadSuppliers() {
+            try {
+                const response = await ApiClient.getSuppliers();
+                suppliers = response.data || [];
+
+                // Populate supplier filter
+                const filterSelect = document.getElementById('supplierFilter');
+                filterSelect.innerHTML = '<option value="">All Suppliers</option>';
+                suppliers.forEach(supplier => {
+                    filterSelect.innerHTML += `<option value="${supplier.id}">${escapeHtml(supplier.name)}</option>`;
+                });
+
+                // Populate supplier dropdown in form
+                const formSelect = document.getElementById('supplierId');
+                formSelect.innerHTML = '<option value="">Select Supplier</option>';
+                suppliers.forEach(supplier => {
+                    formSelect.innerHTML += `<option value="${supplier.id}">${escapeHtml(supplier.name)}</option>`;
+                });
+            } catch (error) {
+                console.error('Failed to load suppliers:', error);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await ApiClient.getProducts();
+                products = response.data || [];
+            } catch (error) {
+                console.error('Failed to load products:', error);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const [draftRes, submittedRes, approvedRes, receivedRes] = await Promise.all([
+                    ApiClient.getPurchaseOrders({ status: 'draft' }),
+                    ApiClient.getPurchaseOrders({ status: 'submitted' }),
+                    ApiClient.getPurchaseOrders({ status: 'approved' }),
+                    ApiClient.getPurchaseOrders({ status: 'received' })
+                ]);
+
+                document.getElementById('statDraft').textContent = draftRes.total || 0;
+                document.getElementById('statPending').textContent = submittedRes.total || 0;
+                document.getElementById('statApproved').textContent = approvedRes.total || 0;
+                document.getElementById('statReceived').textContent = receivedRes.total || 0;
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        async function loadPurchaseOrders() {
+            try {
+                const loadingState = document.getElementById('loadingState');
+                const emptyState = document.getElementById('emptyState');
+                const tableContainer = document.getElementById('tableContainer');
+
+                loadingState.style.display = 'flex';
+                emptyState.style.display = 'none';
+                tableContainer.style.display = 'none';
+
+                const params = {
+                    offset: currentPage * currentLimit,
+                    limit: currentLimit
+                };
+
+                if (currentSearch) params.search = currentSearch;
+                if (currentStatus) params.status = currentStatus;
+                if (currentSupplier) params.supplierId = currentSupplier;
+
+                const response = await ApiClient.getPurchaseOrders(params);
+                const pos = response.data || [];
+                const total = response.total || 0;
+
+                loadingState.style.display = 'none';
+
+                if (pos.length === 0 && currentPage === 0) {
+                    emptyState.style.display = 'flex';
+                } else {
+                    tableContainer.style.display = 'block';
+                    renderPurchaseOrders(pos);
+                    updatePagination(total);
+                }
+            } catch (error) {
+                console.error('Failed to load purchase orders:', error);
+                showToast('Failed to load purchase orders', 'error');
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'flex';
+            }
+        }
+
+        function renderPurchaseOrders(pos) {
+            const tbody = document.getElementById('poTableBody');
+            tbody.innerHTML = pos.map(po => {
+                const statusColors = {
+                    draft: 'background: #e5e7eb; color: #374151;',
+                    submitted: 'background: #fef3c7; color: #92400e;',
+                    approved: 'background: #ddd6fe; color: #5b21b6;',
+                    received: 'background: #d1fae5; color: #065f46;',
+                    cancelled: 'background: #fee2e2; color: #991b1b;'
+                };
+
+                return `
+                    <tr>
+                        <td><code>${escapeHtml(po.po_number || '')}</code></td>
+                        <td>${escapeHtml(po.supplier_name || 'N/A')}</td>
+                        <td>${formatDate(po.order_date)}</td>
+                        <td>${po.expected_delivery_date ? formatDate(po.expected_delivery_date) : '-'}</td>
+                        <td><strong>${formatCurrency(po.total_amount || 0)}</strong></td>
+                        <td><span class="badge" style="${statusColors[po.status] || ''}">${escapeHtml(po.status || 'draft')}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button onclick="viewPO(${po.id})" class="btn-icon" title="View">
+                                    <i class="ph ph-eye"></i>
+                                </button>
+                                <button onclick="editPO(${po.id})" class="btn-icon" title="Edit">
+                                    <i class="ph ph-pencil"></i>
+                                </button>
+                                <button onclick="deletePO(${po.id})" class="btn-icon btn-icon-danger" title="Delete">
+                                    <i class="ph ph-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updatePagination(total) {
+            const start = currentPage * currentLimit + 1;
+            const end = Math.min((currentPage + 1) * currentLimit, total);
+            document.getElementById('paginationInfo').textContent = `Showing ${start}-${end} of ${total}`;
+            document.getElementById('prevBtn').disabled = currentPage === 0;
+            document.getElementById('nextBtn').disabled = end >= total;
+        }
+
+        window.previousPage = () => {
+            if (currentPage > 0) {
+                currentPage--;
+                loadPurchaseOrders();
+            }
+        };
+
+        window.nextPage = () => {
+            currentPage++;
+            loadPurchaseOrders();
+        };
+
+        window.openAddPOModal = () => {
+            editingPOId = null;
+            lineItems = [];
+            lineItemCounter = 0;
+            document.getElementById('modalTitle').textContent = 'Create Purchase Order';
+            document.getElementById('poForm').reset();
+            document.getElementById('orderDate').valueAsDate = new Date();
+            document.getElementById('lineItemsContainer').innerHTML = '';
+            document.getElementById('totalAmount').textContent = 'Rs. 0.00';
+            addLineItem();
+            document.getElementById('poModal').classList.add('active');
+        };
+
+        function closePOModal() {
+            document.getElementById('poModal').classList.remove('active');
+        }
+
+        window.closePOModal = closePOModal;
+
+        window.addLineItem = () => {
+            const id = ++lineItemCounter;
+            lineItems.push({ id, productId: '', quantity: 1, unitPrice: 0 });
+            renderLineItems();
+        };
+
+        function renderLineItems() {
+            const container = document.getElementById('lineItemsContainer');
+            container.innerHTML = lineItems.map((item, index) => `
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 12px; margin-bottom: 12px; padding: 12px; background: var(--bg); border-radius: var(--radius-sm);">
+                    <select onchange="updateLineItem(${index}, 'productId', this.value)" required>
+                        <option value="">Select Product</option>
+                        ${products.map(p => `<option value="${p.id}" ${item.productId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+                    </select>
+                    <input type="number" placeholder="Quantity" min="1" value="${item.quantity}" onchange="updateLineItem(${index}, 'quantity', this.value)" required>
+                    <input type="number" placeholder="Unit Price" min="0" step="0.01" value="${item.unitPrice}" onchange="updateLineItem(${index}, 'unitPrice', this.value)" required>
+                    <div style="padding: 10px; font-weight: 600;">${formatCurrency(item.quantity * item.unitPrice)}</div>
+                    <button type="button" onclick="removeLineItem(${index})" class="btn-icon btn-icon-danger">
+                        <i class="ph ph-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            updateTotal();
+        }
+
+        window.updateLineItem = (index, field, value) => {
+            lineItems[index][field] = field === 'productId' ? value : parseFloat(value) || 0;
+            renderLineItems();
+        };
+
+        window.removeLineItem = (index) => {
+            lineItems.splice(index, 1);
+            renderLineItems();
+        };
+
+        function updateTotal() {
+            const total = lineItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+            document.getElementById('totalAmount').textContent = formatCurrency(total);
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            if (lineItems.length === 0 || lineItems.some(item => !item.productId)) {
+                showToast('Please add at least one line item with a product selected', 'error');
+                return;
+            }
+
+            const total = lineItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+
+            const data = {
+                supplierId: parseInt(document.getElementById('supplierId').value),
+                orderDate: document.getElementById('orderDate').value,
+                expectedDeliveryDate: document.getElementById('expectedDate').value || null,
+                totalAmount: total,
+                status: document.getElementById('status').value,
+                notes: document.getElementById('notes').value || null,
+                lineItems: lineItems.map(item => ({
+                    productId: parseInt(item.productId),
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice
+                }))
+            };
+
+            try {
+                if (editingPOId) {
+                    await ApiClient.updatePurchaseOrder(editingPOId, data);
+                    showToast('Purchase order updated successfully', 'success');
+                } else {
+                    await ApiClient.createPurchaseOrder(data);
+                    showToast('Purchase order created successfully', 'success');
+                }
+                closePOModal();
+                loadPurchaseOrders();
+                loadStats();
+            } catch (error) {
+                console.error('Failed to save purchase order:', error);
+                showToast(error.message || 'Failed to save purchase order', 'error');
+            }
+        }
+
+        window.handleSubmit = handleSubmit;
+
+        window.editPO = async (id) => {
+            try {
+                const po = await ApiClient.getPurchaseOrderById(id);
+                editingPOId = id;
+
+                document.getElementById('modalTitle').textContent = 'Edit Purchase Order';
+                document.getElementById('supplierId').value = po.supplier_id;
+                document.getElementById('orderDate').value = po.order_date;
+                document.getElementById('expectedDate').value = po.expected_delivery_date || '';
+                document.getElementById('status').value = po.status;
+                document.getElementById('notes').value = po.notes || '';
+
+                lineItems = (po.line_items || []).map((item, index) => ({
+                    id: ++lineItemCounter,
+                    productId: item.product_id,
+                    quantity: item.quantity,
+                    unitPrice: item.unit_price
+                }));
+
+                renderLineItems();
+                document.getElementById('poModal').classList.add('active');
+            } catch (error) {
+                console.error('Failed to load purchase order:', error);
+                showToast('Failed to load purchase order', 'error');
+            }
+        };
+
+        window.deletePO = async (id) => {
+            if (!confirm('Are you sure you want to delete this purchase order?')) return;
+
+            try {
+                await ApiClient.deletePurchaseOrder(id);
+                showToast('Purchase order deleted successfully', 'success');
+                loadPurchaseOrders();
+                loadStats();
+            } catch (error) {
+                console.error('Failed to delete purchase order:', error);
+                showToast('Failed to delete purchase order', 'error');
+            }
+        };
+
+        window.viewPO = async (id) => {
+            try {
+                const po = await ApiClient.getPurchaseOrderById(id);
+                viewingPOId = id;
+
+                const supplier = suppliers.find(s => s.id === po.supplier_id);
+                const statusColors = {
+                    draft: 'background: #e5e7eb; color: #374151;',
+                    submitted: 'background: #fef3c7; color: #92400e;',
+                    approved: 'background: #ddd6fe; color: #5b21b6;',
+                    received: 'background: #d1fae5; color: #065f46;',
+                    cancelled: 'background: #fee2e2; color: #991b1b;'
+                };
+
+                const lineItemsHtml = (po.line_items || []).map(item => {
+                    const product = products.find(p => p.id === item.product_id);
+                    return `
+                        <tr>
+                            <td>${escapeHtml(product?.name || 'Unknown')}</td>
+                            <td>${item.quantity}</td>
+                            <td>${formatCurrency(item.unit_price)}</td>
+                            <td><strong>${formatCurrency(item.quantity * item.unit_price)}</strong></td>
+                        </tr>
+                    `;
+                }).join('');
+
+                document.getElementById('viewModalBody').innerHTML = `
+                    <div style="display: grid; gap: 24px;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                                <div>
+                                    <h3 style="margin: 0; font-size: 1.5rem;">${escapeHtml(po.po_number)}</h3>
+                                    <p style="color: var(--text-muted); margin-top: 4px;">Purchase Order</p>
+                                </div>
+                                <span class="badge" style="${statusColors[po.status] || ''}; font-size: 14px; padding: 6px 14px;">${escapeHtml(po.status)}</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 16px; background: var(--bg); border-radius: var(--radius-sm);">
+                                <div>
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">SUPPLIER</div>
+                                    <div style="font-weight: 600;">${escapeHtml(supplier?.name || 'N/A')}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">ORDER DATE</div>
+                                    <div style="font-weight: 600;">${formatDate(po.order_date)}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">EXPECTED DELIVERY</div>
+                                    <div style="font-weight: 600;">${po.expected_delivery_date ? formatDate(po.expected_delivery_date) : 'Not set'}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">RECEIVED DATE</div>
+                                    <div style="font-weight: 600;">${po.received_date ? formatDate(po.received_date) : '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="margin-bottom: 12px;">Line Items</h4>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${lineItemsHtml}</tbody>
+                                <tfoot>
+                                    <tr style="border-top: 2px solid var(--border); font-weight: 600; font-size: 1.1rem;">
+                                        <td colspan="3" style="text-align: right; padding: 16px;">Total Amount:</td>
+                                        <td style="padding: 16px;">${formatCurrency(po.total_amount)}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        ${po.notes ? `
+                            <div>
+                                <h4 style="margin-bottom: 8px;">Notes</h4>
+                                <p style="color: var(--text-muted); white-space: pre-wrap;">${escapeHtml(po.notes)}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                // Show approve button for submitted POs
+                const approveBtn = document.getElementById('approveBtn');
+                approveBtn.style.display = po.status === 'submitted' ? 'block' : 'none';
+
+                // Show receive button for approved POs
+                const receiveBtn = document.getElementById('receiveBtn');
+                receiveBtn.style.display = po.status === 'approved' ? 'block' : 'none';
+
+                document.getElementById('viewModal').classList.add('active');
+            } catch (error) {
+                console.error('Failed to load purchase order:', error);
+                showToast('Failed to load purchase order', 'error');
+            }
+        };
+
+        window.closeViewModal = () => {
+            document.getElementById('viewModal').classList.remove('active');
+            viewingPOId = null;
+        };
+
+        window.approvePO = async () => {
+            if (!viewingPOId) return;
+
+            try {
+                await ApiClient.updatePurchaseOrder(viewingPOId, { status: 'approved' });
+                showToast('Purchase order approved successfully', 'success');
+                closeViewModal();
+                loadPurchaseOrders();
+                loadStats();
+            } catch (error) {
+                console.error('Failed to approve purchase order:', error);
+                showToast('Failed to approve purchase order', 'error');
+            }
+        };
+
+        window.receivePO = async () => {
+            if (!viewingPOId) return;
+
+            try {
+                await ApiClient.updatePurchaseOrder(viewingPOId, { 
+                    status: 'received',
+                    receivedDate: new Date().toISOString().split('T')[0]
+                });
+                showToast('Purchase order marked as received', 'success');
+                closeViewModal();
+                loadPurchaseOrders();
+                loadStats();
+            } catch (error) {
+                console.error('Failed to update purchase order:', error);
+                showToast('Failed to update purchase order', 'error');
+            }
+        };
+
+        window.logout = () => {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                window.location.href = './login.html';
+            }
+        };
+
+        function formatCurrency(amount) {
+            return 'Rs. ' + parseFloat(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast toast-${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

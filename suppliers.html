@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suppliers - Invoicify ERP</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.0.3"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>Invoicify</h1>
+        <p class="sidebar-subtitle">ERP System</p>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-item">
+          <i class="ph ph-house"></i>
+          <span>Dashboard</span>
+        </a>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Sales</div>
+          <a href="/index.html" class="nav-item">
+            <i class="ph ph-file-text"></i>
+            <span>Invoices</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Customers</div>
+          <a href="/customers.html" class="nav-item">
+            <i class="ph ph-users"></i>
+            <span>Customers</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Purchases</div>
+          <a href="/suppliers.html" class="nav-item active">
+            <i class="ph ph-truck"></i>
+            <span>Suppliers</span>
+          </a>
+          <a href="/purchase-orders.html" class="nav-item">
+            <i class="ph ph-shopping-cart"></i>
+            <span>Purchase Orders</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Inventory</div>
+          <a href="/inventory.html" class="nav-item">
+            <i class="ph ph-package"></i>
+            <span>Products</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Accounting</div>
+          <a href="/expenses.html" class="nav-item">
+            <i class="ph ph-receipt"></i>
+            <span>Expenses</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Reports</div>
+          <a href="/reports.html" class="nav-item">
+            <i class="ph ph-chart-line"></i>
+            <span>Reports</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">System</div>
+          <a href="/settings.html" class="nav-item">
+            <i class="ph ph-gear"></i>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="btn-logout" class="btn btn-secondary btn-block">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Suppliers</h1>
+          <p class="page-subtitle">Manage your supplier database</p>
+        </div>
+        <button id="btn-add-supplier" class="btn btn-primary">
+          <i class="ph ph-plus"></i>
+          <span>Add Supplier</span>
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="filters-row">
+          <div class="search-box" style="flex: 1; max-width: 400px;">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Search suppliers..." />
+          </div>
+          
+          <select id="status-filter" class="filter-select">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+
+          <button id="btn-refresh" class="btn btn-secondary">
+            <i class="ph ph-arrows-clockwise"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Suppliers Table -->
+      <div class="card">
+        <div id="loading" class="loading-state" style="display: none;">
+          <i class="ph ph-spinner spinner"></i>
+          <p>Loading suppliers...</p>
+        </div>
+
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <i class="ph ph-truck" style="font-size: 64px; opacity: 0.3;"></i>
+          <h3>No suppliers yet</h3>
+          <p>Add your first supplier to get started</p>
+          <button class="btn btn-primary" onclick="document.getElementById('btn-add-supplier').click()">
+            <i class="ph ph-plus"></i>
+            <span>Add Supplier</span>
+          </button>
+        </div>
+
+        <div id="suppliers-table" style="display: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Contact</th>
+                <th>Location</th>
+                <th>Payment Terms</th>
+                <th>Outstanding</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="suppliers-tbody">
+              <!-- Rows will be inserted here -->
+            </tbody>
+          </table>
+
+          <div class="pagination" id="pagination" style="display: none;">
+            <button id="btn-prev" class="btn btn-secondary" disabled>
+              <i class="ph ph-caret-left"></i>
+              <span>Previous</span>
+            </button>
+            <span id="page-info" class="pagination-info">Page 1 of 1</span>
+            <button id="btn-next" class="btn btn-secondary" disabled>
+              <span>Next</span>
+              <i class="ph ph-caret-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Supplier Modal -->
+  <div id="supplier-modal" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Supplier</h2>
+        <button class="modal-close" onclick="closeSupplierModal()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <form id="supplier-form">
+        <div class="modal-body">
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="ph ph-buildings"></i>
+              Basic Information
+            </h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Supplier Name *</label>
+                <input type="text" id="supplier-name" required />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="supplier-email" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="supplier-phone" />
+              </div>
+              <div class="form-group">
+                <label>Tax ID</label>
+                <input type="text" id="supplier-tax-id" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="ph ph-map-pin"></i>
+              Address
+            </h3>
+            <div class="form-group">
+              <label>Street Address</label>
+              <textarea id="supplier-address" rows="2"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>City</label>
+                <input type="text" id="supplier-city" />
+              </div>
+              <div class="form-group">
+                <label>State/Province</label>
+                <input type="text" id="supplier-state" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Country</label>
+                <input type="text" id="supplier-country" value="Sri Lanka" />
+              </div>
+              <div class="form-group">
+                <label>Postal Code</label>
+                <input type="text" id="supplier-postal" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="ph ph-handshake"></i>
+              Business Terms
+            </h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Payment Terms</label>
+                <select id="supplier-payment-terms">
+                  <option value="Net 7">Net 7 Days</option>
+                  <option value="Net 15">Net 15 Days</option>
+                  <option value="Net 30" selected>Net 30 Days</option>
+                  <option value="Net 45">Net 45 Days</option>
+                  <option value="Net 60">Net 60 Days</option>
+                  <option value="Net 90">Net 90 Days</option>
+                  <option value="COD">Cash on Delivery</option>
+                  <option value="Advance">Advance Payment</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Status</label>
+                <select id="supplier-status">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="ph ph-note"></i>
+              Notes
+            </h3>
+            <div class="form-group">
+              <label>Additional Notes</label>
+              <textarea id="supplier-notes" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeSupplierModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="ph ph-check"></i>
+            <span id="btn-submit-text">Save Supplier</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import ApiClient from './js/api-client.js';
+
+    let currentPage = 0;
+    let currentLimit = 50;
+    let currentSearch = '';
+    let currentStatus = '';
+    let editingSupplierId = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await checkAuth();
+      await loadSuppliers();
+      setupEventListeners();
+    });
+
+    async function checkAuth() {
+      if (!ApiClient.isAuthenticated()) {
+        window.location.href = '/login.html';
+        return;
+      }
+    }
+
+    function setupEventListeners() {
+      const searchInput = document.getElementById('search-input');
+      let searchTimeout;
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          currentSearch = e.target.value;
+          currentPage = 0;
+          loadSuppliers();
+        }, 300);
+      });
+
+      document.getElementById('status-filter').addEventListener('change', (e) => {
+        currentStatus = e.target.value;
+        currentPage = 0;
+        loadSuppliers();
+      });
+
+      document.getElementById('btn-refresh').addEventListener('click', loadSuppliers);
+      document.getElementById('btn-add-supplier').addEventListener('click', openAddSupplierModal);
+      document.getElementById('supplier-form').addEventListener('submit', handleSubmit);
+
+      document.getElementById('btn-prev').addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          loadSuppliers();
+        }
+      });
+
+      document.getElementById('btn-next').addEventListener('click', () => {
+        currentPage++;
+        loadSuppliers();
+      });
+
+      document.getElementById('btn-logout').addEventListener('click', () => {
+        ApiClient.logout();
+      });
+
+      document.getElementById('supplier-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'supplier-modal') {
+          closeSupplierModal();
+        }
+      });
+    }
+
+    async function loadSuppliers() {
+      const loading = document.getElementById('loading');
+      const emptyState = document.getElementById('empty-state');
+      const table = document.getElementById('suppliers-table');
+
+      loading.style.display = 'flex';
+      emptyState.style.display = 'none';
+      table.style.display = 'none';
+
+      try {
+        const params = {
+          limit: currentLimit,
+          offset: currentPage * currentLimit
+        };
+
+        if (currentSearch) params.search = currentSearch;
+        if (currentStatus) params.status = currentStatus;
+
+        const response = await ApiClient.getSuppliers(params);
+        const { suppliers, pagination } = response;
+
+        if (suppliers.length === 0 && currentPage === 0 && !currentSearch && !currentStatus) {
+          emptyState.style.display = 'flex';
+          loading.style.display = 'none';
+          return;
+        }
+
+        renderSuppliers(suppliers);
+        updatePagination(pagination);
+
+        loading.style.display = 'none';
+        table.style.display = 'block';
+      } catch (error) {
+        console.error('Failed to load suppliers:', error);
+        loading.style.display = 'none';
+        showToast('Failed to load suppliers', 'error');
+      }
+    }
+
+    function renderSuppliers(suppliers) {
+      const tbody = document.getElementById('suppliers-tbody');
+      tbody.innerHTML = '';
+
+      suppliers.forEach(supplier => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><code>${supplier.supplier_code || '-'}</code></td>
+          <td>
+            <div class="supplier-name">
+              <strong>${escapeHtml(supplier.name)}</strong>
+            </div>
+          </td>
+          <td>
+            <div class="contact-info">
+              ${supplier.email ? `<div><i class="ph ph-envelope"></i> ${escapeHtml(supplier.email)}</div>` : ''}
+              ${supplier.phone ? `<div><i class="ph ph-phone"></i> ${escapeHtml(supplier.phone)}</div>` : ''}
+              ${!supplier.email && !supplier.phone ? '-' : ''}
+            </div>
+          </td>
+          <td>
+            ${supplier.city || supplier.country ? 
+              `<div>${[supplier.city, supplier.country].filter(Boolean).join(', ')}</div>` : 
+              '-'}
+          </td>
+          <td>${escapeHtml(supplier.payment_terms || 'Net 30')}</td>
+          <td>${formatCurrency(supplier.outstanding_balance)}</td>
+          <td>
+            <span class="badge ${supplier.status === 'active' ? 'badge-success' : 'badge-secondary'}">
+              ${supplier.status}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon" onclick="editSupplier(${supplier.id})" title="Edit">
+                <i class="ph ph-pencil"></i>
+              </button>
+              <button class="btn-icon btn-icon-danger" onclick="deleteSupplier(${supplier.id}, '${escapeHtml(supplier.name)}')" title="Delete">
+                <i class="ph ph-trash"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updatePagination(pagination) {
+      const paginationDiv = document.getElementById('pagination');
+      const pageInfo = document.getElementById('page-info');
+      const btnPrev = document.getElementById('btn-prev');
+      const btnNext = document.getElementById('btn-next');
+
+      if (pagination.total > currentLimit) {
+        paginationDiv.style.display = 'flex';
+        const totalPages = Math.ceil(pagination.total / currentLimit);
+        pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages} (${pagination.total} total)`;
+        
+        btnPrev.disabled = currentPage === 0;
+        btnNext.disabled = !pagination.hasMore;
+      } else {
+        paginationDiv.style.display = 'none';
+      }
+    }
+
+    function openAddSupplierModal() {
+      editingSupplierId = null;
+      document.getElementById('modal-title').textContent = 'Add Supplier';
+      document.getElementById('btn-submit-text').textContent = 'Save Supplier';
+      document.getElementById('supplier-form').reset();
+      document.getElementById('supplier-status').value = 'active';
+      document.getElementById('supplier-country').value = 'Sri Lanka';
+      document.getElementById('supplier-payment-terms').value = 'Net 30';
+      document.getElementById('supplier-modal').classList.add('active');
+    }
+
+    window.editSupplier = async function(id) {
+      editingSupplierId = id;
+      document.getElementById('modal-title').textContent = 'Edit Supplier';
+      document.getElementById('btn-submit-text').textContent = 'Update Supplier';
+
+      try {
+        const response = await ApiClient.getSuppliers({ limit: 1000 });
+        const supplier = response.suppliers.find(s => s.id === id);
+
+        if (!supplier) {
+          showToast('Supplier not found', 'error');
+          return;
+        }
+
+        document.getElementById('supplier-name').value = supplier.name || '';
+        document.getElementById('supplier-email').value = supplier.email || '';
+        document.getElementById('supplier-phone').value = supplier.phone || '';
+        document.getElementById('supplier-tax-id').value = supplier.tax_id || '';
+        document.getElementById('supplier-address').value = supplier.address || '';
+        document.getElementById('supplier-city').value = supplier.city || '';
+        document.getElementById('supplier-state').value = supplier.state || '';
+        document.getElementById('supplier-country').value = supplier.country || '';
+        document.getElementById('supplier-postal').value = supplier.postal_code || '';
+        document.getElementById('supplier-payment-terms').value = supplier.payment_terms || 'Net 30';
+        document.getElementById('supplier-status').value = supplier.status || 'active';
+        document.getElementById('supplier-notes').value = supplier.notes || '';
+
+        document.getElementById('supplier-modal').classList.add('active');
+      } catch (error) {
+        console.error('Failed to load supplier:', error);
+        showToast('Failed to load supplier details', 'error');
+      }
+    };
+
+    window.deleteSupplier = async function(id, name) {
+      if (!confirm(`Are you sure you want to delete supplier "${name}"?\n\nThis will set their status to inactive.`)) {
+        return;
+      }
+
+      try {
+        await ApiClient.deleteSupplier(id);
+        showToast('Supplier deleted successfully', 'success');
+        await loadSuppliers();
+      } catch (error) {
+        console.error('Failed to delete supplier:', error);
+        showToast('Failed to delete supplier', 'error');
+      }
+    };
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+
+      const supplierData = {
+        name: document.getElementById('supplier-name').value.trim(),
+        email: document.getElementById('supplier-email').value.trim(),
+        phone: document.getElementById('supplier-phone').value.trim(),
+        taxId: document.getElementById('supplier-tax-id').value.trim(),
+        address: document.getElementById('supplier-address').value.trim(),
+        city: document.getElementById('supplier-city').value.trim(),
+        state: document.getElementById('supplier-state').value.trim(),
+        country: document.getElementById('supplier-country').value.trim(),
+        postalCode: document.getElementById('supplier-postal').value.trim(),
+        paymentTerms: document.getElementById('supplier-payment-terms').value,
+        status: document.getElementById('supplier-status').value,
+        notes: document.getElementById('supplier-notes').value.trim()
+      };
+
+      try {
+        if (editingSupplierId) {
+          await ApiClient.updateSupplier(editingSupplierId, supplierData);
+          showToast('Supplier updated successfully', 'success');
+        } else {
+          await ApiClient.createSupplier(supplierData);
+          showToast('Supplier created successfully', 'success');
+        }
+
+        closeSupplierModal();
+        await loadSuppliers();
+      } catch (error) {
+        console.error('Failed to save supplier:', error);
+        showToast(error.message || 'Failed to save supplier', 'error');
+      }
+    }
+
+    window.closeSupplierModal = function() {
+      document.getElementById('supplier-modal').classList.remove('active');
+      document.getElementById('supplier-form').reset();
+      editingSupplierId = null;
+    };
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-LK', {
+        style: 'currency',
+        currency: 'LKR',
+        minimumFractionDigits: 2
+      }).format(amount || 0);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#2563eb'};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: var(--shadow-lg);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .contact-info {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .contact-info i {
+      font-size: 12px;
+      opacity: 0.6;
+      margin-right: 4px;
+    }
+
+    .badge-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+  </style>
+</body>
+</html>
