@@ -9,6 +9,27 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- User settings table for cross-device sync
+CREATE TABLE IF NOT EXISTS user_settings (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  business_name VARCHAR(255),
+  address TEXT,
+  email VARCHAR(255),
+  phone VARCHAR(50),
+  currency VARCHAR(10) DEFAULT 'LKR',
+  theme_color VARCHAR(7) DEFAULT '#2563eb',
+  logo_url TEXT,
+  bank_name VARCHAR(255),
+  bank_branch VARCHAR(255),
+  bank_account_no VARCHAR(100),
+  show_bank_details BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_settings_user_id ON user_settings(user_id);
+
 CREATE TABLE IF NOT EXISTS invoices (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,

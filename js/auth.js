@@ -119,8 +119,26 @@ export function setupRegisterForm() {
         });
       }
       
-      // Save business settings to localStorage with correct key and field names
-      const settings = {
+      // Save settings to database via API
+      const settingsPayload = {
+        businessName,
+        address: businessAddress,
+        phone: businessPhone,
+        email: businessEmail,
+        currency: currency || 'LKR',
+        themeColor: themeColor || '#2563eb',
+        logoUrl: logoUrl,
+        showBankDetails: true
+      };
+      
+      try {
+        await ApiClient.saveSettings(settingsPayload);
+      } catch (error) {
+        console.warn('Failed to save settings to server, will use local storage:', error);
+      }
+      
+      // Also save locally as cache
+      const localSettings = {
         name: businessName,
         address: businessAddress,
         phone: businessPhone,
@@ -130,7 +148,7 @@ export function setupRegisterForm() {
         logoUrl: logoUrl,
         showBankDetails: true
       };
-      localStorage.setItem('invoicify_settings', JSON.stringify(settings));
+      localStorage.setItem('invoicify_settings', JSON.stringify(localSettings));
       
       // Redirect to dashboard
       window.location.href = '/dashboard.html';

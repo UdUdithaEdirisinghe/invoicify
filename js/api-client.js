@@ -130,6 +130,20 @@ class ApiClient {
     });
   }
 
+  // Settings endpoints
+  async getSettings() {
+    return await this.request('/api/settings', {
+      method: 'GET'
+    });
+  }
+
+  async saveSettings(settings) {
+    return await this.request('/api/settings', {
+      method: 'POST',
+      body: JSON.stringify(settings)
+    });
+  }
+
   // Check if user is authenticated
   isAuthenticated() {
     return !!this.getToken();

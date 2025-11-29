@@ -16,9 +16,20 @@ class App {
     }
 
     init() {
+        this.loadSettings();
         this.setupEventListeners();
         this.loadCustomers();
         this.loadProducts();
+    }
+    
+    async loadSettings() {
+        try {
+            this.state.settings = await Store.getSettingsAsync();
+            this.applyTheme(this.state.settings.themeColor);
+        } catch (err) {
+            console.warn('Failed to load settings:', err);
+            this.state.settings = Store.getSettings();
+        }
     }
 
     async loadProducts() {
@@ -144,11 +155,11 @@ class App {
                 settings.logoUrl = await this.readFileAsBase64(fileInput.files[0]);
             }
 
-            Store.saveSettings(settings);
+            const result = await Store.saveSettingsAsync(settings);
             this.state.settings = settings;
             this.applyTheme(settings.themeColor);
             document.getElementById('logo-preview').src = settings.logoUrl || '';
-            alert('Settings Saved');
+            alert(result.remote ? 'Settings saved to cloud!' : 'Settings saved locally');
             this.renderPreview(); 
         });
 

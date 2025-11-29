@@ -12,7 +12,69 @@ export default class Store {
         };
         return data ? { ...defaults, ...JSON.parse(data) } : defaults;
     }
-    static saveSettings(settings) { localStorage.setItem(DB_KEYS.SETTINGS, JSON.stringify(settings)); }
+    
+    static async getSettingsAsync() {
+        if (Api.isAuthenticated()) {
+            try {
+                const response = await Api.getSettings();
+                const settings = response.settings;
+                // Map API response to local format
+                const localSettings = {
+                    name: settings.businessName,
+                    address: settings.address,
+                    email: settings.email,
+                    phone: settings.phone,
+                    currency: settings.currency,
+                    themeColor: settings.themeColor,
+                    logoUrl: settings.logoUrl,
+                    bankName: settings.bankName,
+                    branch: settings.bankBranch,
+                    accountNo: settings.bankAccountNo,
+                    showBankDetails: settings.showBankDetails
+                };
+                // Cache locally
+                localStorage.setItem(DB_KEYS.SETTINGS, JSON.stringify(localSettings));
+                return localSettings;
+            } catch (error) {
+                console.error('Failed to load settings from server:', error);
+                return this.getSettings(); // Fallback to local
+            }
+        }
+        return this.getSettings();
+    }
+    
+    static saveSettings(settings) { 
+        localStorage.setItem(DB_KEYS.SETTINGS, JSON.stringify(settings)); 
+    }
+    
+    static async saveSettingsAsync(settings) {
+        // Save locally first
+        this.saveSettings(settings);
+        
+        if (Api.isAuthenticated()) {
+            try {
+                // Map to API format
+                await Api.saveSettings({
+                    businessName: settings.name,
+                    address: settings.address,
+                    email: settings.email,
+                    phone: settings.phone,
+                    currency: settings.currency,
+                    themeColor: settings.themeColor,
+                    logoUrl: settings.logoUrl,
+                    bankName: settings.bankName,
+                    bankBranch: settings.branch,
+                    bankAccountNo: settings.accountNo,
+                    showBankDetails: settings.showBankDetails
+                });
+                return { success: true, remote: true };
+            } catch (error) {
+                console.error('Failed to save settings to server:', error);
+                return { success: true, remote: false };
+            }
+        }
+        return { success: true, remote: false };
+    }
     static getDocuments() { const data = localStorage.getItem(DB_KEYS.DOCUMENTS); return data ? JSON.parse(data) : []; }
     static async getDocumentsAsync() {
         if (Api.isAuthenticated()) {
