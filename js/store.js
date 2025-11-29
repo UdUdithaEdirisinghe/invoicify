@@ -1,6 +1,6 @@
 import Api from './api-client.js';
 
-const DB_KEYS = { DOCUMENTS: 'invoicify_docs', SETTINGS: 'invoicify_settings', CUSTOMERS: 'invoicify_customers' };
+const DB_KEYS = { DOCUMENTS: 'invoicify_docs', SETTINGS: 'invoicify_settings', CUSTOMERS: 'invoicify_customers', INVENTORY: 'invoicify_inventory' };
 
 export default class Store {
     static getSettings() {
@@ -110,4 +110,13 @@ export default class Store {
         }
     }
     static generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
+
+    // --- Inventory (Local-only fallback) ---
+    static getProducts() {
+        const data = localStorage.getItem(DB_KEYS.INVENTORY);
+        return data ? JSON.parse(data) : [];
+    }
+    static saveProducts(products) {
+        localStorage.setItem(DB_KEYS.INVENTORY, JSON.stringify(products || []));
+    }
 }

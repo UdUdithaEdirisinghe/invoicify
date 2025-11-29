@@ -37,10 +37,13 @@ class App {
             if (ApiClient.isAuthenticated()) {
                 const { products } = await ApiClient.fetch('/api/inventory/products');
                 this.state.products = products || [];
+            } else {
+                // Fallback to local inventory when offline/not authenticated
+                this.state.products = Store.getProducts();
             }
         } catch (err) {
             console.warn('Failed to load products:', err);
-            this.state.products = [];
+            this.state.products = Store.getProducts();
         }
     }
 
@@ -122,6 +125,28 @@ class App {
                             body: { productId, type: 'out', quantity: totalQty, note: 'PDF generated - manual deduction' }
                         });
                     }
+                    // Refresh remote inventory
+                    const { products } = await ApiClient.fetch('/api/inventory/products');
+                    this.state.products = products || [];
+                } else {
+                    // Local-only deduction
+                    const consolidated = new Map();
+                    for (const item of this.state.currentDoc.items) {
+                        if (item.productId) {
+                            const qty = parseInt(item.qty) || 0;
+                            const prev = consolidated.get(item.productId) || 0;
+                            consolidated.set(item.productId, prev + qty);
+                        }
+                    }
+                    this.state.products = (this.state.products || []).map(p => {
+                        const deduct = consolidated.get(String(p.id)) || consolidated.get(p.id) || 0;
+                        if (deduct > 0) {
+                            const newQty = Math.max(0, (parseInt(p.quantity) || 0) - deduct);
+                            return { ...p, quantity: newQty };
+                        }
+                        return p;
+                    });
+                    Store.saveProducts(this.state.products);
                 }
             } catch (err) {
                 console.error('Inventory deduction failed:', err);
@@ -211,17 +236,23 @@ class App {
             }
         });
         
+        const LOW_STOCK_THRESHOLD = 5;
         this.state.currentDoc.items.forEach((item, index) => {
             const tr = document.createElement('tr');
-            const stockBadge = item.productId ? 
-                this.state.products.find(p => p.id === item.productId)?.quantity || 0 : '';
+            const product = item.productId ? this.state.products.find(p => String(p.id) === String(item.productId)) : null;
+            const qtyAvail = product ? (parseInt(product.quantity) || 0) : '';
+            const stockState = typeof qtyAvail === 'number' ? (qtyAvail <= 0 ? 'out' : (qtyAvail <= LOW_STOCK_THRESHOLD ? 'low' : 'ok')) : null;
             const isDuplicate = item.productId && duplicateProducts.has(item.productId);
             tr.innerHTML = `
                 <td>
                     <input type="text" value="${item.name}" data-idx="${index}" data-field="name" placeholder="Type product name..." class="line-item-input ${isDuplicate ? 'duplicate-warning' : ''}" autocomplete="off">
                     <div class="product-suggestions" id="suggestions-${index}"></div>
                     ${isDuplicate ? `<small class="duplicate-badge">⚠️ Duplicate item - consider merging</small>` : ''}
-                    ${stockBadge !== '' ? `<small class="stock-badge">Available: ${stockBadge}</small>` : ''}
+                    ${stockState ? (stockState === 'out' 
+                        ? `<span class="badge badge-out"><i class="ph ph-warning"></i> Out of stock</span>` 
+                        : stockState === 'low' 
+                            ? `<span class="badge badge-low"><i class="ph ph-warning"></i> Low stock (${qtyAvail})</span>` 
+                            : `<small class="stock-badge">Available: ${qtyAvail}</small>`) : ''}
                 </td>
                 <td><input type="number" value="${item.qty}" data-idx="${index}" data-field="qty" min="1" class="line-item-input"></td>
                 <td><input type="number" value="${item.price}" data-idx="${index}" data-field="price" step="0.01" min="0" class="line-item-input"></td>
@@ -255,15 +286,23 @@ class App {
                 }
                 
                 const matches = this.state.products.filter(p => 
-                    p.name.toLowerCase().includes(query)
+                    (p.name || '').toLowerCase().includes(query)
                 ).slice(0, 5);
                 
                 if (matches.length > 0) {
                     suggestionsDiv.innerHTML = matches.map(p => {
                         const price = Number(p.unit_price).toFixed(2);
+                        const qty = parseInt(p.quantity) || 0;
+                        const status = qty <= 0 ? 'out' : (qty <= LOW_STOCK_THRESHOLD ? 'low' : 'ok');
+                        const statusEl = status === 'out' 
+                            ? `<span class="badge badge-out"><i class="ph ph-warning"></i> Out</span>`
+                            : status === 'low' 
+                                ? `<span class="badge badge-low"><i class="ph ph-warning"></i> Low</span>`
+                                : '';
                         return `<div class="suggestion-item" data-product-id="${p.id}" data-product-name="${p.name}" data-product-price="${p.unit_price}">
                             <strong>${p.name}</strong>
-                            <span class="suggestion-stock">Stock: ${p.quantity}</span>
+                            <span class="suggestion-stock">Stock: ${qty}</span>
+                            ${statusEl}
                             <span class="suggestion-price">LKR ${price}</span>
                         </div>`;
                     }).join('');
@@ -280,9 +319,17 @@ class App {
                     const matches = this.state.products.slice(0, 5);
                     suggestionsDiv.innerHTML = matches.map(p => {
                         const price = Number(p.unit_price).toFixed(2);
+                        const qty = parseInt(p.quantity) || 0;
+                        const status = qty <= 0 ? 'out' : (qty <= LOW_STOCK_THRESHOLD ? 'low' : 'ok');
+                        const statusEl = status === 'out' 
+                            ? `<span class="badge badge-out"><i class="ph ph-warning"></i> Out</span>`
+                            : status === 'low' 
+                                ? `<span class="badge badge-low"><i class="ph ph-warning"></i> Low</span>`
+                                : '';
                         return `<div class="suggestion-item" data-product-id="${p.id}" data-product-name="${p.name}" data-product-price="${p.unit_price}">
                             <strong>${p.name}</strong>
-                            <span class="suggestion-stock">Stock: ${p.quantity}</span>
+                            <span class="suggestion-stock">Stock: ${qty}</span>
+                            ${statusEl}
                             <span class="suggestion-price">LKR ${price}</span>
                         </div>`;
                     }).join('');
