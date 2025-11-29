@@ -55,7 +55,7 @@ export default async function handler(req, res) {
                 const result = await pool.query(
                     `SELECT p.*, pc.name as category_name 
                      FROM products p 
-                     LEFT JOIN product_categories pc ON p.category_id = pc.id 
+                     LEFT JOIN product_categories pc ON p.product_category_id = pc.id 
                      WHERE p.id = $1 AND p.user_id = $2`,
                     [id, userId]
                 );
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
                 const { search, categoryId, offset = 0, limit = 50 } = req.query;
                 let query = `SELECT p.*, pc.name as category_name 
                              FROM products p 
-                             LEFT JOIN product_categories pc ON p.category_id = pc.id 
+                             LEFT JOIN product_categories pc ON p.product_category_id = pc.id 
                              WHERE p.user_id = $1`;
                 const params = [userId];
                 let paramCount = 1;
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
                 }
                 if (categoryId) {
                     paramCount++;
-                    query += ` AND p.category_id = $${paramCount}`;
+                    query += ` AND p.product_category_id = $${paramCount}`;
                     params.push(categoryId);
                 }
 
@@ -98,16 +98,16 @@ export default async function handler(req, res) {
                 });
             }
         } else if (req.method === 'POST') {
-            const { name, sku, description, category_id, unit_price, cost_price, quantity, low_stock_threshold } = req.body;
+            const { name, sku, description, product_category_id, unit_price, cost_price, current_quantity, stock_threshold } = req.body;
 
             if (!name) {
                 return res.status(400).json({ error: 'Name is required' });
             }
 
             const result = await pool.query(
-                `INSERT INTO products (user_id, category_id, name, sku, description, unit_price, cost_price, quantity, low_stock_threshold)
+                `INSERT INTO products (user_id, product_category_id, name, sku, description, unit_price, cost_price, current_quantity, stock_threshold)
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-                [userId, category_id, name, sku, description, unit_price || 0, cost_price || 0, quantity || 0, low_stock_threshold || 10]
+                [userId, product_category_id, name, sku, description, unit_price || 0, cost_price || 0, current_quantity || 0, stock_threshold || 10]
             );
 
             return res.status(201).json(result.rows[0]);
@@ -116,13 +116,13 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Product ID is required' });
             }
 
-            const { name, sku, description, category_id, unit_price, cost_price, quantity, low_stock_threshold } = req.body;
+            const { name, sku, description, product_category_id, unit_price, cost_price, current_quantity, stock_threshold } = req.body;
 
             const result = await pool.query(
-                `UPDATE products SET name = $1, sku = $2, description = $3, category_id = $4, 
-                 unit_price = $5, cost_price = $6, quantity = $7, low_stock_threshold = $8, updated_at = CURRENT_TIMESTAMP
+                `UPDATE products SET name = $1, sku = $2, description = $3, product_category_id = $4, 
+                 unit_price = $5, cost_price = $6, current_quantity = $7, stock_threshold = $8, updated_at = CURRENT_TIMESTAMP
                  WHERE id = $9 AND user_id = $10 RETURNING *`,
-                [name, sku, description, category_id, unit_price, cost_price, quantity, low_stock_threshold, id, userId]
+                [name, sku, description, product_category_id, unit_price, cost_price, current_quantity, stock_threshold, id, userId]
             );
 
             if (result.rows.length === 0) {
