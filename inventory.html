@@ -128,11 +128,11 @@
                 name: current.name,
                 sku: current.sku,
                 description: current.description,
-                categoryId: current.product_category_id,
-                unitPrice: current.unit_price,
-                costPrice: current.cost_price,
-                currentQuantity: newQty,
-                stockThreshold: current.stock_threshold
+                product_category_id: current.product_category_id,
+                unit_price: current.unit_price,
+                cost_price: current.cost_price,
+                current_quantity: newQty,
+                stock_threshold: current.stock_threshold
               });
               await loadProducts();
               return;
@@ -148,11 +148,11 @@
               name: current.name,
               sku: current.sku,
               description: current.description,
-              categoryId: current.product_category_id,
-              unitPrice: current.unit_price,
-              costPrice: current.cost_price,
-              currentQuantity: newQty,
-              stockThreshold: current.stock_threshold
+              product_category_id: current.product_category_id,
+              unit_price: current.unit_price,
+              cost_price: current.cost_price,
+              current_quantity: newQty,
+              stock_threshold: current.stock_threshold
             });
             await loadProducts();
           });
@@ -168,9 +168,9 @@
       const body = {
         name: document.getElementById('name').value.trim(),
         sku: document.getElementById('sku').value.trim(),
-        unitPrice: parseFloat(document.getElementById('unitPrice').value || '0'),
-        currentQuantity: parseInt(document.getElementById('quantity').value || '0', 10),
-        stockThreshold: parseInt(document.getElementById('lowStockThreshold').value || '0', 10),
+        unit_price: parseFloat(document.getElementById('unitPrice').value || '0'),
+        current_quantity: parseInt(document.getElementById('quantity').value || '0', 10),
+        stock_threshold: parseInt(document.getElementById('lowStockThreshold').value || '0', 10),
         description: document.getElementById('description').value.trim()
       };
       if (!body.name) return alert('Name is required');
