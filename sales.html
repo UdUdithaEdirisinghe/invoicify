@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Management - Invoicify ERP</title>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar"></aside>
+
+    <main class="main-content">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Sales Management</h1>
+          <p class="page-subtitle">Track invoices, quotations, payments, and revenue</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" onclick="window.location.href='./index.html#editor'">
+            <i class="ph ph-file-text"></i> New Quotation
+          </button>
+          <button class="btn btn-primary" onclick="window.location.href='./index.html#editor'">
+            <i class="ph ph-receipt"></i> New Invoice
+          </button>
+        </div>
+      </header>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 24px;">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #dbeafe; color: #2563eb;">
+            <i class="ph ph-currency-circle-dollar"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Revenue (This Month)</div>
+            <div class="stat-value" id="stat-revenue">Rs. 0.00</div>
+            <div class="stat-change" id="stat-revenue-change"></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #fef3c7; color: #f59e0b;">
+            <i class="ph ph-file-text"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Pending Invoices</div>
+            <div class="stat-value" id="stat-pending">0</div>
+            <div class="stat-change" id="stat-pending-amount"></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #d1fae5; color: #10b981;">
+            <i class="ph ph-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Paid This Month</div>
+            <div class="stat-value" id="stat-paid">Rs. 0.00</div>
+            <div class="stat-change" id="stat-paid-count"></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #e0e7ff; color: #6366f1;">
+            <i class="ph ph-chart-line"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Average Invoice Value</div>
+            <div class="stat-value" id="stat-avg">Rs. 0.00</div>
+            <div class="stat-change" id="stat-avg-count"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px;">
+        <div class="card">
+          <div class="card-header">
+            <h3>Revenue Trend (Last 6 Months)</h3>
+          </div>
+          <canvas id="revenueChart" style="max-height: 300px;"></canvas>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Payment Status</h3>
+          </div>
+          <canvas id="statusChart" style="max-height: 300px;"></canvas>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" data-tab="invoices">
+          <i class="ph ph-receipt"></i> Invoices
+        </button>
+        <button class="tab" data-tab="quotations">
+          <i class="ph ph-file-text"></i> Quotations
+        </button>
+        <button class="tab" data-tab="payments">
+          <i class="ph ph-currency-circle-dollar"></i> Payments
+        </button>
+        <button class="tab" data-tab="customers">
+          <i class="ph ph-users"></i> Top Customers
+        </button>
+      </div>
+
+      <!-- Tab Content: Invoices -->
+      <div class="tab-content active" data-content="invoices">
+        <div class="card">
+          <div class="card-header">
+            <h3>Recent Invoices</h3>
+            <div class="filters" style="display: flex; gap: 12px;">
+              <select id="invoice-status-filter" class="form-control" style="width: auto;">
+                <option value="">All Statuses</option>
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <input type="text" id="invoice-search" placeholder="Search invoices..." class="form-control" style="width: 250px;">
+            </div>
+          </div>
+          
+          <div id="invoices-loading" style="padding: 40px; text-align: center; color: #64748b;">
+            <p>Loading invoices...</p>
+          </div>
+
+          <div id="invoices-empty" style="display: none; padding: 60px; text-align: center;">
+            <i class="ph ph-receipt" style="font-size: 64px; color: #cbd5e1; margin-bottom: 16px;"></i>
+            <h3>No invoices yet</h3>
+            <p style="color: #64748b; margin-bottom: 20px;">Create your first invoice to start tracking sales</p>
+            <button class="btn btn-primary" onclick="window.location.href='./index.html#editor'">Create Invoice</button>
+          </div>
+
+          <div id="invoices-table-container" style="display: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Invoice #</th>
+                  <th>Customer</th>
+                  <th>Date</th>
+                  <th>Due Date</th>
+                  <th>Amount</th>
+                  <th>Paid</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="invoices-tbody"></tbody>
+            </table>
+            <div id="invoices-pagination" class="pagination"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Quotations -->
+      <div class="tab-content" data-content="quotations">
+        <div class="card">
+          <div class="card-header">
+            <h3>Quotations</h3>
+            <input type="text" id="quote-search" placeholder="Search quotations..." class="form-control" style="width: 250px;">
+          </div>
+          
+          <div id="quotes-loading" style="padding: 40px; text-align: center; color: #64748b;">
+            <p>Loading quotations...</p>
+          </div>
+
+          <div id="quotes-empty" style="display: none; padding: 60px; text-align: center;">
+            <i class="ph ph-file-text" style="font-size: 64px; color: #cbd5e1; margin-bottom: 16px;"></i>
+            <h3>No quotations yet</h3>
+            <p style="color: #64748b;">Quotations you create will appear here</p>
+          </div>
+
+          <div id="quotes-table-container" style="display: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Quote #</th>
+                  <th>Customer</th>
+                  <th>Date</th>
+                  <th>Valid Until</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="quotes-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Payments -->
+      <div class="tab-content" data-content="payments">
+        <div class="card">
+          <div class="card-header">
+            <h3>Payment History</h3>
+            <div class="filters" style="display: flex; gap: 12px;">
+              <input type="date" id="payment-start-date" class="form-control" style="width: auto;">
+              <input type="date" id="payment-end-date" class="form-control" style="width: auto;">
+              <button class="btn btn-secondary" onclick="loadPayments()">Filter</button>
+            </div>
+          </div>
+          
+          <div id="payments-loading" style="padding: 40px; text-align: center; color: #64748b;">
+            <p>Loading payments...</p>
+          </div>
+
+          <div id="payments-empty" style="display: none; padding: 60px; text-align: center;">
+            <i class="ph ph-currency-circle-dollar" style="font-size: 64px; color: #cbd5e1; margin-bottom: 16px;"></i>
+            <h3>No payments recorded</h3>
+            <p style="color: #64748b;">Payment records will appear here</p>
+          </div>
+
+          <div id="payments-table-container" style="display: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Invoice #</th>
+                  <th>Customer</th>
+                  <th>Method</th>
+                  <th>Amount</th>
+                  <th>Reference</th>
+                </tr>
+              </thead>
+              <tbody id="payments-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Top Customers -->
+      <div class="tab-content" data-content="customers">
+        <div class="card">
+          <div class="card-header">
+            <h3>Top Customers by Revenue</h3>
+          </div>
+          
+          <div id="customers-loading" style="padding: 40px; text-align: center; color: #64748b;">
+            <p>Analyzing customer data...</p>
+          </div>
+
+          <div id="customers-table-container" style="display: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Customer</th>
+                  <th>Total Invoices</th>
+                  <th>Total Revenue</th>
+                  <th>Avg Invoice</th>
+                  <th>Outstanding</th>
+                </tr>
+              </thead>
+              <tbody id="customers-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import ApiClient from './js/api-client.js';
+    import { injectSidebar } from './js/layout.js';
+
+    let revenueChart, statusChart;
+    let currentInvoices = [];
+    let currentQuotes = [];
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      await injectSidebar('sales');
+      
+      if (!ApiClient.isAuthenticated()) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      setupTabs();
+      setupFilters();
+      await Promise.all([
+        loadStats(),
+        loadCharts(),
+        loadInvoices(),
+        loadQuotations(),
+        loadPayments(),
+        loadTopCustomers()
+      ]);
+    });
+
+    // Tab Management
+    function setupTabs() {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.dataset.tab;
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.querySelector(`[data-content="${tabName}"]`).classList.add('active');
+        });
+      });
+    }
+
+    // Filters
+    function setupFilters() {
+      document.getElementById('invoice-status-filter')?.addEventListener('change', filterInvoices);
+      document.getElementById('invoice-search')?.addEventListener('input', filterInvoices);
+      document.getElementById('quote-search')?.addEventListener('input', filterQuotes);
+    }
+
+    function filterInvoices() {
+      const status = document.getElementById('invoice-status-filter').value;
+      const search = document.getElementById('invoice-search').value.toLowerCase();
+      
+      let filtered = currentInvoices;
+      if (status) filtered = filtered.filter(inv => inv.status === status);
+      if (search) filtered = filtered.filter(inv => 
+        (inv.invoice_number || '').toLowerCase().includes(search) ||
+        (inv.customer_name || '').toLowerCase().includes(search)
+      );
+      
+      renderInvoices(filtered);
+    }
+
+    function filterQuotes() {
+      const search = document.getElementById('quote-search').value.toLowerCase();
+      let filtered = currentQuotes;
+      if (search) filtered = filtered.filter(q => 
+        (q.quote_number || '').toLowerCase().includes(search) ||
+        (q.customer_name || '').toLowerCase().includes(search)
+      );
+      renderQuotes(filtered);
+    }
+
+    // Load Stats
+    async function loadStats() {
+      try {
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+
+        const response = await ApiClient.getInvoices().catch(() => ({ data: [] }));
+        const invoices = response.data || response.invoices || [];
+
+        // This month's invoices
+        const thisMonth = invoices.filter(inv => {
+          const invDate = new Date(inv.invoice_date || inv.created_at);
+          return invDate >= new Date(firstDayOfMonth) && invDate <= new Date(lastDayOfMonth);
+        });
+
+        const totalRevenue = thisMonth.reduce((sum, inv) => sum + (parseFloat(inv.total_amount) || 0), 0);
+        const pendingInvoices = invoices.filter(inv => inv.status === 'sent' || inv.status === 'overdue');
+        const pendingAmount = pendingInvoices.reduce((sum, inv) => sum + (parseFloat(inv.total_amount) || 0), 0);
+        const paidThisMonth = thisMonth.filter(inv => inv.status === 'paid');
+        const paidAmount = paidThisMonth.reduce((sum, inv) => sum + (parseFloat(inv.paid_amount) || 0), 0);
+        const avgInvoice = thisMonth.length > 0 ? totalRevenue / thisMonth.length : 0;
+
+        document.getElementById('stat-revenue').textContent = formatCurrency(totalRevenue);
+        document.getElementById('stat-pending').textContent = pendingInvoices.length;
+        document.getElementById('stat-pending-amount').textContent = formatCurrency(pendingAmount);
+        document.getElementById('stat-paid').textContent = formatCurrency(paidAmount);
+        document.getElementById('stat-paid-count').textContent = `${paidThisMonth.length} invoices`;
+        document.getElementById('stat-avg').textContent = formatCurrency(avgInvoice);
+        document.getElementById('stat-avg-count').textContent = `${thisMonth.length} invoices`;
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
+    }
+
+    // Load Charts
+    async function loadCharts() {
+      try {
+        const response = await ApiClient.getInvoices().catch(() => ({ data: [] }));
+        const invoices = response.data || response.invoices || [];
+
+        // Revenue Trend
+        const months = [];
+        const today = new Date();
+        for (let i = 5; i >= 0; i--) {
+          const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+          months.push({
+            label: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+            year: date.getFullYear(),
+            month: date.getMonth()
+          });
+        }
+
+        const revenueData = months.map(m => {
+          const monthInvoices = invoices.filter(inv => {
+            const invDate = new Date(inv.invoice_date || inv.created_at);
+            return invDate.getFullYear() === m.year && invDate.getMonth() === m.month;
+          });
+          return monthInvoices.reduce((sum, inv) => sum + (parseFloat(inv.total_amount) || 0), 0);
+        });
+
+        const revenueCtx = document.getElementById('revenueChart');
+        if (revenueChart) revenueChart.destroy();
+        revenueChart = new Chart(revenueCtx, {
+          type: 'line',
+          data: {
+            labels: months.map(m => m.label),
+            datasets: [{
+              label: 'Revenue',
+              data: revenueData,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, ticks: { callback: value => 'Rs. ' + value.toLocaleString() } }
+            }
+          }
+        });
+
+        // Status Chart
+        const statusCounts = {
+          paid: invoices.filter(inv => inv.status === 'paid').length,
+          sent: invoices.filter(inv => inv.status === 'sent').length,
+          overdue: invoices.filter(inv => inv.status === 'overdue').length,
+          draft: invoices.filter(inv => inv.status === 'draft').length
+        };
+
+        const statusCtx = document.getElementById('statusChart');
+        if (statusChart) statusChart.destroy();
+        statusChart = new Chart(statusCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Paid', 'Sent', 'Overdue', 'Draft'],
+            datasets: [{
+              data: [statusCounts.paid, statusCounts.sent, statusCounts.overdue, statusCounts.draft],
+              backgroundColor: ['#10b981', '#3b82f6', '#ef4444', '#94a3b8']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { position: 'bottom' } }
+          }
+        });
+      } catch (error) {
+        console.error('Failed to load charts:', error);
+      }
+    }
+
+    // Load Invoices
+    async function loadInvoices() {
+      const loading = document.getElementById('invoices-loading');
+      const empty = document.getElementById('invoices-empty');
+      const container = document.getElementById('invoices-table-container');
+
+      loading.style.display = 'block';
+      empty.style.display = 'none';
+      container.style.display = 'none';
+
+      try {
+        const response = await ApiClient.getInvoices();
+        currentInvoices = response.data || response.invoices || [];
+
+        loading.style.display = 'none';
+
+        if (currentInvoices.length === 0) {
+          empty.style.display = 'block';
+          return;
+        }
+
+        container.style.display = 'block';
+        renderInvoices(currentInvoices);
+      } catch (error) {
+        console.error('Failed to load invoices:', error);
+        loading.innerHTML = '<p style="color: #ef4444;">Failed to load invoices</p>';
+      }
+    }
+
+    function renderInvoices(invoices) {
+      const tbody = document.getElementById('invoices-tbody');
+      tbody.innerHTML = '';
+
+      invoices.forEach(inv => {
+        const tr = document.createElement('tr');
+        const statusClass = {
+          paid: 'badge-success',
+          sent: 'badge-primary',
+          overdue: 'badge-danger',
+          draft: 'badge-secondary'
+        }[inv.status] || 'badge-secondary';
+
+        tr.innerHTML = `
+          <td><code>${escapeHtml(inv.invoice_number || '-')}</code></td>
+          <td>${escapeHtml(inv.customer_name || 'N/A')}</td>
+          <td>${formatDate(inv.invoice_date || inv.created_at)}</td>
+          <td>${inv.due_date ? formatDate(inv.due_date) : '-'}</td>
+          <td><strong>${formatCurrency(inv.total_amount)}</strong></td>
+          <td>${formatCurrency(inv.paid_amount || 0)}</td>
+          <td><span class="badge ${statusClass}">${inv.status || 'draft'}</span></td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon" onclick="viewInvoice(${inv.id})" title="View">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="btn-icon" onclick="editInvoice(${inv.id})" title="Edit">
+                <i class="ph ph-pencil"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Load Quotations
+    async function loadQuotations() {
+      const loading = document.getElementById('quotes-loading');
+      const empty = document.getElementById('quotes-empty');
+      const container = document.getElementById('quotes-table-container');
+
+      loading.style.display = 'block';
+      empty.style.display = 'none';
+      container.style.display = 'none';
+
+      try {
+        // TODO: Add quotations API endpoint
+        currentQuotes = [];
+        
+        loading.style.display = 'none';
+        empty.style.display = 'block';
+      } catch (error) {
+        console.error('Failed to load quotations:', error);
+        loading.innerHTML = '<p style="color: #ef4444;">Failed to load quotations</p>';
+      }
+    }
+
+    function renderQuotes(quotes) {
+      const tbody = document.getElementById('quotes-tbody');
+      tbody.innerHTML = '';
+      // Render logic similar to invoices
+    }
+
+    // Load Payments
+    window.loadPayments = async function() {
+      const loading = document.getElementById('payments-loading');
+      const empty = document.getElementById('payments-empty');
+      const container = document.getElementById('payments-table-container');
+
+      loading.style.display = 'block';
+      empty.style.display = 'none';
+      container.style.display = 'none';
+
+      try {
+        const startDate = document.getElementById('payment-start-date')?.value;
+        const endDate = document.getElementById('payment-end-date')?.value;
+        
+        const params = {};
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+
+        const response = await ApiClient.getPayments(params).catch(() => ({ data: [] }));
+        const payments = response.data || [];
+
+        loading.style.display = 'none';
+
+        if (payments.length === 0) {
+          empty.style.display = 'block';
+          return;
+        }
+
+        container.style.display = 'block';
+        renderPayments(payments);
+      } catch (error) {
+        console.error('Failed to load payments:', error);
+        loading.innerHTML = '<p style="color: #ef4444;">Failed to load payments</p>';
+      }
+    };
+
+    function renderPayments(payments) {
+      const tbody = document.getElementById('payments-tbody');
+      tbody.innerHTML = '';
+
+      payments.forEach(payment => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${formatDate(payment.payment_date)}</td>
+          <td><code>${escapeHtml(payment.invoice_number || '-')}</code></td>
+          <td>${escapeHtml(payment.customer_name || 'N/A')}</td>
+          <td>${escapeHtml(payment.payment_method || '-')}</td>
+          <td><strong>${formatCurrency(payment.amount)}</strong></td>
+          <td>${escapeHtml(payment.transaction_reference || '-')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Load Top Customers
+    async function loadTopCustomers() {
+      const loading = document.getElementById('customers-loading');
+      const container = document.getElementById('customers-table-container');
+
+      loading.style.display = 'block';
+      container.style.display = 'none';
+
+      try {
+        const [invoicesRes, customersRes] = await Promise.all([
+          ApiClient.getInvoices().catch(() => ({ data: [] })),
+          ApiClient.getCustomers().catch(() => ({ data: [] }))
+        ]);
+
+        const invoices = invoicesRes.data || invoicesRes.invoices || [];
+        const customers = customersRes.data || [];
+
+        // Calculate customer stats
+        const customerStats = {};
+        invoices.forEach(inv => {
+          const custId = inv.customer_id;
+          if (!custId) return;
+
+          if (!customerStats[custId]) {
+            const customer = customers.find(c => c.id === custId);
+            customerStats[custId] = {
+              id: custId,
+              name: customer?.name || inv.customer_name || 'Unknown',
+              invoiceCount: 0,
+              totalRevenue: 0,
+              outstanding: customer?.outstanding_balance || 0
+            };
+          }
+
+          customerStats[custId].invoiceCount++;
+          customerStats[custId].totalRevenue += parseFloat(inv.total_amount) || 0;
+        });
+
+        const topCustomers = Object.values(customerStats)
+          .sort((a, b) => b.totalRevenue - a.totalRevenue)
+          .slice(0, 10);
+
+        loading.style.display = 'none';
+        container.style.display = 'block';
+
+        const tbody = document.getElementById('customers-tbody');
+        tbody.innerHTML = '';
+
+        topCustomers.forEach((customer, index) => {
+          const avgInvoice = customer.invoiceCount > 0 ? customer.totalRevenue / customer.invoiceCount : 0;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>#${index + 1}</strong></td>
+            <td><strong>${escapeHtml(customer.name)}</strong></td>
+            <td>${customer.invoiceCount}</td>
+            <td><strong>${formatCurrency(customer.totalRevenue)}</strong></td>
+            <td>${formatCurrency(avgInvoice)}</td>
+            <td>${formatCurrency(customer.outstanding)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (error) {
+        console.error('Failed to load customer analytics:', error);
+        loading.innerHTML = '<p style="color: #ef4444;">Failed to load customer data</p>';
+      }
+    }
+
+    // Utility Functions
+    function formatCurrency(amount) {
+      return 'Rs. ' + (parseFloat(amount) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text || '';
+      return div.innerHTML;
+    }
+
+    // Global functions for actions
+    window.viewInvoice = function(id) {
+      // TODO: Implement invoice viewer modal
+      alert('View invoice #' + id);
+    };
+
+    window.editInvoice = function(id) {
+      window.location.href = `./index.html#editor?id=${id}`;
+    };
+  </script>
+</body>
+</html>

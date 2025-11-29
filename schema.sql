@@ -162,6 +162,7 @@ CREATE TABLE IF NOT EXISTS invoices (
   customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
   invoice_number VARCHAR(50) UNIQUE NOT NULL,
   invoice_data JSONB NOT NULL,
+    invoice_date DATE,
   subtotal NUMERIC(12,2) DEFAULT 0,
   tax_amount NUMERIC(12,2) DEFAULT 0,
   discount_amount NUMERIC(12,2) DEFAULT 0,
@@ -179,6 +180,7 @@ CREATE INDEX IF NOT EXISTS idx_invoices_user_id ON invoices(user_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_customer ON invoices(customer_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
 CREATE INDEX IF NOT EXISTS idx_invoices_number ON invoices(invoice_number);
+CREATE INDEX IF NOT EXISTS idx_invoices_date ON invoices(invoice_date DESC);
 CREATE INDEX IF NOT EXISTS idx_invoices_created_at ON invoices(created_at DESC);
 
 -- Quotations

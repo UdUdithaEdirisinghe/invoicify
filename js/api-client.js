@@ -106,26 +106,34 @@ class ApiClient {
 
   // Invoice endpoints
   async createInvoice(invoiceData) {
-    return await this.request('/api/invoices/create', {
+    return await this.request('/api/invoices', {
       method: 'POST',
-      body: JSON.stringify({ invoiceData })
+      body: JSON.stringify(invoiceData)
     });
   }
 
-  async getInvoices() {
-    return await this.request('/api/invoices/list', {
+  async getInvoices(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return await this.request(`/api/invoices${queryString ? '?' + queryString : ''}`, {
       method: 'GET'
     });
   }
 
   async getInvoice(id) {
-    return await this.request(`/api/invoices/get?id=${id}`, {
+    return await this.request(`/api/invoices?id=${id}`, {
+        async updateInvoice(id, invoiceData) {
+          return await this.request(`/api/invoices?id=${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(invoiceData)
+          });
+        }
+
       method: 'GET'
     });
   }
 
   async deleteInvoice(id) {
-    return await this.request(`/api/invoices/delete?id=${id}`, {
+    return await this.request(`/api/invoices?id=${id}`, {
       method: 'DELETE'
     });
   }

@@ -4,7 +4,10 @@ import { setupLogout } from './auth.js';
 function buildSidebar() {
   const items = [
     { href: '/dashboard.html', icon: 'house', label: 'Dashboard' },
-    { section: 'Sales', items: [ { href: '/index.html', icon: 'file-text', label: 'Invoices' } ] },
+    { section: 'Sales', items: [ 
+      { href: '/sales.html', icon: 'chart-bar', label: 'Sales Management' },
+      { href: '/index.html', icon: 'file-text', label: 'Invoices' } 
+    ] },
     { section: 'Customers', items: [ { href: '/customers.html', icon: 'users', label: 'Customers' } ] },
     { section: 'Purchases', items: [ { href: '/suppliers.html', icon: 'truck', label: 'Suppliers' }, { href: '/purchase-orders.html', icon: 'shopping-cart', label: 'Purchase Orders' } ] },
     { section: 'Inventory', items: [ { href: '/inventory.html', icon: 'package', label: 'Products' } ] },

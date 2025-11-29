@@ -7,7 +7,8 @@
     "api/suppliers.js": { "maxDuration": 10 },
     "api/expenses.js": { "maxDuration": 10 },
     "api/products.js": { "maxDuration": 10 },
-    "api/purchase-orders.js": { "maxDuration": 10 }
+    "api/purchase-orders.js": { "maxDuration": 10 },
+    "api/invoices.js": { "maxDuration": 10 }
   },
   "rewrites": [
     { "source": "/", "destination": "/login.html" },
