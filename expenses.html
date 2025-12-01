@@ -638,7 +638,8 @@
 
       try {
         const response = await ApiClient.getExpenses({ limit: 1000 });
-        const expense = response.expenses.find(e => e.id === id);
+        const expenses = response.data || response.expenses || [];
+        const expense = expenses.find(e => e.id === id);
 
         if (!expense) {
           showToast('Expense not found', 'error');
