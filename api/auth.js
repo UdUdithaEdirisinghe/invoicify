@@ -42,10 +42,25 @@ export default async function handler(req, res) {
             const user = result.rows[0];
 
             if (businessName || businessAddress || taxId || phone) {
+                // Initialize JSONB user settings when user provides business details on registration
+                const initial = {
+                    businessName: businessName || '',
+                    address: businessAddress || '',
+                    email: user.email || '',
+                    phone: phone || '',
+                    currency: 'LKR',
+                    themeColor: '#3b82f6',
+                    logo: '',
+                    bankName: '',
+                    bankBranch: '',
+                    bankAccount: '',
+                    showBankDetails: false
+                };
                 await pool.query(
-                    `INSERT INTO user_settings (user_id, business_name, business_address, tax_id, phone, currency, language)
-                     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-                    [user.id, businessName, businessAddress, taxId, phone, 'LKR', 'en']
+                    `INSERT INTO user_settings (user_id, settings_data, updated_at)
+                     VALUES ($1, $2, NOW())
+                     ON CONFLICT (user_id) DO UPDATE SET settings_data = EXCLUDED.settings_data, updated_at = NOW()` ,
+                    [user.id, JSON.stringify(initial)]
                 );
             }
 

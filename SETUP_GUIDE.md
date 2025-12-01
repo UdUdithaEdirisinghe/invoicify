@@ -36,21 +36,25 @@ This guide will walk you through setting up authentication and database for your
    ```
 5. **Save this somewhere safe** - you'll need it later
 
-### 1.3 Create Database Tables
+### 1.3 Create/Repair Core Tables (Recommended)
+
+Use this script to ensure your DB matches the current code (auth + settings):
 
 1. In Neon dashboard, click "SQL Editor" in the left menu
-2. Open the file `schema.sql` from your project
+2. Open `db/sql/repair_auth_schema.sql` from this repo
 3. Copy ALL the SQL code
 4. Paste it into the Neon SQL Editor
-5. Click "Run" or press Ctrl+Enter
-6. You should see "Success" messages
+5. Click "Run" or press Ctrl+Enter (safe to run multiple times)
 
-**Verify tables were created:**
+This creates/repairs:
+- `users` with `password` column used by the API
+- `user_settings` with JSONB `settings_data` and defaults
+
+**Verify tables exist:**
 ```sql
 SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public';
+WHERE table_schema = 'public' AND table_name IN ('users', 'user_settings');
 ```
-You should see `users` and `invoices` tables.
 
 ---
 
@@ -193,12 +197,13 @@ vercel --prod
 - Check `JWT_SECRET` is set in Vercel
 - Try logging out and back in
 
-### "Table does not exist"
-- Re-run `schema.sql` in Neon SQL Editor
+### "Table does not exist" or "column \"password\" does not exist"
+- Run `db/sql/repair_auth_schema.sql` in Neon SQL Editor (idempotent)
 - Verify tables exist:
   ```sql
-  SELECT * FROM users LIMIT 1;
-  SELECT * FROM invoices LIMIT 1;
+  SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('users','user_settings');
+  SELECT id, username, email FROM users LIMIT 1;
+  SELECT user_id, settings_data FROM user_settings LIMIT 1;
   ```
 
 ### "Username already exists"

@@ -1,0 +1,112 @@
+##############################################
+# INVOICIFY - COMPLETE SETUP INSTRUCTIONS
+##############################################
+
+## STEP 1: DATABASE SETUP (DO THIS FIRST!)
+##############################################
+
+1. Go to: https://console.neon.tech
+2. Sign in with GitHub
+3. Create project: "invoicify-db"
+4. Click "SQL Editor"
+5. Copy ALL contents from: db\sql\repair_auth_schema.sql
+6. Paste into SQL Editor
+7. Click "Run" or press Ctrl+Enter
+8. Wait for "COMMIT" success message
+9. Copy your connection string from Dashboard tab
+
+Your connection string looks like:
+postgres://username:password@ep-xxxx.region.aws.neon.tech/dbname?sslmode=require
+
+
+## STEP 2: UPDATE .ENV.LOCAL FILE
+##############################################
+
+Open .env.local in notepad and replace with:
+
+POSTGRES_URL="paste_your_actual_neon_connection_string_here"
+JWT_SECRET="075dae5669301059b67242fd21f27029877ab8372454cf602c37e867239dc41a"
+
+Save the file!
+
+
+## STEP 3: RUN THESE COMMANDS IN POWERSHELL
+##############################################
+
+cd c:\Users\udith\Desktop\invoice-app
+
+# Enable scripts (if needed)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+
+# Install dependencies (already done, but safe to re-run)
+npm install
+
+# Generate a new JWT secret (optional but recommended)
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# Copy the output and update JWT_SECRET in .env.local
+
+# Load environment and start server
+$env:POSTGRES_URL = (Get-Content .env.local | Select-String -Pattern '^POSTGRES_URL' | ForEach-Object { ($_ -split '=',2)[1].Trim('"') })
+$env:JWT_SECRET = (Get-Content .env.local | Select-String -Pattern '^JWT_SECRET' | ForEach-Object { ($_ -split '=',2)[1].Trim('"') })
+npm run dev
+
+## STEP 4: TEST IN BROWSER
+##############################################
+
+1. Open: http://localhost:3000/api/health
+   Expected: {"status":"ok","env":{"hasPostgresUrl":true},"db":{"ok":1}}
+
+2. Open: http://localhost:3000/register.html
+   - Username: testuser
+   - Email: test@example.com
+   - Password: test123
+   - Click Register
+
+3. Should redirect to dashboard automatically
+
+4. Try:
+   - Click Settings (should show default values)
+   - Create new invoice
+   - Generate PDF
+
+
+## ALTERNATIVE: USE THE START SCRIPT
+##############################################
+
+After completing STEP 1 (database) and STEP 2 (.env.local):
+
+.\start.ps1
+
+This will guide you through the process interactively.
+
+
+## TROUBLESHOOTING
+##############################################
+
+Problem: "Cannot connect to database"
+Fix: Check POSTGRES_URL in .env.local is correct and includes ?sslmode=require
+
+Problem: "Unauthorized" or login doesn't work  
+Fix: Clear browser data (F12 > Application > Local Storage > Clear)
+
+Problem: "Column password does not exist"
+Fix: Run db\sql\repair_auth_schema.sql in Neon SQL Editor
+
+Problem: Port 3000 already in use
+Fix: Stop other processes or change port in package.json
+
+Problem: PowerShell won't run scripts
+Fix: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+
+
+## WHAT WAS FIXED
+##############################################
+
+✓ users table now uses 'password' column (not password_hash)
+✓ user_settings uses JSONB settings_data (not individual columns)
+✓ Settings API does lazy initialization (creates defaults on first access)
+✓ Settings API normalizes missing keys automatically
+✓ Auth API writes JSONB settings on registration
+✓ Health check endpoint added (/api/health)
+✓ All APIs use consistent JWT verification
+✓ Logout properly clears tokens and redirects
