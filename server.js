@@ -17,7 +17,7 @@ app.use(express.json());
 // Serve static files
 app.use(express.static(__dirname));
 
-// API routes - import and use all API handlers
+// API routes - import and use all API handlers as route handlers
 const apiFiles = [
   'auth',
   'customers',
@@ -30,11 +30,13 @@ const apiFiles = [
   'health'
 ];
 
-// Dynamic import for API routes
+// Load API handlers
 for (const file of apiFiles) {
   try {
     const module = await import(`./api/${file}.js`);
-    app.use(`/api/${file}`, module.default || module);
+    const handler = module.default || module;
+    // Handle all HTTP methods and pass to the Vercel-style handler
+    app.all(`/api/${file}`, (req, res) => handler(req, res));
   } catch (error) {
     console.error(`Failed to load API module: ${file}`, error.message);
   }
