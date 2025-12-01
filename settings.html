@@ -511,6 +511,10 @@
             </div>
           </div>
 
+          <p class="text-muted" style="margin-bottom: 16px;">
+            Leave password fields empty if you don't want to change your password.
+          </p>
+
           <button type="button" class="btn btn-secondary" id="change-password-btn">
             <i class="ph ph-key"></i>
             Change Password
@@ -724,33 +728,67 @@
     }
 
     async function handlePasswordChange() {
-      const currentPassword = document.getElementById('current-password').value;
-      const newPassword = document.getElementById('new-password').value;
-      const confirmPassword = document.getElementById('confirm-password').value;
+      const currentPassword = document.getElementById('current-password').value.trim();
+      const newPassword = document.getElementById('new-password').value.trim();
+      const confirmPassword = document.getElementById('confirm-password').value.trim();
 
-      // Validation
-      if (!currentPassword || !newPassword || !confirmPassword) {
-        showToast('Please fill all password fields', 'error');
+      // Enhanced validation with specific feedback
+      if (!currentPassword) {
+        showToast('Please enter your current password', 'error');
+        document.getElementById('current-password').focus();
+        return;
+      }
+
+      if (!newPassword) {
+        showToast('Please enter a new password', 'error');
+        document.getElementById('new-password').focus();
         return;
       }
 
       if (newPassword.length < 6) {
         showToast('New password must be at least 6 characters', 'error');
+        document.getElementById('new-password').focus();
+        return;
+      }
+
+      if (!confirmPassword) {
+        showToast('Please confirm your new password', 'error');
+        document.getElementById('confirm-password').focus();
         return;
       }
 
       if (newPassword !== confirmPassword) {
         showToast('New passwords do not match', 'error');
+        document.getElementById('confirm-password').focus();
+        document.getElementById('confirm-password').select();
+        return;
+      }
+
+      if (currentPassword === newPassword) {
+        showToast('New password must be different from current password', 'error');
+        document.getElementById('new-password').focus();
+        return;
+      }
+
+      if (!confirm('Are you sure you want to change your password?')) {
         return;
       }
 
       try {
         showLoading(true);
+        const token = localStorage.getItem('auth_token');
+        
+        if (!token) {
+          showToast('Not authenticated. Please login again.', 'error');
+          setTimeout(() => window.location.replace('/login.html'), 1500);
+          return;
+        }
+
         const response = await fetch('/api/auth?action=change-password', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             currentPassword,
@@ -761,17 +799,36 @@
         const data = await response.json();
 
         if (response.ok) {
-          showToast('Password changed successfully', 'success');
+          showToast('✓ Password changed successfully!', 'success');
           // Clear password fields
           document.getElementById('current-password').value = '';
           document.getElementById('new-password').value = '';
           document.getElementById('confirm-password').value = '';
+          
+          // Optional: logout and redirect after password change
+          setTimeout(() => {
+            if (confirm('Password changed! Would you like to logout and login again with your new password?')) {
+              localStorage.clear();
+              sessionStorage.clear();
+              window.location.replace('/login.html');
+            }
+          }, 2000);
         } else {
-          showToast(data.error || 'Failed to change password', 'error');
+          // Handle specific error messages with better UX
+          let errorMessage = data.error || 'Failed to change password';
+          if (errorMessage.includes('Current password is incorrect')) {
+            document.getElementById('current-password').focus();
+            document.getElementById('current-password').select();
+          }
+          showToast(errorMessage, 'error');
         }
       } catch (error) {
         console.error('Failed to change password:', error);
-        showToast('Failed to change password', 'error');
+        if (error.message.includes('Failed to fetch')) {
+          showToast('Cannot connect to server. Please check your connection.', 'error');
+        } else {
+          showToast('Failed to change password: ' + error.message, 'error');
+        }
       } finally {
         showLoading(false);
       }
