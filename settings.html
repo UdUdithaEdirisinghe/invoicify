@@ -515,7 +515,7 @@
             Leave password fields empty if you don't want to change your password.
           </p>
 
-          <button type="button" class="btn btn-secondary" id="change-password-btn">
+          <button type="button" class="btn btn-secondary" id="change-password-btn" onclick="console.log('ONCLICK FIRED'); alert('Button clicked!')">
             <i class="ph ph-key"></i>
             Change Password
           </button>
@@ -648,12 +648,19 @@
       });
 
       // Change password button
+      console.log('🔍 Looking for change password button...');
       const changePasswordBtn = document.getElementById('change-password-btn');
+      console.log('Button element:', changePasswordBtn);
       if (changePasswordBtn) {
-        changePasswordBtn.addEventListener('click', handlePasswordChange);
-        console.log('✓ Change password button listener attached');
+        try {
+          changePasswordBtn.addEventListener('click', handlePasswordChange);
+          console.log('✓ Change password button listener attached successfully');
+          console.log('Button onclick:', changePasswordBtn.onclick);
+        } catch (err) {
+          console.error('❌ Error attaching listener:', err);
+        }
       } else {
-        console.error('❌ Change password button not found!');
+        console.error('❌ Change password button not found in DOM!');
       }
     }
 
@@ -738,11 +745,13 @@
     }
 
     async function handlePasswordChange() {
-      console.log('🔐 Change password clicked');
-      
-      const currentPassword = document.getElementById('current-password').value.trim();
-      const newPassword = document.getElementById('new-password').value.trim();
-      const confirmPassword = document.getElementById('confirm-password').value.trim();
+      try {
+        console.log('🔐 Change password function called');
+        console.log('Stack trace:', new Error().stack);
+        
+        const currentPassword = document.getElementById('current-password').value.trim();
+        const newPassword = document.getElementById('new-password').value.trim();
+        const confirmPassword = document.getElementById('confirm-password').value.trim();
 
       console.log('Password fields:', {
         current: currentPassword ? '***filled***' : 'empty',
