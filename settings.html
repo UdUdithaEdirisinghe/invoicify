@@ -515,7 +515,7 @@
             Leave password fields empty if you don't want to change your password.
           </p>
 
-          <button type="button" class="btn btn-secondary" id="change-password-btn" onclick="console.log('ONCLICK FIRED'); alert('Button clicked!')">
+          <button type="button" class="btn btn-secondary" id="change-password-btn">
             <i class="ph ph-key"></i>
             Change Password
           </button>
@@ -745,13 +745,11 @@
     }
 
     async function handlePasswordChange() {
-      try {
-        console.log('🔐 Change password function called');
-        console.log('Stack trace:', new Error().stack);
-        
-        const currentPassword = document.getElementById('current-password').value.trim();
-        const newPassword = document.getElementById('new-password').value.trim();
-        const confirmPassword = document.getElementById('confirm-password').value.trim();
+      console.log('🔐 Change password function called');
+      
+      const currentPassword = document.getElementById('current-password').value.trim();
+      const newPassword = document.getElementById('new-password').value.trim();
+      const confirmPassword = document.getElementById('confirm-password').value.trim();
 
       console.log('Password fields:', {
         current: currentPassword ? '***filled***' : 'empty',
