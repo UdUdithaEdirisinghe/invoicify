@@ -490,6 +490,33 @@
           </div>
         </div>
 
+        <!-- Security Settings -->
+        <div class="settings-section">
+          <h2><i class="ph ph-lock"></i> Security</h2>
+          
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="current-password" placeholder="Enter current password">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="new-password" placeholder="Enter new password">
+            </div>
+
+            <div class="form-group">
+              <label>Confirm Password</label>
+              <input type="password" id="confirm-password" placeholder="Confirm new password">
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-secondary" id="change-password-btn">
+            <i class="ph ph-key"></i>
+            Change Password
+          </button>
+        </div>
+
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">
             <i class="ph ph-check"></i>
@@ -589,8 +616,12 @@
       document.getElementById('reset-btn').addEventListener('click', () => {
         if (confirm('Reset all settings to last saved values?')) {
           populateForm(currentSettings);
+          showToast('Settings reset', 'info');
         }
       });
+
+      // Change password button
+      document.getElementById('change-password-btn').addEventListener('click', handlePasswordChange);
     }
 
     async function handleSubmit(e) {
@@ -644,6 +675,7 @@
         const logoData = event.target.result;
         currentSettings.logo = logoData;
         showLogoPreview(logoData);
+        showToast('Logo uploaded. Click "Save Settings" to persist.', 'info');
       };
       reader.readAsDataURL(file);
     }
@@ -662,6 +694,61 @@
       previewBox.classList.add('empty');
       document.getElementById('remove-logo-btn').style.display = 'none';
       document.getElementById('logo-input').value = '';
+      showToast('Logo removed. Click "Save Settings" to persist.', 'info');
+    }
+
+    async function handlePasswordChange() {
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+
+      // Validation
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        showToast('Please fill all password fields', 'error');
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        showToast('New password must be at least 6 characters', 'error');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        showToast('New passwords do not match', 'error');
+        return;
+      }
+
+      try {
+        showLoading(true);
+        const response = await fetch('/api/auth/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            currentPassword,
+            newPassword
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showToast('Password changed successfully', 'success');
+          // Clear password fields
+          document.getElementById('current-password').value = '';
+          document.getElementById('new-password').value = '';
+          document.getElementById('confirm-password').value = '';
+        } else {
+          showToast(data.error || 'Failed to change password', 'error');
+        }
+      } catch (error) {
+        console.error('Failed to change password:', error);
+        showToast('Failed to change password', 'error');
+      } finally {
+        showLoading(false);
+      }
     }
 
     function showLoading(show) {

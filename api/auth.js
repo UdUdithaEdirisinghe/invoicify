@@ -103,6 +103,53 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({ user: result.rows[0] });
+        } else if (action === 'change-password' && req.method === 'POST') {
+            const authHeader = req.headers.authorization;
+            if (!authHeader?.startsWith('Bearer ')) {
+                return res.status(401).json({ error: 'No token provided' });
+            }
+
+            const token = authHeader.substring(7);
+            const decoded = jwt.verify(token, JWT_SECRET);
+
+            const { currentPassword, newPassword } = req.body;
+
+            if (!currentPassword || !newPassword) {
+                return res.status(400).json({ error: 'Current and new passwords are required' });
+            }
+
+            if (newPassword.length < 6) {
+                return res.status(400).json({ error: 'New password must be at least 6 characters' });
+            }
+
+            // Get current user
+            const userResult = await pool.query(
+                'SELECT * FROM users WHERE id = $1',
+                [decoded.userId]
+            );
+
+            if (userResult.rows.length === 0) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            const user = userResult.rows[0];
+
+            // Verify current password
+            const validPassword = await bcrypt.compare(currentPassword, user.password);
+            if (!validPassword) {
+                return res.status(401).json({ error: 'Current password is incorrect' });
+            }
+
+            // Hash new password
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+            // Update password
+            await pool.query(
+                'UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2',
+                [hashedPassword, decoded.userId]
+            );
+
+            return res.status(200).json({ message: 'Password changed successfully' });
         } else {
             return res.status(404).json({ error: 'Invalid auth action' });
         }
