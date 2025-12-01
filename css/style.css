@@ -678,7 +678,8 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 
 .editor-layout { 
     display: grid; 
-    grid-template-columns: 1fr 1fr; 
+    /* Give the form more breathing room while keeping preview fixed */
+    grid-template-columns: minmax(680px, 1fr) minmax(640px, 720px);
     gap: 36px; 
     height: calc(100vh - 120px);
 }
@@ -860,6 +861,11 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     .prev-info-row { flex-direction: column; gap: 20px; align-items: flex-start; }
     .prev-dates { text-align: left; width: 100%; }
     .prev-date-row { justify-content: flex-start; }
+}
+
+/* When space is somewhat constrained but not mobile, prioritize editor width */
+@media (max-width: 1360px) and (min-width: 769px) {
+    .editor-layout { grid-template-columns: minmax(560px, 1fr) 640px; }
 }
 
 /* --- Modal Styles --- */
