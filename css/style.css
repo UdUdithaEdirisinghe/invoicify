@@ -535,7 +535,7 @@ tbody tr.low-stock:hover { background: #f9fafb; }
     z-index: 1000;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 20px;
     overflow-y: auto;
 }
 
@@ -549,10 +549,12 @@ tbody tr.low-stock:hover { background: #f9fafb; }
     box-shadow: var(--shadow-lg);
     width: 100%;
     max-width: 500px;
-    max-height: 90vh;
+    max-height: calc(100vh - 40px);
     display: flex;
     flex-direction: column;
     animation: modalSlideIn 0.3s ease;
+    margin: auto;
+    position: relative;
 }
 
 .modal-large {
@@ -571,17 +573,19 @@ tbody tr.low-stock:hover { background: #f9fafb; }
 }
 
 .modal-header {
-    padding: 24px;
+    padding: 20px 24px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-shrink: 0;
 }
 
 .modal-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
     color: var(--text);
+    margin: 0;
 }
 
 .modal-close {
@@ -596,6 +600,7 @@ tbody tr.low-stock:hover { background: #f9fafb; }
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    flex-shrink: 0;
 }
 
 .modal-close:hover {
@@ -606,15 +611,18 @@ tbody tr.low-stock:hover { background: #f9fafb; }
 .modal-body {
     padding: 24px;
     overflow-y: auto;
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .modal-footer {
-    padding: 24px;
+    padding: 16px 24px;
     border-top: 1px solid var(--border);
     display: flex;
     gap: 12px;
     justify-content: flex-end;
+    flex-shrink: 0;
+    background: white;
 }
 
 /* --- Form Sections --- */
@@ -1066,10 +1074,33 @@ tbody tr.low-stock:hover { background: #f9fafb; }
         grid-template-columns: 1fr;
     }
 
+    .modal {
+        padding: 0;
+    }
+
     .modal-content {
         max-width: 100%;
+        max-height: 100vh;
         margin: 0;
         border-radius: 0;
+        min-height: 100vh;
+    }
+
+    .modal-header {
+        padding: 16px 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 1.125rem;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        padding: 16px 20px;
+    }
         max-height: 100vh;
     }
 
