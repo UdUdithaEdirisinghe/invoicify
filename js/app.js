@@ -82,6 +82,8 @@ class App {
         if (hash === 'customers') this.renderCustomers();
         if (hash === 'settings') this.renderSettings();
         if (hash === 'editor') {
+            // Reload settings to get latest changes
+            this.loadSettings();
             if(!this.isEditing) {
                 this.state.currentDoc = this.getEmptyDoc();
                 this.populateEditor();
@@ -173,6 +175,13 @@ class App {
             } catch (err) {
                 console.error('Inventory deduction failed:', err);
                 alert('Failed to update inventory: ' + (err.message || 'Unknown error') + '. PDF will be generated without inventory update.');
+            }
+            
+            // Reload settings from server before generating PDF
+            try {
+                this.state.settings = await Store.getSettingsAsync();
+            } catch (err) {
+                console.error('Failed to reload settings:', err);
             }
             
             const fullDoc = { ...this.state.currentDoc, business: this.state.settings };

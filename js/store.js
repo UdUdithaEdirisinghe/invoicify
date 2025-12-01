@@ -16,21 +16,20 @@ export default class Store {
     static async getSettingsAsync() {
         if (Api.isAuthenticated()) {
             try {
-                const response = await Api.getSettings();
-                const settings = response.settings;
+                const settings = await Api.getSettings();
                 // Map API response to local format
                 const localSettings = {
-                    name: settings.businessName,
-                    address: settings.address,
-                    email: settings.email,
-                    phone: settings.phone,
-                    currency: settings.currency,
-                    themeColor: settings.themeColor,
-                    logoUrl: settings.logoUrl,
-                    bankName: settings.bankName,
-                    branch: settings.bankBranch,
-                    accountNo: settings.bankAccountNo,
-                    showBankDetails: settings.showBankDetails
+                    name: settings.businessName || '',
+                    address: settings.address || '',
+                    email: settings.email || '',
+                    phone: settings.phone || '',
+                    currency: settings.currency || 'LKR',
+                    themeColor: settings.themeColor || '#2563eb',
+                    logoUrl: settings.logo || '', // API uses 'logo', local uses 'logoUrl'
+                    bankName: settings.bankName || '',
+                    branch: settings.bankBranch || '',
+                    accountNo: settings.bankAccount || '', // API uses 'bankAccount', local uses 'accountNo'
+                    showBankDetails: settings.showBankDetails || false
                 };
                 // Cache locally
                 localStorage.setItem(DB_KEYS.SETTINGS, JSON.stringify(localSettings));
@@ -55,17 +54,17 @@ export default class Store {
             try {
                 // Map to API format
                 await Api.saveSettings({
-                    businessName: settings.name,
-                    address: settings.address,
-                    email: settings.email,
-                    phone: settings.phone,
-                    currency: settings.currency,
-                    themeColor: settings.themeColor,
-                    logoUrl: settings.logoUrl,
-                    bankName: settings.bankName,
-                    bankBranch: settings.branch,
-                    bankAccountNo: settings.accountNo,
-                    showBankDetails: settings.showBankDetails
+                    businessName: settings.name || '',
+                    address: settings.address || '',
+                    email: settings.email || '',
+                    phone: settings.phone || '',
+                    currency: settings.currency || 'LKR',
+                    themeColor: settings.themeColor || '#2563eb',
+                    logo: settings.logoUrl || '', // Local uses 'logoUrl', API uses 'logo'
+                    bankName: settings.bankName || '',
+                    bankBranch: settings.branch || '',
+                    bankAccount: settings.accountNo || '', // Local uses 'accountNo', API uses 'bankAccount'
+                    showBankDetails: settings.showBankDetails !== undefined ? settings.showBankDetails : false
                 });
                 return { success: true, remote: true };
             } catch (error) {
