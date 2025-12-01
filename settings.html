@@ -548,7 +548,6 @@
     // Check authentication first
     if (!ApiClient.isAuthenticated()) {
         window.location.replace('/login.html');
-        throw new Error('Not authenticated');
     }
     
     // Make ApiClient available globally for inline script
@@ -558,6 +557,11 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', async () => {
+      // Recheck auth after DOM loads
+      if (!ApiClient.isAuthenticated()) {
+        window.location.replace('/login.html');
+        return;
+      }
       // Setup logout button with unified implementation
       const logoutBtn = document.querySelector('.logout-btn');
       if (logoutBtn) {
@@ -644,7 +648,13 @@
       });
 
       // Change password button
-      document.getElementById('change-password-btn').addEventListener('click', handlePasswordChange);
+      const changePasswordBtn = document.getElementById('change-password-btn');
+      if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', handlePasswordChange);
+        console.log('✓ Change password button listener attached');
+      } else {
+        console.error('❌ Change password button not found!');
+      }
     }
 
     async function handleSubmit(e) {
@@ -728,9 +738,17 @@
     }
 
     async function handlePasswordChange() {
+      console.log('🔐 Change password clicked');
+      
       const currentPassword = document.getElementById('current-password').value.trim();
       const newPassword = document.getElementById('new-password').value.trim();
       const confirmPassword = document.getElementById('confirm-password').value.trim();
+
+      console.log('Password fields:', {
+        current: currentPassword ? '***filled***' : 'empty',
+        new: newPassword ? '***filled***' : 'empty', 
+        confirm: confirmPassword ? '***filled***' : 'empty'
+      });
 
       // Enhanced validation with specific feedback
       if (!currentPassword) {
