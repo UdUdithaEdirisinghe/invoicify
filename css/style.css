@@ -939,7 +939,7 @@ tbody tr.low-stock:hover { background: #f9fafb; }
 
 .sidebar-nav {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: hidden;
     padding: 16px 0;
 }
 
