@@ -537,12 +537,13 @@
     <div class="loading-spinner"></div>
   </div>
 
-  <script src="./js/api-client.js"></script>
-  <script src="./js/store.js"></script>
   <script type="module">
     import Store from './js/store.js';
+    import ApiClient from './js/api-client.js';
     
-    const ApiClient = new APIClient();
+    // Make ApiClient available globally for inline script
+    window.ApiClientInstance = new ApiClient();
+    
     let currentSettings = {};
 
     // Logout functionality
@@ -733,7 +734,7 @@
 
       try {
         showLoading(true);
-        const response = await fetch('/api/auth/change-password', {
+        const response = await fetch('/api/auth?action=change-password', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
