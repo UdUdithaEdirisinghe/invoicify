@@ -1,6 +1,9 @@
-const sql = require('../db');
+import { sql } from '@vercel/postgres';
+import jwt from 'jsonwebtoken';
 
-module.exports = async (req, res) => {
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+
+export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,12 +23,9 @@ module.exports = async (req, res) => {
   const token = authHeader.substring(7);
   
   try {
-    // Simple token validation - in production, use proper JWT validation
-    if (!token) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-
-    const userId = 1; // In production, extract from JWT token
+    // Verify JWT token
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userId = decoded.userId;
 
     if (req.method === 'GET') {
       // Get user settings
@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
         WHERE user_id = ${userId}
       `;
 
-      if (result.length === 0) {
+      if (result.rows.length === 0) {
         // Return default settings
         return res.status(200).json({
           businessName: '',
@@ -52,20 +52,20 @@ module.exports = async (req, res) => {
         });
       }
 
-      return res.status(200).json(result[0].settings_data);
+      return res.status(200).json(result.rows[0].settings_data);
     }
 
     if (req.method === 'POST' || req.method === 'PUT') {
       // Save user settings
       const settings = req.body;
 
-      // Upsert settings
+      // Upsert settings using JSONB
       await sql`
         INSERT INTO user_settings (user_id, settings_data, updated_at)
-        VALUES (${userId}, ${sql.json(settings)}, NOW())
+        VALUES (${userId}, ${JSON.stringify(settings)}, NOW())
         ON CONFLICT (user_id)
         DO UPDATE SET
-          settings_data = ${sql.json(settings)},
+          settings_data = ${JSON.stringify(settings)},
           updated_at = NOW()
       `;
 
@@ -77,6 +77,21 @@ module.exports = async (req, res) => {
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
+
+  } catch (error) {
+    console.error('Settings API error:', error);
+    
+    // Handle JWT errors
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+    
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+}
 
   } catch (error) {
     console.error('Settings API Error:', error);
