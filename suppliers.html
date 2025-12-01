@@ -384,29 +384,6 @@
         if (currentStatus) params.status = currentStatus;
 
         const response = await ApiClient.getSuppliers(params);
-        const { suppliers, pagination } = response;
-
-        if (suppliers.length === 0 && currentPage === 0 && !currentSearch && !currentStatus) {
-          emptyState.style.display = 'flex';
-          loading.style.display = 'none';
-          return;
-        }
-
-        renderSuppliers(suppliers);
-        updatePagination(pagination);
-
-        loading.style.display = 'none';
-        table.style.display = 'block';
-      try {
-        const params = {
-          limit: currentLimit,
-          offset: currentPage * currentLimit
-        };
-
-        if (currentSearch) params.search = currentSearch;
-        if (currentStatus) params.status = currentStatus;
-
-        const response = await ApiClient.getSuppliers(params);
         const suppliers = response.suppliers || response.data || [];
         const pagination = response.pagination || { total: suppliers.length, hasMore: false };
 

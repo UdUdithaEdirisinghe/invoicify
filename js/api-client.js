@@ -121,14 +121,14 @@ class ApiClient {
 
   async getInvoice(id) {
     return await this.request(`/api/invoices?id=${id}`, {
-        async updateInvoice(id, invoiceData) {
-          return await this.request(`/api/invoices?id=${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(invoiceData)
-          });
-        }
-
       method: 'GET'
+    });
+  }
+
+  async updateInvoice(id, invoiceData) {
+    return await this.request(`/api/invoices?id=${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(invoiceData)
     });
   }
 
