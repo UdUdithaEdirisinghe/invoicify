@@ -939,8 +939,14 @@ tbody tr.low-stock:hover { background: #f9fafb; }
 
 .sidebar-nav {
     flex: 1;
-    overflow-y: hidden;
+    overflow-y: auto;
     padding: 16px 0;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 .sidebar-footer {
