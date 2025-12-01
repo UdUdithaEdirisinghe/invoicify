@@ -147,6 +147,12 @@
     <script type="module">
         import ApiClient from './js/api-client.js';
 
+        // Check authentication
+        if (!ApiClient.isAuthenticated()) {
+            window.location.replace('/login.html');
+            throw new Error('Not authenticated');
+        }
+
         // Set default dates (last 30 days)
         const now = new Date();
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -563,8 +569,11 @@
 
         window.logout = () => {
             if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('token');
-                window.location.href = './login.html';
+                // Clear all storage
+                localStorage.clear();
+                sessionStorage.clear();
+                // Redirect to login
+                window.location.replace('./login.html');
             }
         };
 

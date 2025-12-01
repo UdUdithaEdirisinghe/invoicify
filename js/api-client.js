@@ -25,6 +25,8 @@ class ApiClient {
 
   removeToken() {
     localStorage.removeItem('auth_token');
+    // Also clear any cached user data
+    sessionStorage.clear();
   }
 
   getAuthHeaders() {
@@ -51,11 +53,26 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Request failed');
+        // Handle 401 Unauthorized - auto logout
+        if (response.status === 401) {
+          console.warn('Session expired or invalid token');
+          this.removeToken();
+          // Only redirect to login if not already on auth pages
+          if (!window.location.pathname.includes('login') && 
+              !window.location.pathname.includes('register')) {
+            window.location.replace('/login.html');
+          }
+        }
+        throw new Error(data.error || `Request failed with status ${response.status}`);
       }
 
       return data;
     } catch (error) {
+      // Network errors or JSON parsing errors
+      if (error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
+        console.error('Network error - server may be unreachable:', error);
+        throw new Error('Unable to connect to server. Please check your connection.');
+      }
       console.error('API request failed:', error);
       throw error;
     }
@@ -101,7 +118,8 @@ class ApiClient {
 
   logout() {
     this.removeToken();
-    window.location.href = '/login.html';
+    // Use replace to prevent back button issues
+    window.location.replace('/login.html');
   }
 
   // Invoice endpoints

@@ -40,11 +40,30 @@
         import { setupLoginForm } from './js/auth.js';
         import ApiClient from './js/api-client.js';
 
-        // Redirect if already logged in
-        if (ApiClient.isAuthenticated()) {
-            window.location.href = '/dashboard.html';
+        // Redirect if already logged in - but wait for DOM to be ready
+        // This prevents race conditions during logout
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkAuthAndInit);
         } else {
-            setupLoginForm();
+            checkAuthAndInit();
+        }
+
+        function checkAuthAndInit() {
+            // Double-check token is valid before redirecting
+            if (ApiClient.isAuthenticated()) {
+                // Verify token with server before redirecting
+                ApiClient.verifyToken()
+                    .then(() => {
+                        window.location.replace('/dashboard.html');
+                    })
+                    .catch(() => {
+                        // Token invalid, stay on login page
+                        ApiClient.removeToken();
+                        setupLoginForm();
+                    });
+            } else {
+                setupLoginForm();
+            }
         }
     </script>
 </body>

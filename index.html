@@ -179,6 +179,9 @@
             </section>
         </main>
     </div>
+    <div id="toast" class="toast"></div>
+    <div id="product-error" class="alert" style="display:none"></div>
+    <div id="product-empty" class="empty" style="display:none">No products available yet.</div>
     <script type="module">
         // Protect this page - redirect to login if not authenticated
         import ApiClient from './js/api-client.js';
@@ -186,7 +189,7 @@
         import './js/layout.js';
         
         if (!ApiClient.isAuthenticated()) {
-            window.location.href = '/login.html';
+            window.location.replace('/login.html');
         }
         setupLogout(); // ensure logout binding even if layout injection delayed
     </script>

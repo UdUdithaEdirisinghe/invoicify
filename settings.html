@@ -541,6 +541,12 @@
     import Store from './js/store.js';
     import ApiClient from './js/api-client.js';
     
+    // Check authentication first
+    if (!ApiClient.isAuthenticated()) {
+        window.location.replace('/login.html');
+        throw new Error('Not authenticated');
+    }
+    
     // Make ApiClient available globally for inline script
     window.ApiClientInstance = new ApiClient();
     
@@ -548,13 +554,16 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', async () => {
-      // Setup logout button
+      // Setup logout button with unified implementation
       const logoutBtn = document.querySelector('.logout-btn');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
           if (confirm('Are you sure you want to logout?')) {
-            localStorage.removeItem('token');
-            window.location.href = '/login.html';
+            // Clear all storage for clean logout
+            localStorage.clear();
+            sessionStorage.clear();
+            // Redirect to login using replace to prevent back button issues
+            window.location.replace('/login.html');
           }
         });
       }
@@ -741,7 +750,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           },
           body: JSON.stringify({
             currentPassword,

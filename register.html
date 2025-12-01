@@ -103,7 +103,7 @@
 
         // Redirect if already logged in
         if (ApiClient.isAuthenticated()) {
-            window.location.href = '/dashboard.html';
+            window.location.replace('/dashboard.html');
         } else {
             setupRegisterForm();
         }

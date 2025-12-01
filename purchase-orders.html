@@ -347,6 +347,12 @@
         let products = [];
         let lineItemCounter = 0;
 
+        // Check authentication before initializing
+        if (!ApiClient.isAuthenticated()) {
+            window.location.replace('/login.html');
+            throw new Error('Not authenticated');
+        }
+
         // Initialize
         async function init() {
             await loadSuppliers();
@@ -815,8 +821,11 @@
 
         window.logout = () => {
             if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('token');
-                window.location.href = './login.html';
+                // Clear all storage
+                localStorage.clear();
+                sessionStorage.clear();
+                // Redirect to login
+                window.location.replace('./login.html');
             }
         };
 

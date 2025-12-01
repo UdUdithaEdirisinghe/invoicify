@@ -269,7 +269,7 @@
 
   <script type="module">
     import ApiClient from './js/api-client.js';
-    import { injectSidebar } from './js/layout.js';
+    import './js/layout.js';
 
     let revenueChart, statusChart;
     let currentInvoices = [];
@@ -277,10 +277,9 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', async () => {
-      await injectSidebar('sales');
-      
+      // Auth check
       if (!ApiClient.isAuthenticated()) {
-        window.location.href = '/login.html';
+        window.location.replace('/login.html');
         return;
       }
 

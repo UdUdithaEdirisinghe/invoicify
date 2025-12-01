@@ -3,7 +3,7 @@ import ApiClient from './api-client.js';
 // Auth guard - redirect to login if not authenticated
 export function requireAuth() {
   if (!ApiClient.isAuthenticated()) {
-    window.location.href = '/login.html';
+    window.location.replace('/login.html');
     return false;
   }
   return true;
@@ -45,8 +45,8 @@ export function setupLoginForm() {
 
       await ApiClient.login(username, password);
       
-      // Redirect to dashboard
-      window.location.href = '/dashboard.html';
+      // Redirect to dashboard using replace to prevent back button issues
+      window.location.replace('/dashboard.html');
     } catch (error) {
       showError(error.message || 'Login failed. Please check your credentials.');
       submitBtn.disabled = false;
@@ -152,8 +152,8 @@ export function setupRegisterForm() {
       };
       localStorage.setItem('invoicify_settings', JSON.stringify(localSettings));
       
-      // Redirect to dashboard
-      window.location.href = '/dashboard.html';
+      // Redirect to dashboard using replace to prevent back button issues
+      window.location.replace('/dashboard.html');
     } catch (error) {
       showError(error.message || 'Registration failed. Username may already exist.');
       submitBtn.disabled = false;
@@ -167,15 +167,25 @@ export function setupRegisterForm() {
   }
 }
 
-// Logout handler
-
-// Logout handler
+// Logout handler - unified across all pages
 export function setupLogout() {
-  const logoutBtns = document.querySelectorAll('.logout-btn, [data-logout]');
+  // Remove duplicate comment and ensure proper cleanup
+  const logoutBtns = document.querySelectorAll('.logout-btn, [data-logout], #btn-logout');
   logoutBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    // Remove any existing listeners to prevent duplicates
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode?.replaceChild(newBtn, btn);
+    
+    newBtn.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      
       if (confirm('Are you sure you want to log out?')) {
+        // Clear all local data
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Then use ApiClient logout which redirects
         ApiClient.logout();
       }
     });

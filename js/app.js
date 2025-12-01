@@ -107,7 +107,7 @@ class App {
 
         document.getElementById('btn-save').addEventListener('click', async () => {
             const res = await Store.saveDocumentAsync(this.state.currentDoc);
-            alert(res.remote ? 'Saved to cloud!' : 'Draft Saved locally!');
+            this.showToast(res.remote ? 'Saved to cloud!' : 'Draft Saved locally!', 'success');
             if (res.remote) {
                 window.location.href = '/dashboard.html';
             } else {
@@ -174,7 +174,7 @@ class App {
                 }
             } catch (err) {
                 console.error('Inventory deduction failed:', err);
-                alert('Failed to update inventory: ' + (err.message || 'Unknown error') + '. PDF will be generated without inventory update.');
+                this.showToast('Failed to update inventory: ' + (err.message || 'Unknown error'), 'warning');
             }
             
             // Reload settings from server before generating PDF
@@ -186,7 +186,7 @@ class App {
             
             const fullDoc = { ...this.state.currentDoc, business: this.state.settings };
             PdfGenerator.generate(fullDoc);
-            alert(inventoryUpdated ? 'PDF generated and inventory updated!' : 'PDF generated (inventory update failed)');
+            this.showToast(inventoryUpdated ? 'PDF generated and inventory updated!' : 'PDF generated successfully!', 'success');
         });
 
         document.getElementById('btn-save-settings').addEventListener('click', async () => {
@@ -213,7 +213,7 @@ class App {
             this.state.settings = settings;
             this.applyTheme(settings.themeColor);
             document.getElementById('logo-preview').src = settings.logoUrl || '';
-            alert(result.remote ? 'Settings saved to cloud!' : 'Settings saved locally');
+            this.showToast(result.remote ? 'Settings saved to cloud!' : 'Settings saved locally', 'success');
             this.renderPreview(); 
         });
 
@@ -726,6 +726,16 @@ class App {
             this.renderCustomers(); 
         } catch (err) {
             console.warn('Failed to load customers:', err);
+        }
+    }
+
+    // Toast notification helper
+    showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        if (toast) {
+            toast.textContent = message;
+            toast.className = `toast toast-${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
     }
 }
