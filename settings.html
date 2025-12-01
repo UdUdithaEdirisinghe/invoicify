@@ -653,14 +653,21 @@
       console.log('🔍 Looking for change password button...');
       const changePasswordBtn = document.getElementById('change-password-btn');
       console.log('Button element:', changePasswordBtn);
+      console.log('Button type:', changePasswordBtn?.type);
+      console.log('Button parent:', changePasswordBtn?.parentElement?.tagName);
+      
       if (changePasswordBtn) {
-        try {
-          changePasswordBtn.addEventListener('click', handlePasswordChange);
-          console.log('✓ Change password button listener attached successfully');
-          console.log('Button onclick:', changePasswordBtn.onclick);
-        } catch (err) {
-          console.error('❌ Error attaching listener:', err);
-        }
+        // Remove any existing listeners
+        const newBtn = changePasswordBtn.cloneNode(true);
+        changePasswordBtn.parentNode.replaceChild(newBtn, changePasswordBtn);
+        
+        newBtn.addEventListener('click', function(e) {
+          console.log('🚨 BUTTON CLICKED!', e);
+          e.preventDefault();
+          e.stopPropagation();
+          handlePasswordChange();
+        });
+        console.log('✓ Change password button listener attached successfully');
       } else {
         console.error('❌ Change password button not found in DOM!');
       }

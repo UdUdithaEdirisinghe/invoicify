@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Change Password API</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto; }
+        input { display: block; width: 100%; padding: 10px; margin: 10px 0; }
+        button { padding: 12px 24px; background: #3b82f6; color: white; border: none; cursor: pointer; }
+        #result { margin-top: 20px; padding: 15px; border-radius: 8px; white-space: pre-wrap; }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <h1>Test Change Password API</h1>
+    
+    <h3>Step 1: Login First</h3>
+    <input type="email" id="login-email" placeholder="Email" value="udithaedirisinghe69@gmail.com">
+    <input type="password" id="login-password" placeholder="Password" value="test123">
+    <button onclick="testLogin()">Login</button>
+    
+    <h3>Step 2: Change Password</h3>
+    <input type="password" id="current" placeholder="Current Password" value="test123">
+    <input type="password" id="new" placeholder="New Password" value="newpass123">
+    <button onclick="testChangePassword()">Test Change Password</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        let authToken = localStorage.getItem('auth_token');
+        
+        async function testLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const result = document.getElementById('result');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/auth?action=login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('auth_token', authToken);
+                    result.className = 'success';
+                    result.textContent = '✓ Login successful!\nToken: ' + authToken.substring(0, 20) + '...';
+                } else {
+                    result.className = 'error';
+                    result.textContent = '✗ Login failed: ' + data.error;
+                }
+            } catch (error) {
+                result.className = 'error';
+                result.textContent = '✗ Error: ' + error.message;
+            }
+        }
+        
+        async function testChangePassword() {
+            const current = document.getElementById('current').value;
+            const newPass = document.getElementById('new').value;
+            const result = document.getElementById('result');
+            
+            if (!authToken) {
+                result.className = 'error';
+                result.textContent = '✗ Please login first!';
+                return;
+            }
+            
+            result.textContent = 'Testing...\n\nURL: http://localhost:3000/api/auth?action=change-password\n' +
+                                'Method: POST\n' +
+                                'Token: ' + authToken.substring(0, 20) + '...\n' +
+                                'Body: ' + JSON.stringify({currentPassword: current, newPassword: newPass}, null, 2);
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/auth?action=change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + authToken
+                    },
+                    body: JSON.stringify({
+                        currentPassword: current,
+                        newPassword: newPass
+                    })
+                });
+                
+                const data = await response.json();
+                
+                result.textContent += '\n\n--- RESPONSE ---\n';
+                result.textContent += 'Status: ' + response.status + ' ' + response.statusText + '\n';
+                result.textContent += 'Response: ' + JSON.stringify(data, null, 2);
+                
+                if (response.ok) {
+                    result.className = 'success';
+                } else {
+                    result.className = 'error';
+                }
+            } catch (error) {
+                result.className = 'error';
+                result.textContent += '\n\n✗ Error: ' + error.message;
+                console.error('Full error:', error);
+            }
+        }
+        
+        // Show current token on load
+        if (authToken) {
+            document.getElementById('result').textContent = 'Found token in localStorage:\n' + authToken.substring(0, 50) + '...';
+            document.getElementById('result').className = 'success';
+        }
+    </script>
+</body>
+</html>
