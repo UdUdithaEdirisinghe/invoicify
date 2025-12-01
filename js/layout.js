@@ -30,7 +30,7 @@ function buildSidebar() {
     }
     html += '</div>';
   }
-  html += '</nav><div class="sidebar-footer"><button class="btn btn-secondary btn-block logout-btn"><i class="ph ph-sign-out"></i><span>Logout</span></button></div>';
+  html += '</nav><div class="sidebar-footer"><button class="btn btn-danger btn-block logout-btn"><i class="ph ph-sign-out"></i><span>Logout</span></button></div>';
   return html;
 }
 
