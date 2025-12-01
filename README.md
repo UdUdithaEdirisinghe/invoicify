@@ -56,6 +56,18 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 npm run dev
 ```
 
+### Environment Variables
+
+Create a local env file by copying `.env.example` to `.env.local` and filling in your own values:
+
+```bash
+Copy-Item .env.example .env.local
+# then edit .env.local with your POSTGRES_URL and JWT_SECRET
+```
+
+Secrets should never be committed. The repository already ignores `.env`, `.env.local`, and `.env*.local`.
+
+For production (Vercel), set the same variables in Project Settings → Environment Variables.
 Open `http://localhost:3000/`
 
 ### 5. Deploy to Vercel
