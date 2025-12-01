@@ -7,22 +7,6 @@
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css">
   <link rel="stylesheet" href="./css/style.css">
   <style>
-    body {
-      background: #f8fafc;
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      overflow-y: auto;
-    }
-
-    .settings-container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 24px;
-      padding-bottom: 80px;
-      margin-left: 280px;
-    }
-
     .settings-header {
       margin-bottom: 32px;
     }
@@ -296,11 +280,6 @@
     }
 
     @media (max-width: 768px) {
-      .settings-container {
-        margin-left: 0;
-        padding-top: 80px;
-      }
-
       .form-row {
         grid-template-columns: 1fr;
       }
@@ -404,13 +383,13 @@
     </aside>
 
     <!-- Main Content -->
-    <div class="settings-container">
-    <div class="settings-header">
-      <h1><i class="ph ph-gear"></i> Settings</h1>
-      <p>Manage your business information and preferences</p>
-    </div>
+    <main class="main-content">
+      <div class="settings-header">
+        <h1><i class="ph ph-gear"></i> Settings</h1>
+        <p>Manage your business information and preferences</p>
+      </div>
 
-    <div class="settings-card">
+      <div class="settings-card">
       <form id="settings-form">
         <!-- Branding Section -->
         <div class="settings-section">
@@ -523,8 +502,8 @@
         </div>
       </form>
     </div>
-  </div>
-  
+    </main>
+    
   </div><!-- Close app-container -->
 
   <div class="loading-overlay" id="loading-overlay">
