@@ -539,7 +539,9 @@
 
   <script src="./js/api-client.js"></script>
   <script src="./js/store.js"></script>
-  <script>
+  <script type="module">
+    import Store from './js/store.js';
+    
     const ApiClient = new APIClient();
     let currentSettings = {};
 
@@ -560,19 +562,23 @@
     async function loadSettings() {
       try {
         showLoading(true);
-        const settings = await ApiClient.getSettings();
-        currentSettings = settings;
-        populateForm(settings);
+        // Load from Store which syncs with server
+        currentSettings = await Store.getSettingsAsync();
+        populateForm(currentSettings);
       } catch (error) {
         console.error('Failed to load settings:', error);
-        showToast('Failed to load settings', 'error');
+        // Fallback to local settings
+        currentSettings = Store.getSettings();
+        populateForm(currentSettings);
+        showToast('Loaded local settings (offline mode)', 'info');
       } finally {
         showLoading(false);
       }
     }
 
     function populateForm(settings) {
-      document.getElementById('business-name').value = settings.businessName || '';
+      // Map Store format to form fields
+      document.getElementById('business-name').value = settings.name || '';
       document.getElementById('business-address').value = settings.address || '';
       document.getElementById('business-phone').value = settings.phone || '';
       document.getElementById('business-email').value = settings.email || '';
@@ -582,13 +588,13 @@
       document.getElementById('theme-color-picker').value = themeColor;
       document.getElementById('theme-color-text').value = themeColor;
       
-      document.getElementById('show-bank-details').checked = settings.showBankDetails || false;
+      document.getElementById('show-bank-details').checked = settings.showBankDetails !== false;
       document.getElementById('bank-name').value = settings.bankName || '';
-      document.getElementById('bank-branch').value = settings.bankBranch || '';
-      document.getElementById('bank-account').value = settings.bankAccount || '';
+      document.getElementById('bank-branch').value = settings.branch || '';
+      document.getElementById('bank-account').value = settings.accountNo || '';
 
-      if (settings.logo) {
-        showLogoPreview(settings.logo);
+      if (settings.logoUrl) {
+        showLogoPreview(settings.logoUrl);
       }
     }
 
@@ -627,8 +633,9 @@
     async function handleSubmit(e) {
       e.preventDefault();
 
+      // Map form fields to Store format
       const settings = {
-        businessName: document.getElementById('business-name').value,
+        name: document.getElementById('business-name').value,
         address: document.getElementById('business-address').value,
         phone: document.getElementById('business-phone').value,
         email: document.getElementById('business-email').value,
@@ -636,16 +643,22 @@
         themeColor: document.getElementById('theme-color-picker').value,
         showBankDetails: document.getElementById('show-bank-details').checked,
         bankName: document.getElementById('bank-name').value,
-        bankBranch: document.getElementById('bank-branch').value,
-        bankAccount: document.getElementById('bank-account').value,
-        logo: currentSettings.logo || ''
+        branch: document.getElementById('bank-branch').value,
+        accountNo: document.getElementById('bank-account').value,
+        logoUrl: currentSettings.logoUrl || ''
       };
 
       try {
         showLoading(true);
-        await ApiClient.saveSettings(settings);
+        // Save using Store which syncs with server
+        const result = await Store.saveSettingsAsync(settings);
         currentSettings = settings;
-        showToast('Settings saved successfully', 'success');
+        
+        if (result.remote) {
+          showToast('Settings saved successfully to server', 'success');
+        } else {
+          showToast('Settings saved locally (offline mode)', 'success');
+        }
       } catch (error) {
         console.error('Failed to save settings:', error);
         showToast('Failed to save settings', 'error');
@@ -673,7 +686,7 @@
       const reader = new FileReader();
       reader.onload = (event) => {
         const logoData = event.target.result;
-        currentSettings.logo = logoData;
+        currentSettings.logoUrl = logoData;
         showLogoPreview(logoData);
         showToast('Logo uploaded. Click "Save Settings" to persist.', 'info');
       };
@@ -688,7 +701,7 @@
     }
 
     function removeLogo() {
-      currentSettings.logo = '';
+      currentSettings.logoUrl = '';
       const previewBox = document.getElementById('logo-preview-box');
       previewBox.innerHTML = 'No logo';
       previewBox.classList.add('empty');
@@ -778,32 +791,30 @@
         setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
-
-    // Add CSS animations
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes slideIn {
-        from {
-          transform: translateX(400px);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
-      @keyframes slideOut {
-        from {
-          transform: translateX(0);
-          opacity: 1;
-        }
-        to {
-          transform: translateX(400px);
-          opacity: 0;
-        }
-      }
-    `;
-    document.head.appendChild(style);
   </script>
+
+  <!-- Add CSS animations -->
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  </style>
 </body>
 </html>
