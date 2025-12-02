@@ -278,6 +278,16 @@ button:disabled {
 .btn i {
     font-size: 16px;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1em; /* lock to text line height for perfect centering */
+    vertical-align: middle;
+}
+
+/* Nudge plus icon by 1px to counter font metrics and ensure perfect visual centering */
+.btn i.ph-plus {
+    transform: translateY(1px);
 }
 .btn-primary { 
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
