@@ -1401,6 +1401,11 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 #products-tbody .row-menu .menu-item.danger { color: #b91c1c; }
 #products-tbody .row-menu .menu-item.danger i { color: #dc2626; }
 
+/* Icon-only compact dropdown */
+#products-tbody .row-menu.compact { min-width: auto; padding: 6px; }
+#products-tbody .row-menu.compact .menu-item { padding: 8px; justify-content: center; }
+#products-tbody .row-menu.compact .menu-item span { display: none; }
+
 /* Slightly tighter rows for inventory list */
 #products-tbody td { padding-top: 14px; padding-bottom: 14px; }
 
