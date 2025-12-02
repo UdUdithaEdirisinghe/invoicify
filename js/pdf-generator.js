@@ -179,10 +179,7 @@ export default class PdfGenerator {
         // --- Footer Rows Construction ---
         const footerRows = [];
         
-        // 1. Spacer Row (Small gap before totals)
-        footerRows.push([{ content: '', colSpan: 5, styles: { cellPadding: 2, lineWidth: 0 } }]);
-        
-        // 2. Sub Total (Clean, No Borders)
+        // Sub Total (Clean, No Borders) - removed spacer row for tighter layout
         footerRows.push([
             { content: 'Sub Total', colSpan: 4, styles: { halign: 'right', fontStyle: 'normal', lineWidth: 0 } }, 
             { content: docData.totals.subtotal.toFixed(2), styles: { halign: 'right', fontStyle: 'normal', lineWidth: 0 } }
