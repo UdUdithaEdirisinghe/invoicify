@@ -1193,9 +1193,12 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 }
 
 .empty-state .btn {
-    width: auto;
+    width: auto !important;
+    display: inline-flex !important;
     align-self: center;
     flex-shrink: 0;
+    min-width: auto;
+    max-width: max-content;
 }
 
 /* --- Data Table --- */
