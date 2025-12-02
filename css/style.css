@@ -568,11 +568,17 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     border-bottom: 1px solid var(--border-light);
     position: relative;
 }
-.editor-items-table td:first-child { padding-bottom: 12px; }
-/* Reserve space only when badges are direct children (legacy layout) */
-.editor-items-table td:first-child:has(> .badge-low),
-.editor-items-table td:first-child:has(> .badge-out),
-.editor-items-table td:first-child:has(> .stock-badge) { padding-bottom: 36px; }
+.editor-items-table td:first-child { padding-bottom: 8px; }
+/* Place stock/duplicate badges directly under the item input without forcing extra row height */
+.editor-items-table .item-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+.editor-items-table .item-cell .stock-badge,
+.editor-items-table .item-cell .badge-low,
+.editor-items-table .item-cell .badge-out,
+.editor-items-table .item-cell .duplicate-badge { align-self: flex-start; }
 .editor-items-table tbody tr:hover {
     background: var(--primary-subtle);
 }

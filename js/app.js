@@ -302,8 +302,10 @@ class App {
 
             tr.innerHTML = `
                 <td>
-                    <div class="line-item-input-wrap">
-                        <input type="text" value="${item.name}" data-idx="${index}" data-field="name" placeholder="Type product name..." class="line-item-input ${isDuplicate ? 'duplicate-warning' : ''}" autocomplete="off">
+                    <div class="item-cell">
+                        <div class="line-item-input-wrap">
+                            <input type="text" value="${item.name}" data-idx="${index}" data-field="name" placeholder="Type product name..." class="line-item-input ${isDuplicate ? 'duplicate-warning' : ''}" autocomplete="off">
+                        </div>
                         ${badgeHtml}
                     </div>
                     <div class="product-suggestions" id="suggestions-${index}"></div>
