@@ -87,35 +87,110 @@
             <td>${threshold}</td>
             <td class="actions-cell">
               <div class="actions-row">
-                <button class="icon-btn" data-id="${p.id}" data-action="in" title="Stock In"><i class="ph ph-arrow-up"></i></button>
-                <button class="icon-btn" data-id="${p.id}" data-action="out" title="Stock Out"><i class="ph ph-arrow-down"></i></button>
-                <button class="icon-btn" data-id="${p.id}" data-action="adjust" title="Adjust"><i class="ph ph-sliders"></i></button>
-                <button class="icon-btn danger" data-id="${p.id}" data-action="delete" title="Delete"><i class="ph ph-trash"></i></button>
+                <button class="icon-btn more-btn" data-id="${p.id}" title="Actions" aria-haspopup="menu" aria-expanded="false">
+                  <i class="ph ph-dots-three-outline-vertical"></i>
+                </button>
+                <div class="row-menu" role="menu" hidden>
+                  <button class="menu-item" data-action="in" role="menuitem">
+                    <i class="ph ph-arrow-up"></i>
+                    <span>Stock In</span>
+                  </button>
+                  <button class="menu-item" data-action="out" role="menuitem">
+                    <i class="ph ph-arrow-down"></i>
+                    <span>Stock Out</span>
+                  </button>
+                  <button class="menu-item" data-action="adjust" role="menuitem">
+                    <i class="ph ph-sliders"></i>
+                    <span>Adjust</span>
+                  </button>
+                  <button class="menu-item danger" data-action="delete" role="menuitem">
+                    <i class="ph ph-trash"></i>
+                    <span>Delete</span>
+                  </button>
+                </div>
               </div>
             </td>
           </tr>`;
         }).join('');
 
-        // Delegate actions
-        tbody.querySelectorAll('button').forEach(btn => {
-          btn.addEventListener('click', async (e) => {
-            const id = e.currentTarget.dataset.id;
-            const action = e.currentTarget.dataset.action;
-            if (action === 'delete') {
-              if (!confirm('Delete product?')) return;
-              await ApiClient.deleteProduct(id);
-              await loadProducts();
+        // Update current list reference for delegated handlers
+        currentProductsList = list;
+
+        // Wire delegated handlers once
+        if (!menusWired) {
+          // Toggle/open menu or perform action from menu item
+          tbody.addEventListener('click', async (e) => {
+            const moreBtn = e.target.closest('.more-btn');
+            if (moreBtn) {
+              e.preventDefault();
+              const cell = moreBtn.closest('.actions-cell');
+              const expanded = moreBtn.getAttribute('aria-expanded') === 'true';
+              closeAllMenus();
+              if (!expanded) {
+                cell.classList.add('open');
+                moreBtn.setAttribute('aria-expanded', 'true');
+                const menu = cell.querySelector('.row-menu');
+                if (menu) menu.hidden = false;
+                const firstItem = cell.querySelector('.row-menu .menu-item');
+                if (firstItem) firstItem.focus();
+              }
               return;
             }
-            const current = list.find(x => String(x.id) === String(id));
-            if (!current) return;
-            if (action === 'adjust') {
-              const qtyStr = prompt('Set quantity to:', current.current_quantity);
-              if (qtyStr === null) return;
-              const newQty = parseInt(qtyStr, 10);
-              if (Number.isNaN(newQty) || newQty < 0) return alert('Invalid quantity');
+
+            const itemBtn = e.target.closest('.row-menu .menu-item');
+            if (itemBtn) {
+              e.preventDefault();
+              const cell = itemBtn.closest('.actions-cell');
+              const id = cell.querySelector('.more-btn')?.dataset.id;
+              const action = itemBtn.dataset.action;
+              if (!id || !action) return;
+
+              if (action === 'delete') {
+                if (!confirm('Delete product?')) return closeAllMenus();
+                await ApiClient.deleteProduct(id);
+                closeAllMenus();
+                await loadProducts();
+                return;
+              }
+
+              const current = (currentProductsList || []).find(x => String(x.id) === String(id));
+              if (!current) { closeAllMenus(); return; }
+
+              if (action === 'adjust') {
+                const qtyStr = prompt('Set quantity to:', current.current_quantity);
+                if (qtyStr === null) return closeAllMenus();
+                const newQty = parseInt(qtyStr, 10);
+                if (Number.isNaN(newQty) || newQty < 0) { alert('Invalid quantity'); return closeAllMenus(); }
+                try {
+                  await ApiClient.updateProduct(id, {
+                    name: current.name,
+                    sku: current.sku,
+                    description: current.description,
+                    product_category_id: current.product_category_id,
+                    unit_price: current.unit_price,
+                    cost_price: current.cost_price,
+                    current_quantity: newQty,
+                    stock_threshold: current.stock_threshold
+                  });
+                  closeAllMenus();
+                  await loadProducts();
+                  alert(`Quantity adjusted successfully! New quantity: ${newQty}`);
+                } catch (err) {
+                  console.error('Adjust failed:', err);
+                  alert('Failed to adjust quantity: ' + (err.message || 'Unknown error'));
+                }
+                return;
+              }
+
+              // Stock In / Out
+              const qtyStr = prompt(action === 'in' ? 'Add quantity:' : 'Remove quantity:');
+              if (!qtyStr) { closeAllMenus(); return; }
+              const delta = parseInt(qtyStr, 10);
+              if (Number.isNaN(delta) || delta <= 0) { alert('Invalid quantity'); closeAllMenus(); return; }
+              let newQty = parseInt(current.current_quantity || 0, 10);
+              newQty = action === 'in' ? newQty + delta : Math.max(0, newQty - delta);
               try {
-                await ApiClient.updateProduct(id, { 
+                await ApiClient.updateProduct(id, {
                   name: current.name,
                   sku: current.sku,
                   description: current.description,
@@ -125,40 +200,28 @@
                   current_quantity: newQty,
                   stock_threshold: current.stock_threshold
                 });
+                closeAllMenus();
                 await loadProducts();
-                alert(`Quantity adjusted successfully! New quantity: ${newQty}`);
+                alert(`Stock ${action === 'in' ? 'added' : 'removed'} successfully! New quantity: ${newQty}`);
               } catch (err) {
-                console.error('Adjust failed:', err);
-                alert('Failed to adjust quantity: ' + (err.message || 'Unknown error'));
+                console.error('Stock update failed:', err);
+                alert('Failed to update stock: ' + (err.message || 'Unknown error'));
               }
-              return;
-            }
-            // Stock In / Out
-            const qtyStr = prompt(action === 'in' ? 'Add quantity:' : 'Remove quantity:');
-            if (!qtyStr) return;
-            const delta = parseInt(qtyStr, 10);
-            if (Number.isNaN(delta) || delta <= 0) return alert('Invalid quantity');
-            let newQty = parseInt(current.current_quantity || 0, 10);
-            newQty = action === 'in' ? newQty + delta : Math.max(0, newQty - delta);
-            try {
-              await ApiClient.updateProduct(id, {
-                name: current.name,
-                sku: current.sku,
-                description: current.description,
-                product_category_id: current.product_category_id,
-                unit_price: current.unit_price,
-                cost_price: current.cost_price,
-                current_quantity: newQty,
-                stock_threshold: current.stock_threshold
-              });
-              await loadProducts();
-              alert(`Stock ${action === 'in' ? 'added' : 'removed'} successfully! New quantity: ${newQty}`);
-            } catch (err) {
-              console.error('Stock update failed:', err);
-              alert('Failed to update stock: ' + (err.message || 'Unknown error'));
             }
           });
-        });
+
+          // Close on outside click
+          document.addEventListener('click', (ev) => {
+            if (!ev.target.closest('.actions-cell')) closeAllMenus();
+          });
+
+          // Close on Escape
+          document.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') closeAllMenus();
+          });
+
+          menusWired = true;
+        }
       } catch (err) {
         console.error(err);
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#ef4444;">Failed to load products</td></tr>';
@@ -180,6 +243,20 @@
       form.reset();
       await loadProducts();
     });
+
+    // Track current list + dropdown menu wiring
+    let currentProductsList = [];
+    let menusWired = false;
+
+    function closeAllMenus() {
+      document.querySelectorAll('.actions-cell.open').forEach(cell => {
+        const btn = cell.querySelector('.more-btn');
+        const menu = cell.querySelector('.row-menu');
+        cell.classList.remove('open');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+        if (menu) menu.hidden = true;
+      });
+    }
 
     (async () => {
       const user = await getCurrentUser();

@@ -1298,13 +1298,13 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 
 .data-table tbody tr {
     border-bottom: 1px solid var(--border-light);
+#products-tbody .actions-cell { position: relative; }
 #products-tbody .actions-row {
-    display: inline-flex;        /* behaves like content, not full cell */
-    align-items: center;         /* keep buttons centered vertically */
-    gap: 10px;                   /* even spacing */
-    flex-wrap: nowrap;           /* prevent wrapping when name spans two lines */
-    white-space: nowrap;         /* keep buttons on one line */
-    min-width: 520px;            /* guarantee enough room for 4 buttons */
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    gap: 0;
 }
 #products-tbody .secondary-btn {
     padding: 8px 14px;
@@ -1356,23 +1356,55 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 #products-tbody .icon-btn.danger { color: #b91c1c; border-color: #fca5a5; background: #fff; }
 #products-tbody .icon-btn.danger:hover { background: var(--danger-light); }
 
+/* Dropdown menu for actions */
+#products-tbody .row-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    min-width: 190px;
+    padding: 6px;
+    display: none;
+    z-index: 20;
+}
+#products-tbody .actions-cell.open .row-menu { display: block; animation: fadein 0.12s ease; }
+
+#products-tbody .row-menu .menu-item {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+#products-tbody .row-menu .menu-item i { font-size: 18px; color: var(--text-muted); }
+#products-tbody .row-menu .menu-item:hover { background: var(--bg); }
+#products-tbody .row-menu .menu-item.danger { color: #b91c1c; }
+#products-tbody .row-menu .menu-item.danger i { color: #dc2626; }
+
 /* Slightly tighter rows for inventory list */
 #products-tbody td { padding-top: 14px; padding-bottom: 14px; }
 
 /* Compact actions row for smaller screens */
 @media (max-width: 900px) {
-    #products-tbody .actions-row {
-        gap: 8px;
-        min-width: 360px; /* allow tighter layout while keeping one line */
-    }
+    #products-tbody .actions-row { gap: 0; }
     #products-tbody .secondary-btn,
     #products-tbody .danger-btn {
         padding: 8px 10px;
         font-size: 13px;
     }
-    /* Replace long labels with compact ones using data-action */
-    #products-tbody button[data-action] { position: relative; font-size: 0; }
-    #products-tbody button[data-action]::before {
+    /* Limit compact label rules to icon buttons only */
+    #products-tbody .icon-btn[data-action] { position: relative; font-size: 0; }
+    #products-tbody .icon-btn[data-action]::before {
         font-size: 13px;
         line-height: 1;
         content: attr(data-action);
