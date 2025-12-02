@@ -192,9 +192,9 @@ button:disabled {
 }
 
 .view-header .btn {
-    padding: 8px 18px;
-    font-size: 14px;
-    line-height: 1;
+    padding: 12px 22px;
+    font-size: 15px;
+    line-height: 1.1;
 }
 
 .view-header h1 {
@@ -241,23 +241,24 @@ button:disabled {
 }
 
 .btn { 
-    padding: 10px 20px; 
+    padding: 12px 22px; 
     border-radius: 8px; 
     border: none; 
     cursor: pointer; 
     font-weight: 500; 
-    font-size: 14px; 
+    font-size: 15px; 
     transition: var(--transition);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    line-height: 1;
+    gap: 10px;
+    line-height: 1.1;
     text-decoration: none;
     position: relative;
     overflow: hidden;
     white-space: nowrap;
     vertical-align: middle;
+    min-height: 40px;
 }
 .btn::before {
     content: '';
@@ -1228,9 +1229,9 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     flex-shrink: 0;
     min-width: auto;
     max-width: max-content;
-    padding: 8px 18px !important;
-    line-height: 1 !important;
-    font-size: 14px !important;
+    padding: 12px 22px !important;
+    line-height: 1.1 !important;
+    font-size: 15px !important;
 }
 
 .empty-state .btn i {
