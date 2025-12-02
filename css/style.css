@@ -1203,6 +1203,8 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     flex-shrink: 0;
     min-width: auto;
     max-width: max-content;
+    padding: 8px 18px !important;
+    line-height: 1.4;
 }
 
 /* --- Data Table --- */
