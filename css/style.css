@@ -1300,6 +1300,7 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     gap: 10px;                   /* even spacing */
     flex-wrap: nowrap;           /* prevent wrapping when name spans two lines */
     white-space: nowrap;         /* keep buttons on one line */
+    min-width: 520px;            /* guarantee enough room for 4 buttons */
 }
 #products-tbody .secondary-btn {
     padding: 8px 14px;
@@ -1329,6 +1330,32 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 #products-tbody .danger-btn:hover {
     background: var(--danger-light);
     transform: translateY(-1px);
+}
+
+/* Compact actions row for smaller screens */
+@media (max-width: 900px) {
+    #products-tbody td:last-child {
+        gap: 8px;
+        min-width: 360px; /* allow tighter layout while keeping one line */
+    }
+    #products-tbody .secondary-btn,
+    #products-tbody .danger-btn {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+    /* Replace long labels with compact ones using data-action */
+    #products-tbody button[data-action] { position: relative; font-size: 0; }
+    #products-tbody button[data-action]::before {
+        font-size: 13px;
+        line-height: 1;
+        content: attr(data-action);
+        text-transform: capitalize;
+    }
+    /* Map to friendly short labels */
+    #products-tbody button[data-action="in"]::before { content: "In"; }
+    #products-tbody button[data-action="out"]::before { content: "Out"; }
+    #products-tbody button[data-action="adjust"]::before { content: "Adj"; }
+    #products-tbody button[data-action="delete"]::before { content: "Del"; }
 }
     transition: var(--transition);
 }
