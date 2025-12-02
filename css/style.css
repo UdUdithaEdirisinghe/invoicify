@@ -671,19 +671,19 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 
 .editor-layout { 
     display: grid; 
-    /* Optimal 60/40 split for form/preview - more space for editing */
-    grid-template-columns: 1.5fr 1fr;
-    gap: 40px; 
-    height: calc(100vh - 120px);
+    /* Single-column layout since side preview is removed */
+    grid-template-columns: 1fr;
+    gap: 24px; 
     align-items: start;
 }
 .editor-form { 
-    overflow-y: auto; 
-    padding-right: 20px; 
+    overflow-y: visible; 
+    padding-right: 0; 
     display: flex; 
     flex-direction: column; 
     gap: 20px;
-    max-width: 900px; /* Prevent over-stretching on ultra-wide */
+    max-width: 100%;
+    width: 100%;
 }
 .editor-form::-webkit-scrollbar {
     width: 8px;
@@ -847,19 +847,19 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 /* Optimal desktop layout - spacious yet efficient */
 @media (min-width: 1440px) {
     .editor-layout { 
-        grid-template-columns: 1.6fr 1fr;
-        gap: 48px;
+        grid-template-columns: 1fr;
+        gap: 28px;
     }
     .editor-form {
-        max-width: 1000px;
+        max-width: 100%;
     }
 }
 
 /* When space is somewhat constrained but not mobile */
 @media (max-width: 1360px) and (min-width: 769px) {
     .editor-layout { 
-        grid-template-columns: 1.4fr 1fr;
-        gap: 32px;
+        grid-template-columns: 1fr;
+        gap: 24px;
     }
 }
 
