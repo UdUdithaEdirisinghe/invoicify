@@ -9,99 +9,13 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- Sidebar (same as previous pages) -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h1>Invoicify</h1>
-        <p class="sidebar-subtitle">ERP System</p>
-      </div>
-      
-      <nav class="sidebar-nav">
-        <a href="/dashboard.html" class="nav-item">
-          <i class="ph ph-house"></i>
-          <span>Dashboard</span>
-        </a>
-        
-        <div class="nav-section">
-          <div class="nav-section-title">Sales</div>
-          <a href="/sales.html" class="nav-item">
-            <i class="ph ph-chart-bar"></i>
-            <span>Sales Management</span>
-          </a>
-          <a href="/index.html" class="nav-item">
-            <i class="ph ph-file-text"></i>
-            <span>Invoices</span>
-          </a>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Customers</div>
-          <a href="/customers.html" class="nav-item">
-            <i class="ph ph-users"></i>
-            <span>Customers</span>
-          </a>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Purchases</div>
-          <a href="/suppliers.html" class="nav-item">
-            <i class="ph ph-truck"></i>
-            <span>Suppliers</span>
-          </a>
-          <a href="/purchase-orders.html" class="nav-item">
-            <i class="ph ph-shopping-cart"></i>
-            <span>Purchase Orders</span>
-          </a>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Inventory</div>
-          <a href="/inventory.html" class="nav-item">
-            <i class="ph ph-package"></i>
-            <span>Products</span>
-          </a>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Accounting</div>
-          <a href="/expenses.html" class="nav-item active">
-            <i class="ph ph-receipt"></i>
-            <span>Expenses</span>
-          </a>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">Reports</div>
-          <a href="/reports.html" class="nav-item">
-            <i class="ph ph-chart-line"></i>
-            <span>Reports</span>
-          </a>
-        </div>
-
-        <div class="nav-section">
-          <div class="nav-section-title">System</div>
-          <a href="/settings.html" class="nav-item">
-            <i class="ph ph-gear"></i>
-            <span>Settings</span>
-          </a>
-        </div>
-      </nav>
-
-      <div class="sidebar-footer">
-        <button id="btn-logout" class="btn btn-danger btn-block">
-          <i class="ph ph-sign-out"></i>
-          <span>Logout</span>
-        </button>
-      </div>
-    </aside>
+    <!-- Sidebar -->
+    <aside class="sidebar"><!-- Unified sidebar injected by layout.js --></aside>
 
     <!-- Main Content -->
     <main class="main-content">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Expenses</h1>
-          <p class="page-subtitle">Track and manage business expenses</p>
-        </div>
+      <header class="view-header">
+        <h1>Expenses</h1>
         <div style="display: flex; gap: 12px;">
           <button id="btn-manage-categories" class="btn btn-secondary">
             <i class="ph ph-folders"></i>
@@ -112,7 +26,7 @@
             <span>Add Expense</span>
           </button>
         </div>
-      </div>
+      </header>
 
       <!-- Summary Cards -->
       <div class="stats-grid" id="expense-stats">
@@ -869,5 +783,8 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
   </style>
+
+  <!-- Load layout.js for unified sidebar -->
+  <script src="/js/layout.js"></script>
 </body>
 </html>

@@ -27,14 +27,12 @@
 </head>
 <body>
   <div class="app-container">
-    <aside class="sidebar"></aside>
+    <!-- Sidebar -->
+    <aside class="sidebar"><!-- Unified sidebar injected by layout.js --></aside>
 
     <main class="main-content">
-      <header class="page-header">
-        <div>
-          <h1 class="page-title">Sales Management</h1>
-          <p class="page-subtitle">Track invoices, quotations, payments, and revenue</p>
-        </div>
+      <header class="view-header">
+        <h1>Sales Management</h1>
         <div class="header-actions">
           <button class="btn btn-secondary" onclick="window.location.href='./index.html#editor'">
             <i class="ph ph-file-text"></i> New Quotation
@@ -882,5 +880,8 @@
       }, 3000);
     };
   </script>
+
+  <!-- Load layout.js for unified sidebar -->
+  <script src="/js/layout.js"></script>
 </body>
 </html>
