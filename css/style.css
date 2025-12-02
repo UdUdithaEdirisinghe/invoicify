@@ -278,8 +278,8 @@ button:disabled {
 .btn i {
     font-size: 16px;
     line-height: 1;
-    display: flex;
-    align-items: center;
+    display: inline-block;
+    vertical-align: middle;
 }
 .btn-primary { 
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
