@@ -110,14 +110,12 @@
 
                         <div class="editor-actions">
                             <button class="btn btn-secondary" id="btn-save">Save Draft</button>
+                            <button class="btn btn-secondary" id="btn-preview">Preview</button>
                             <button class="btn btn-primary" id="btn-generate-pdf">Download PDF</button>
                         </div>
                     </div>
 
-                    <!-- Right: Live Preview -->
-                    <div class="editor-preview">
-                        <div id="preview-container"></div>
-                    </div>
+                    <!-- Right: Live Preview removed in favor of modal preview -->
                 </div>
             </section>
 
@@ -166,6 +164,23 @@
                     <button class="btn btn-secondary" id="btn-clear-logo" style="margin-left: 10px;">Remove Logo</button>
                 </div>
             </section>
+
+            <!-- Modal: Preview -->
+            <div id="preview-modal" class="modal">
+                <div class="modal-content modal-large" style="max-width: 900px;">
+                    <div class="modal-header">
+                        <h2>Document Preview</h2>
+                        <button id="preview-close" class="modal-close" title="Close">✕</button>
+                    </div>
+                    <div class="modal-body" id="preview-modal-body" style="display:flex; justify-content:center; align-items:flex-start;">
+                        <!-- .paper pages will be injected here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="preview-close-footer">Close</button>
+                        <button class="btn btn-primary" id="btn-generate-pdf-from-preview">Download PDF</button>
+                    </div>
+                </div>
+            </div>
             
             <!-- VIEW: CUSTOMERS -->
             <section id="view-customers" class="view">

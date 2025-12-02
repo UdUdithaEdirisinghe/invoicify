@@ -222,6 +222,26 @@ class App {
             document.getElementById('logo-preview').src = '';
             document.getElementById('biz-logo').value = '';
         });
+
+        // Modal Preview wiring
+        const previewBtn = document.getElementById('btn-preview');
+        const previewModal = document.getElementById('preview-modal');
+        const previewClose = document.getElementById('preview-close');
+        const previewCloseFooter = document.getElementById('preview-close-footer');
+        const dlFromPreview = document.getElementById('btn-generate-pdf-from-preview');
+        if (previewBtn && previewModal) {
+            previewBtn.addEventListener('click', () => {
+                this.renderPreview('preview-modal-body');
+                previewModal.classList.add('active');
+            });
+        }
+        const closePreview = () => { if (previewModal) previewModal.classList.remove('active'); };
+        if (previewClose) previewClose.addEventListener('click', closePreview);
+        if (previewCloseFooter) previewCloseFooter.addEventListener('click', closePreview);
+        if (dlFromPreview) dlFromPreview.addEventListener('click', () => {
+            const btn = document.getElementById('btn-generate-pdf');
+            if (btn) btn.click();
+        });
     }
 
     readFileAsBase64(file) {
@@ -482,11 +502,12 @@ class App {
         this.renderPreview();
     }
 
-    renderPreview() {
+    renderPreview(targetId) {
         const doc = this.state.currentDoc;
         const settings = this.state.settings;
         const currency = settings.currency || 'LKR';
-        const container = document.getElementById('preview-container');
+        const container = document.getElementById(targetId || 'preview-container');
+        if (!container) return;
         const themeColor = settings.themeColor || '#2563eb';
         container.style.setProperty('--primary', themeColor);
 
