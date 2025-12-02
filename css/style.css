@@ -963,6 +963,7 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     justify-content: center;
     padding: 20px;
     overflow-y: auto;
+    overscroll-behavior: contain; /* keep wheel/scroll within the modal */
 }
 
 .modal.active {
@@ -985,13 +986,14 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     box-shadow: var(--shadow-xl), 0 0 0 1px rgba(0, 0, 0, 0.05);
     width: 100%;
     max-width: 540px;
-    max-height: calc(100vh - 40px);
+    /* Use dynamic viewport units where supported to ensure scrolling works */
+    max-height: calc(100dvh - 40px);
     display: flex;
     flex-direction: column;
     animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     margin: auto;
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* let the body area scroll instead */
 }
 
 .modal-large {
@@ -1053,6 +1055,8 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 .modal-body {
     padding: 28px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     flex: 1 1 auto;
     min-height: 0;
 }
