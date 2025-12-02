@@ -687,6 +687,9 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 .editor-items-table td:nth-child(3),
 .editor-items-table td:nth-child(4) {
     text-align: center;
+    display: flex;
+    align-items: center; /* vertically center when first column grows */
+    justify-content: center;
 }
 .editor-items-table td:nth-child(2) input,
 .editor-items-table td:nth-child(3) input,
@@ -738,20 +741,17 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 }
 
 /* Inline badge inside the input field */
-.line-item-input-wrap { position: relative; }
-.line-item-input-wrap:has(.inline-badge) .line-item-input { padding-right: 150px; }
+.line-item-input-wrap { position: relative; display: flex; flex-direction: column; align-items: stretch; }
+.line-item-input-wrap:has(.inline-badge) .line-item-input { padding-right: 14px !important; }
 .editor-items-table td .line-item-input-wrap .inline-badge {
-    position: absolute;
-    top: 50%;
-    right: 12px;
-    bottom: auto;
-    transform: translateY(-50%);
+    position: static;
+    transform: none;
     pointer-events: none;
-    z-index: 5;
+    z-index: auto;
     font-size: 12px;
     padding: 4px 10px;
-    margin: 0 !important; /* override stock-badge default margin */
-    line-height: 1; /* tighter vertical metrics for perfect centering */
+    margin-top: 6px !important; /* sit just below the input */
+    line-height: 1.2;
 }
 
 .editor-layout { 
@@ -1331,6 +1331,29 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     background: var(--danger-light);
     transform: translateY(-1px);
 }
+
+/* Icon-only compact actions */
+#products-tbody .icon-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    border-radius: var(--radius);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-xs);
+    transition: var(--transition);
+}
+#products-tbody .icon-btn i { font-size: 18px; }
+#products-tbody .icon-btn:hover { background: var(--bg); transform: translateY(-1px); }
+#products-tbody .icon-btn:active { transform: translateY(0); }
+#products-tbody .icon-btn.danger { color: #b91c1c; border-color: #fca5a5; background: #fff; }
+#products-tbody .icon-btn.danger:hover { background: var(--danger-light); }
+
+/* Slightly tighter rows for inventory list */
+#products-tbody td { padding-top: 14px; padding-bottom: 14px; }
 
 /* Compact actions row for smaller screens */
 @media (max-width: 900px) {

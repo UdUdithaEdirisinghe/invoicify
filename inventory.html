@@ -87,10 +87,10 @@
             <td>${threshold}</td>
             <td class="actions-cell">
               <div class="actions-row">
-                <button class="secondary-btn" data-id="${p.id}" data-action="in">Stock In</button>
-                <button class="secondary-btn" data-id="${p.id}" data-action="out">Stock Out</button>
-                <button class="secondary-btn" data-id="${p.id}" data-action="adjust">Adjust</button>
-                <button class="danger-btn" data-id="${p.id}" data-action="delete">Delete</button>
+                <button class="icon-btn" data-id="${p.id}" data-action="in" title="Stock In"><i class="ph ph-arrow-up"></i></button>
+                <button class="icon-btn" data-id="${p.id}" data-action="out" title="Stock Out"><i class="ph ph-arrow-down"></i></button>
+                <button class="icon-btn" data-id="${p.id}" data-action="adjust" title="Adjust"><i class="ph ph-sliders"></i></button>
+                <button class="icon-btn danger" data-id="${p.id}" data-action="delete" title="Delete"><i class="ph ph-trash"></i></button>
               </div>
             </td>
           </tr>`;
