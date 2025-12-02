@@ -1192,6 +1192,10 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     line-height: 1.6;
 }
 
+.empty-state .btn {
+    width: fit-content;
+}
+
 /* --- Data Table --- */
 .data-table {
     width: 100%;
