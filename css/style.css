@@ -1217,6 +1217,7 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 
 .empty-state .btn i {
     font-size: 16px !important;
+    color: white !important;
 }
 
 /* --- Data Table --- */
