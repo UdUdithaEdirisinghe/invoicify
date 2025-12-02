@@ -1168,6 +1168,10 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     text-align: center;
 }
 
+.empty-state > * {
+    width: auto;
+}
+
 .empty-state i {
     font-size: 64px;
     color: var(--text-muted);
