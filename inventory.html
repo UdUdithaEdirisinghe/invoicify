@@ -85,11 +85,13 @@
             <td>LKR ${Number(p.unit_price || 0).toFixed(2)}</td>
             <td>${qtyCell}</td>
             <td>${threshold}</td>
-            <td>
-              <button class="secondary-btn" data-id="${p.id}" data-action="in">Stock In</button>
-              <button class="secondary-btn" data-id="${p.id}" data-action="out">Stock Out</button>
-              <button class="secondary-btn" data-id="${p.id}" data-action="adjust">Adjust</button>
-              <button class="danger-btn" data-id="${p.id}" data-action="delete">Delete</button>
+            <td class="actions-cell">
+              <div class="actions-row">
+                <button class="secondary-btn" data-id="${p.id}" data-action="in">Stock In</button>
+                <button class="secondary-btn" data-id="${p.id}" data-action="out">Stock Out</button>
+                <button class="secondary-btn" data-id="${p.id}" data-action="adjust">Adjust</button>
+                <button class="danger-btn" data-id="${p.id}" data-action="delete">Delete</button>
+              </div>
             </td>
           </tr>`;
         }).join('');

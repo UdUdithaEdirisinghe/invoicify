@@ -1294,8 +1294,8 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 
 .data-table tbody tr {
     border-bottom: 1px solid var(--border-light);
-#products-tbody td:last-child {
-    display: flex;               /* fill cell height for vertical centering */
+#products-tbody .actions-row {
+    display: inline-flex;        /* behaves like content, not full cell */
     align-items: center;         /* keep buttons centered vertically */
     gap: 10px;                   /* even spacing */
     flex-wrap: nowrap;           /* prevent wrapping when name spans two lines */
@@ -1334,7 +1334,7 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 
 /* Compact actions row for smaller screens */
 @media (max-width: 900px) {
-    #products-tbody td:last-child {
+    #products-tbody .actions-row {
         gap: 8px;
         min-width: 360px; /* allow tighter layout while keeping one line */
     }
