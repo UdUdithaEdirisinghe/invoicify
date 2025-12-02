@@ -559,33 +559,39 @@ class App {
         `;
 
         const itemsHtml = doc.items.map((i, idx) => `
-            <tr><td style="text-align: left;">${idx + 1}</td><td style="text-align: left;">${i.name || ''}${i.description ? '<br><small style="color:#666;">' + i.description + '</small>' : ''}</td><td style="text-align: right;">${i.qty}</td><td style="text-align: right;">${Number(i.price).toFixed(2)}</td><td style="text-align: right;">${Number(i.total).toFixed(2)}</td></tr>
+            <tr>
+                <td class="text-center">${idx + 1}</td>
+                <td class="text-left">${i.name || ''}${i.description ? '<br><small style="color:#666;">' + i.description + '</small>' : ''}</td>
+                <td class="text-center">${i.qty}</td>
+                <td class="text-right">${Number(i.price).toFixed(2)}</td>
+                <td class="text-right">${Number(i.total).toFixed(2)}</td>
+            </tr>
         `).join('');
 
         const totalsRowsHtml = `
             <tr>
-                <td colspan="4" style="text-align: right; padding: 6px 10px 6px 0; font-size: 12px; color: #000; font-weight: normal; border-bottom: 1px solid #ddd;">Sub Total</td>
-                <td style="text-align: right; padding: 6px 10px; font-size: 12px; color: #000; font-weight: 500; border-bottom: 1px solid #ddd;">${doc.totals.subtotal.toFixed(2)}</td>
+                <td colspan="4" class="text-right">Sub Total</td>
+                <td class="text-right">${doc.totals.subtotal.toFixed(2)}</td>
             </tr>
             ${doc.totals.tax > 0 ? `<tr>
-                <td colspan="4" style="text-align: right; padding: 6px 10px 6px 0; font-size: 12px; color: #000; font-weight: normal; border-bottom: 1px solid #ddd;">Tax</td>
-                <td style="text-align: right; padding: 6px 10px; font-size: 12px; color: #000; font-weight: 500; border-bottom: 1px solid #ddd;">${doc.totals.tax.toFixed(2)}</td>
+                <td colspan="4" class="text-right">Tax</td>
+                <td class="text-right">${doc.totals.tax.toFixed(2)}</td>
             </tr>` : ''}
             ${doc.totals.discount > 0 ? `<tr>
-                <td colspan="4" style="text-align: right; padding: 6px 10px 6px 0; font-size: 12px; color: #000; font-weight: normal; border-bottom: 1px solid #ddd;">Discount</td>
-                <td style="text-align: right; padding: 6px 10px; font-size: 12px; color: #000; font-weight: 500; border-bottom: 1px solid #ddd;">-${doc.totals.discount.toFixed(2)}</td>
+                <td colspan="4" class="text-right">Discount</td>
+                <td class="text-right">-${doc.totals.discount.toFixed(2)}</td>
             </tr>` : ''}
             ${doc.totals.shipping > 0 ? `<tr>
-                <td colspan="4" style="text-align: right; padding: 6px 10px 6px 0; font-size: 12px; color: #000; font-weight: normal; border-bottom: 1px solid #ddd;">Shipping</td>
-                <td style="text-align: right; padding: 6px 10px; font-size: 12px; color: #000; font-weight: 500; border-bottom: 1px solid #ddd;">${doc.totals.shipping.toFixed(2)}</td>
+                <td colspan="4" class="text-right">Shipping</td>
+                <td class="text-right">${doc.totals.shipping.toFixed(2)}</td>
             </tr>` : ''}
-            <tr>
-                <td colspan="4" style="text-align: right; padding: 8px 10px 8px 0; font-size: 12px; color: #000; font-weight: bold; border-top: 2px solid #333; border-bottom: 1px solid #ddd;">Total</td>
-                <td style="text-align: right; padding: 8px 10px; font-size: 12px; color: #000; font-weight: bold; border-top: 2px solid #333; border-bottom: 1px solid #ddd;">${currency}${doc.totals.grandTotal.toFixed(2)}</td>
+            <tr class="totals-top">
+                <td colspan="4" class="text-right"><strong>Total</strong></td>
+                <td class="text-right"><strong>${currency}${doc.totals.grandTotal.toFixed(2)}</strong></td>
             </tr>
-            <tr>
-                <td colspan="4" style="text-align: right; padding: 10px 10px 10px 0; font-size: 13px; color: #000; font-weight: bold; background: #e8e8e8; border-bottom: none;">Balance Due</td>
-                <td style="text-align: right; padding: 10px 10px; font-size: 13px; color: #000; font-weight: bold; background: #e8e8e8; border-bottom: none;">${currency}${doc.totals.grandTotal.toFixed(2)}</td>
+            <tr class="balance-due">
+                <td colspan="4" class="text-right"><strong>Balance Due</strong></td>
+                <td class="text-right"><strong>${currency}${doc.totals.grandTotal.toFixed(2)}</strong></td>
             </tr>
         `;
 
@@ -613,8 +619,8 @@ class App {
             container.innerHTML = `
                 <div class="paper">
                     ${headerHtml}
-                    <table class="prev-table" style="margin-bottom: 20px;">
-                        <thead><tr><th width="30">#</th><th>Item & Description</th><th width="50" class="text-right">Qty</th><th width="80" class="text-right">Rate</th><th width="80" class="text-right">Amount</th></tr></thead>
+                    <table class="prev-table" style="margin-bottom: 6mm;">
+                        <thead><tr><th>#</th><th>Item & Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
                         <tbody>
                             ${itemsHtml}
                             ${totalsRowsHtml}
@@ -622,7 +628,7 @@ class App {
                     </table>
                     ${notesHtml}
                     ${bankHtml}
-                    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; text-align: center; font-size: 8px; color: #666;">
+                    <div style="margin-top: 10mm; padding-top: 5mm; border-top: 0.3px solid #ccc; text-align: center; font-size: 8px; color: #666;">
                         ${contactInfo} | Page 1 of 1
                     </div>
                 </div>
@@ -632,22 +638,22 @@ class App {
                 <div class="paper" style="margin-bottom: 20px;">
                     ${headerHtml}
                     <table class="prev-table">
-                        <thead><tr><th width="30">#</th><th>Item & Description</th><th width="50" class="text-right">Qty</th><th width="80" class="text-right">Rate</th><th width="80" class="text-right">Amount</th></tr></thead>
+                        <thead><tr><th>#</th><th>Item & Description</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead>
                         <tbody>${itemsHtml}</tbody>
                     </table>
-                    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; text-align: center; font-size: 8px; color: #666;">
+                    <div style="margin-top: 10mm; padding-top: 5mm; border-top: 0.3px solid #ccc; text-align: center; font-size: 8px; color: #666;">
                         ${contactInfo} | Page 1 of 2
                     </div>
                 </div>
                 <div class="paper">
-                    <table class="prev-table" style="margin-bottom: 20px;">
+                    <table class="prev-table" style="margin-bottom: 6mm;">
                         <tbody>
                             ${totalsRowsHtml}
                         </tbody>
                     </table>
                     ${notesHtml}
                     ${bankHtml}
-                    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; text-align: center; font-size: 8px; color: #666;">
+                    <div style="margin-top: 10mm; padding-top: 5mm; border-top: 0.3px solid #ccc; text-align: center; font-size: 8px; color: #666;">
                         ${contactInfo} | Page 2 of 2
                     </div>
                 </div>

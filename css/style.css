@@ -723,202 +723,70 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     display: none; /* Chrome, Safari, Opera */
 }
 
-/* --- MINIMAL PDF PREVIEW STYLES --- */
-.paper { 
-    background: white; 
-    width: 100%;
-    height: auto; 
-    padding: 50px; 
-    box-shadow: none; 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica', Arial, sans-serif;
-    color: #1a1a1a; 
-    margin: 0;
+/* --- TecSie PDF Preview (HTML replica of jsPDF output) --- */
+.paper {
+    background: #ffffff;
+    /* A4 page width and PDF margin (15mm each side) */
+    width: 210mm;
+    padding: 15mm;
+    margin: 0 auto;
     box-sizing: border-box;
     border: none;
+    color: #111;
+    line-height: 1.45;
+    /* Match jsPDF font: times */
+    font-family: 'Times New Roman', Times, serif;
+}
+.paper * {
+    font-family: 'Times New Roman', Times, serif;
 }
 
-/* HEADER SECTION */
-.prev-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: flex-start;
-    margin-bottom: 50px;
-    padding-bottom: 30px;
-    border-bottom: 1px solid #e5e5e5;
-}
-
-.prev-logo-area { 
-    flex: 1;
-}
-
-.prev-logo-area h2 { 
-    color: #3b82f6;
-    margin: 0 0 10px 0;
-    font-size: 22px;
-    font-weight: 600;
-    line-height: 1.2;
-}
-
-.prev-logo-area p { 
-    font-size: 13px;
-    line-height: 1.6;
-    color: #666;
-    margin: 0;
-}
-
-/* RIGHT HEADER */
-.prev-header-right { 
-    text-align: right;
-}
-
-.prev-title { 
-    font-size: 36px; 
-    font-weight: 400;
-    margin: 0 0 10px 0;
-    text-transform: uppercase; 
-    color: #1a1a1a;
-    letter-spacing: 3px;
-    line-height: 1;
-}
-
-.prev-inv-num { 
-    font-weight: 500;
-    font-size: 13px;
-    color: #666;
-    margin: 0 0 20px 0;
-}
-
-.prev-balance-group { 
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e5e5;
-}
-
-.prev-balance-label { 
-    font-size: 11px;
-    font-weight: 600;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-    display: block;
-}
-
-.prev-balance-amount { 
-    font-size: 26px;
-    font-weight: 700;
-    color: #1a1a1a;
-    line-height: 1;
-}
-
-/* INFO ROW */
-.prev-info-row {
+/* HEADER SECTION (replicates jsPDF positions and sizes) */
+.prev-header {
     display: flex;
     justify-content: space-between;
-    gap: 40px;
-    margin-bottom: 40px;
+    align-items: flex-start;
+    margin-bottom: 10mm; /* approx spacing to info row */
 }
+.prev-logo-area { flex: 1 1 auto; max-width: 90mm; }
+.prev-logo-area h2 { color: var(--primary, #2563eb); margin: 0 0 2mm 0; font-size: 20px; font-weight: 700; }
+.prev-logo-area p { font-size: 9px; line-height: 1.5; color: #333; margin: 0; }
 
-.prev-bill-to { 
-    flex: 1;
-}
+.prev-header-right { text-align: right; flex: 0 0 auto; }
+.prev-title { font-size: 28px; font-weight: 400; margin: 0 0 2mm 0; letter-spacing: 1px; }
+.prev-inv-num { font-size: 8px; font-weight: 700; margin: 0 0 2mm 0; }
+.prev-balance-group { margin-top: 2mm; }
+.prev-balance-label { font-size: 9px; color: #323232; margin: 0 0 1mm 0; }
+.prev-balance-amount { font-size: 14px; font-weight: 700; color: #000; }
 
-.prev-bill-label { 
-    font-size: 11px;
-    font-weight: 600;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-    display: block;
-}
+/* Info row to match drawInfoRow */
+.prev-info-row { display: flex; justify-content: space-between; gap: 15mm; margin: 0 0 8mm 0; }
+.prev-bill-to { flex: 1 1 auto; }
+.prev-bill-label { font-size: 10px; color: #000; margin-bottom: 1.5mm; }
+.prev-bill-name { font-weight: 700; font-size: 11px; margin-bottom: 1.5mm; color: #000; }
+.prev-bill-address { font-size: 10px; color: #333; }
+.prev-dates { text-align: right; min-width: 40mm; }
+.prev-date-row { display: flex; justify-content: flex-end; gap: 5mm; margin-bottom: 1.5mm; font-size: 10px; }
+.prev-date-label, .prev-date-val { min-width: 30mm; text-align: right; }
 
-.prev-bill-name { 
-    color: #1a1a1a;
-    font-weight: 600;
-    font-size: 15px;
-    margin-bottom: 8px;
-    line-height: 1.4;
-}
+/* TABLE: grid theme like jsPDF autoTable grid */
+.prev-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.prev-table th, .prev-table td { border: 0.3px solid #e6e6e6; padding: 4mm 3mm; font-size: 9pt; }
+.prev-table thead th { background: #333; color: #fff; font-weight: 700; border-color: #333; }
+.prev-table th:nth-child(1), .prev-table td:nth-child(1) { width: 10mm; text-align: center; }
+.prev-table th:nth-child(2), .prev-table td:nth-child(2) { width: auto; text-align: left; }
+.prev-table th:nth-child(3), .prev-table td:nth-child(3) { width: 20mm; text-align: center; }
+.prev-table th:nth-child(4), .prev-table td:nth-child(4) { width: 30mm; text-align: right; }
+.prev-table th:nth-child(5), .prev-table td:nth-child(5) { width: 35mm; text-align: right; }
+.prev-table tfoot td { border: none; }
+/* Ensure totals styling applies to cells under border-collapse */
+.prev-table tr.totals-top td { border-top: 0.6px solid #dcdcdc; }
+.prev-table tr.balance-due td { background: #EBEBEB; font-weight: 700; }
 
-.prev-bill-address { 
-    font-size: 13px;
-    color: #666;
-    line-height: 1.6;
-}
-
-.prev-dates { 
-    text-align: right;
-}
-
-.prev-date-row { 
-    display: flex;
-    justify-content: flex-end;
-    gap: 20px;
-    margin-bottom: 8px;
-    font-size: 13px;
-}
-
-.prev-date-label { 
-    font-weight: 500;
-    color: #666;
-}
-
-.prev-date-val { 
-    font-weight: 500;
-    color: #1a1a1a;
-    min-width: 100px;
-    text-align: right;
-}
-
-/* TABLE */
-.prev-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    margin-bottom: 30px;
-}
-
-.prev-table th { 
-    text-align: left; 
-    padding: 12px 10px;
-    font-size: 11px; 
-    text-transform: uppercase; 
-    color: #666;
-    font-weight: 600;
-    background: #fafafa;
-    border-bottom: 1px solid #e5e5e5;
-    letter-spacing: 0.5px;
-}
-
-.prev-table th:first-child {
-    width: 40px;
-}
-
-.prev-table th:nth-child(3),
-.prev-table th:nth-child(4),
-.prev-table th:nth-child(5) {
-    text-align: right;
-}
-
-.prev-table td { 
-    padding: 14px 10px;
-    border-bottom: 1px solid #f5f5f5;
-    font-size: 13px; 
-    color: #1a1a1a;
-}
-
-.prev-table td:first-child {
-    color: #999;
-}
-
-.prev-table tbody tr:last-child td { 
-    border-bottom: none;
-}
-
-.prev-table .text-right { 
-    text-align: right;
-    font-weight: 500;
-}
+/* Utility alignment helpers */
+.text-right { text-align: right !important; }
+.text-center { text-align: center !important; }
+.text-left { text-align: left !important; }
 
 /* FOOTER */
 .prev-footer { 
