@@ -195,10 +195,6 @@ button:disabled {
     font-weight: 700;
     color: var(--text);
     letter-spacing: -0.03em;
-    background: linear-gradient(135deg, var(--text) 0%, var(--text-secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 .view-header h2 {
     font-size: 1.75rem;
@@ -219,23 +215,8 @@ button:disabled {
     position: relative;
     overflow: visible; /* Allow dropdowns to overflow */
 }
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
-    opacity: 0;
-    transition: var(--transition);
-}
 .card:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-light);
-}
-.card:hover::before {
-    opacity: 1;
+    /* Minimal hover effect removed */
 }
 .card h3 {
     font-size: 1.125rem;
@@ -248,7 +229,7 @@ button:disabled {
     gap: 10px;
 }
 .card h3 i {
-    color: var(--primary);
+    color: var(--text-secondary);
     font-size: 1.25rem;
 }
 
@@ -382,20 +363,11 @@ button:disabled {
 }
 .stat-card { 
     padding: 28px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.1);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-light);
     position: relative;
     overflow: hidden;
-}
-.stat-card::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
+    border-radius: var(--radius-lg);
 }
 .stat-card h3 { 
     font-size: 0.8125rem; 
@@ -410,10 +382,7 @@ button:disabled {
 .stat-card p { 
     font-size: 2.25rem; 
     font-weight: 700; 
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text);
     line-height: 1;
     position: relative;
     z-index: 1;
@@ -740,7 +709,7 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 }
 .editor-preview { 
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    padding: 48px; 
+    padding: 32px; 
     border-radius: var(--radius-xl); 
     display: flex; 
     flex-direction: column; 
@@ -770,9 +739,9 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 /* --- PDF PREVIEW STYLES --- */
 .paper { 
     background: white; 
-    width: 100%; 
-    max-width: 595px; 
-    min-height: 842px; 
+    width: 210mm; 
+    max-width: 100%;
+    min-height: 297mm; 
     height: auto; 
     padding: 48px; 
     box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.2); 
@@ -781,6 +750,8 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     display: block; 
     position: relative;
     border-radius: 4px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 .paper + .paper { margin-top: 24px; }
 
@@ -799,7 +770,10 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 /* RIGHT HEADER: INVOICE + BALANCE */
 .prev-header-right { 
     text-align: right; 
-    flex: 1; 
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 .prev-title { 
     font-size: 32px; 
@@ -808,7 +782,7 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     text-transform: uppercase; 
     color: #000; 
 }
-.prev-inv-num { font-weight: bold; font-size: 10px; margin-bottom: 15px; }
+.prev-inv-num { font-weight: bold; font-size: 12px; margin-bottom: 15px; color: #333; }
 
 .prev-balance-group { text-align: right; margin-top: 20px; }
 .prev-balance-label { font-size: 10px; font-weight: bold; color: #444; display: block; }
@@ -820,17 +794,18 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     justify-content: space-between;
     margin-top: 40px;
     margin-bottom: 30px;
-    align-items: flex-end;
+    align-items: flex-start;
+    gap: 40px;
 }
-.prev-bill-to { text-align: left; }
-.prev-bill-label { color: #000; font-size: 14px; margin-bottom: 5px; display: block; font-weight: bold; }
+.prev-bill-to { text-align: left; flex: 1; }
+.prev-bill-label { color: #000; font-size: 12px; margin-bottom: 8px; display: block; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
 .prev-bill-name { color: #000; font-weight: bold; font-size: 14px; margin-bottom: 5px; }
-.prev-bill-address { font-size: 12px; color: #333; max-width: 250px; }
+.prev-bill-address { font-size: 12px; color: #555; max-width: 250px; line-height: 1.5; }
 
-.prev-dates { text-align: right; }
-.prev-date-row { display: flex; justify-content: flex-end; gap: 20px; margin-bottom: 5px; font-size: 12px; }
-.prev-date-label { font-weight: normal; color: #000; text-align: right; min-width: 80px; }
-.prev-date-val { font-weight: normal; color: #000; text-align: right; min-width: 80px; }
+.prev-dates { text-align: right; flex-shrink: 0; }
+.prev-date-row { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 8px; font-size: 12px; align-items: center; }
+.prev-date-label { font-weight: 600; color: #666; text-align: right; min-width: 100px; }
+.prev-date-val { font-weight: normal; color: #000; text-align: right; min-width: 100px; }
 
 /* TABLE */
 .prev-table { 
