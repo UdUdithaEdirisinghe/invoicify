@@ -1440,6 +1440,69 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 .data-table tbody td {
     padding: 16px 20px;
     font-size: 15px;
+
+/* --- Inventory Table Minimal Styling (isolated) --- */
+/* Scope all rules to the inventory table by selecting a table that contains #products-tbody */
+.table-container.card:has(#products-tbody) table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent; /* keep container card appearance */
+}
+
+.table-container.card:has(#products-tbody) thead th {
+    background: #f9fafb; /* subtle gray (bg-gray-50) */
+    color: #6b7280;      /* text-gray-500 */
+    font-size: 0.75rem;  /* text-xs */
+    font-weight: 600;    /* font-medium */
+    text-transform: uppercase; /* uppercase */
+    letter-spacing: 0.08em;    /* tracking-wider */
+    padding: 12px 14px;
+    border-bottom: 1px solid #f3f4f6; /* light bottom divider only */
+}
+
+.table-container.card:has(#products-tbody) tbody tr {
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid #f3f4f6; /* border-b border-gray-100 */
+}
+.table-container.card:has(#products-tbody) tbody tr:hover {
+    background: #f9fafb; /* hover:bg-gray-50 */
+}
+
+.table-container.card:has(#products-tbody) tbody td {
+    padding: 16px 14px; /* py-4 with modest horizontal padding */
+    border: none;       /* no vertical grid lines */
+}
+
+/* Typography emphasis per column */
+.table-container.card:has(#products-tbody) tbody td:nth-child(1) {
+    color: #111827;   /* text-gray-900 */
+    font-weight: 600; /* font-medium */
+}
+.table-container.card:has(#products-tbody) tbody td:nth-child(2),
+.table-container.card:has(#products-tbody) tbody td:nth-child(3) {
+    color: #6b7280;   /* text-gray-500 for SKU and Price */
+    font-weight: 500; /* slight distinction without heavy weight */
+}
+
+/* Pastel Low Stock badge only within inventory table */
+.table-container.card:has(#products-tbody) .badge-low {
+    background: #fffbeb; /* bg-yellow-50 */
+    color: #92400e;      /* text-yellow-700-ish */
+    border: 1px solid #fef3c7;
+    border-radius: 9999px; /* rounded-full */
+    padding: 4px 10px;
+    font-weight: 600;
+}
+
+/* Out of stock remains distinct but lightweight */
+.table-container.card:has(#products-tbody) .badge-out {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: 9999px;
+    padding: 4px 10px;
+    font-weight: 600;
+}
     transition: var(--transition);
 }
 
