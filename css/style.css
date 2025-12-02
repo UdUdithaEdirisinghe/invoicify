@@ -234,16 +234,16 @@ button:disabled {
 }
 
 .btn { 
-    padding: 12px 28px; 
-    border-radius: var(--radius); 
+    padding: 10px 20px; 
+    border-radius: 8px; 
     border: none; 
     cursor: pointer; 
-    font-weight: 600; 
-    font-size: 15px; 
+    font-weight: 500; 
+    font-size: 14px; 
     transition: var(--transition);
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     line-height: 1.5;
     text-decoration: none;
     position: relative;
@@ -1190,16 +1190,6 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     font-size: 15px;
     max-width: 400px;
     line-height: 1.6;
-}
-
-.empty-state .btn {
-    padding: 14px 28px !important;
-    font-size: 16px !important;
-    min-width: auto;
-    width: auto !important;
-    max-width: 220px;
-    border-radius: 14px !important;
-    font-weight: 500 !important;
 }
 
 /* --- Data Table --- */
