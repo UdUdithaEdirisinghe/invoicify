@@ -742,32 +742,9 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 }
 
 /* HEADER SECTION (replicates jsPDF positions and sizes) */
-.prev-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10mm; /* approx spacing to info row */
-}
-.prev-logo-area { flex: 1 1 auto; max-width: 90mm; }
-.prev-logo-area h2 { color: var(--primary, #2563eb); margin: 0 0 2mm 0; font-size: 20px; font-weight: 700; }
-.prev-logo-area p { font-size: 9px; line-height: 1.5; color: #333; margin: 0; }
+/* Inline styles in JS now handle layout - keep minimal CSS */
 
-.prev-header-right { text-align: right; flex: 0 0 auto; }
-.prev-title { font-size: 28px; font-weight: 400; margin: 0 0 2mm 0; letter-spacing: 1px; }
-.prev-inv-num { font-size: 8px; font-weight: 700; margin: 0 0 2mm 0; }
-.prev-balance-group { margin-top: 2mm; }
-.prev-balance-label { font-size: 9px; color: #323232; margin: 0 0 1mm 0; }
-.prev-balance-amount { font-size: 14px; font-weight: 700; color: #000; }
-
-/* Info row to match drawInfoRow */
-.prev-info-row { display: flex; justify-content: space-between; gap: 15mm; margin: 0 0 8mm 0; }
-.prev-bill-to { flex: 1 1 auto; }
-.prev-bill-label { font-size: 10px; color: #000; margin-bottom: 1.5mm; }
-.prev-bill-name { font-weight: 700; font-size: 11px; margin-bottom: 1.5mm; color: #000; }
-.prev-bill-address { font-size: 10px; color: #333; }
-.prev-dates { text-align: right; min-width: 40mm; }
-.prev-date-row { display: flex; justify-content: flex-end; gap: 5mm; margin-bottom: 1.5mm; font-size: 10px; }
-.prev-date-label, .prev-date-val { min-width: 30mm; text-align: right; }
+/* Info row - inline styles handle layout */
 
 /* TABLE: grid theme like jsPDF autoTable grid */
 .prev-table { width: 100%; border-collapse: collapse; table-layout: fixed; }

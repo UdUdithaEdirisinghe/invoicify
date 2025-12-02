@@ -518,41 +518,40 @@ class App {
         
         // Generate header content (reusable for page 2)
         const headerHtml = `
-            <div class="prev-header">
-                <div class="prev-logo-area">
-                    ${settings.logoUrl ? `<img src="${settings.logoUrl}" style="max-height: 50px; max-width: 100px; object-fit: contain; display: block; margin-bottom: 10px;">` : `<h2 style="color: ${themeColor}; font-size: 20px; font-weight: bold; margin-bottom: 10px;">${settings.name}</h2>`}
+            <div class="prev-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 50px;">
+                <div class="prev-logo-area" style="flex: 1;">
+                    ${settings.logoUrl ? `<img src="${settings.logoUrl}" style="max-height: 50px; max-width: 100px; object-fit: contain; display: block; margin-bottom: 10px;">` : `<h2 style="color: ${themeColor}; font-size: 20px; font-weight: bold; margin: 0 0 10px 0;">${settings.name}</h2>`}
                     ${settings.logoUrl ? `<div style="font-weight: bold; font-size: 10px; margin-bottom: 3px; color: #000;">${settings.name}</div>` : ''}
                     <div style="font-size: 9px; line-height: 1.5; color: #333; max-width: 200px;">
                         ${settings.address.replace(/\n/g, '<br>')}
                         ${contactInfo ? `<br>${contactInfo}` : ''}
                     </div>
                 </div>
-                <div class="prev-header-right">
-                    <div class="prev-title" style="font-size: 28px; font-weight: normal; margin-bottom: 5px;">${doc.type.toUpperCase()}</div>
-                    <div class="prev-inv-num" style="font-size: 8px; font-weight: bold; margin-bottom: 8px;">${docTypeLabel}# ${doc.number}</div>
-                    <div style="margin-top: 8px;">
-                        <div style="font-size: 9px; color: #323232; font-weight: normal; margin-bottom: 5px;">${balanceLabel}</div>
+                <div class="prev-header-right" style="text-align: right;">
+                    <div style="font-size: 28px; font-weight: normal; margin: 0 0 5px 0; letter-spacing: 1px;">${doc.type.toUpperCase()}</div>
+                    <div style="font-size: 8px; font-weight: bold; margin-bottom: 10px;">${docTypeLabel}# ${doc.number}</div>
+                    <div style="margin-top: 10px;">
+                        <div style="font-size: 9px; color: #323232; margin-bottom: 5px;">${balanceLabel}</div>
                         <div style="font-size: 14px; font-weight: bold; color: #000;">${currency} ${doc.totals.grandTotal.toFixed(2)}</div>
                     </div>
                 </div>
             </div>
 
-            <div class="prev-info-row" style="margin-top: 50px; margin-bottom: 20px;">
-                <div class="prev-bill-to">
-                    <div style="font-size: 10px; color: #000; margin-bottom: 5px;">Bill To</div>
-                    <div style="font-weight: bold; font-size: 11px; color: #000; margin-bottom: 5px;">${doc.customer.name || 'Client Name'}</div>
-                    <div style="font-size: 10px; color: #333; line-height: 1.5;">${doc.customer.address ? doc.customer.address.replace(/\n/g, '<br>') : ''}</div>
-                    ${doc.customer.phone ? `<div style="font-size: 10px; color: #333; margin-top: 3px;">Phone: ${doc.customer.phone}</div>` : ''}
-                    ${doc.customer.email ? `<div style="font-size: 10px; color: #333; margin-top: 2px;">Email: ${doc.customer.email}</div>` : ''}
+            <div class="prev-info-row" style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+                <div class="prev-bill-to" style="flex: 1;">
+                    <div style="font-size: 10px; color: #000; margin-bottom: 6px;">Bill To</div>
+                    <div style="font-weight: bold; font-size: 11px; color: #000; margin-bottom: 6px;">${doc.customer.name || 'Client Name'}</div>
+                    ${doc.customer.address ? `<div style="font-size: 10px; color: #333; line-height: 1.5;">${doc.customer.address.replace(/\n/g, '<br>')}</div>` : ''}
+                    ${doc.customer.phone || doc.customer.email ? `<div style="font-size: 10px; color: #333; margin-top: 5px;">${[doc.customer.phone, doc.customer.email].filter(Boolean).join(' | ')}</div>` : ''}
                 </div>
-                <div class="prev-dates">
-                    <div style="display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 3px; font-size: 10px;">
-                        <span style="min-width: 100px; text-align: right; color: #000;">Invoice Date :</span>
-                        <span style="min-width: 100px; text-align: right; color: #000;">${doc.date}</span>
+                <div class="prev-dates" style="text-align: right; min-width: 200px;">
+                    <div style="margin-bottom: 5px;">
+                        <div style="font-size: 10px; color: #000;">Invoice Date :</div>
+                        <div style="font-size: 10px; color: #000; margin-top: 2px;">${doc.date}</div>
                     </div>
-                    ${doc.dueDate ? `<div style="display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 3px; font-size: 10px;">
-                        <span style="min-width: 100px; text-align: right; color: #000;">Due Date :</span>
-                        <span style="min-width: 100px; text-align: right; color: #000;">${doc.dueDate}</span>
+                    ${doc.dueDate ? `<div style="margin-top: 10px;">
+                        <div style="font-size: 10px; color: #000;">Due Date :</div>
+                        <div style="font-size: 10px; color: #000; margin-top: 2px;">${doc.dueDate}</div>
                     </div>` : ''}
                 </div>
             </div>
