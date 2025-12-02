@@ -735,7 +735,7 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 .editor-items-table td .badge-out,
 .editor-items-table td .stock-badge {
     position: absolute;
-    left: 16px;
+    right: 16px;
     bottom: 8px;
     margin-top: 0; /* override default margin that adds height */
     pointer-events: none; /* visual indicator only */
