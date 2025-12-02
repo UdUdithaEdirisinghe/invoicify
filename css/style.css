@@ -281,6 +281,11 @@ button:disabled {
     color: white;
     box-shadow: var(--shadow);
 }
+
+.btn-primary i {
+    color: white;
+}
+
 .btn-primary:hover { 
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
