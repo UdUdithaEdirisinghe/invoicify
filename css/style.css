@@ -716,20 +716,11 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     position: sticky;
     top: 0;
     max-height: calc(100vh - 120px);
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
 .editor-preview::-webkit-scrollbar {
-    width: 8px;
-}
-.editor-preview::-webkit-scrollbar-track {
-    background: #f5f5f5;
-    border-radius: 4px;
-}
-.editor-preview::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 4px;
-}
-.editor-preview::-webkit-scrollbar-thumb:hover {
-    background: #999;
+    display: none; /* Chrome, Safari, Opera */
 }
 
 /* --- MINIMAL PDF PREVIEW STYLES --- */
@@ -751,25 +742,27 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     display: flex; 
     justify-content: space-between; 
     align-items: flex-start;
-    margin-bottom: 40px;
-    padding-bottom: 20px;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
     border-bottom: 1px solid #e5e5e5;
 }
 
 .prev-logo-area { 
-    flex: 1; 
+    flex: 1;
+    max-width: 50%;
 }
 
 .prev-logo-area h2 { 
     color: #1a1a1a;
-    margin: 0 0 4px 0;
+    margin: 0 0 8px 0;
     font-size: 20px;
     font-weight: 600;
+    line-height: 1.2;
 }
 
 .prev-logo-area p { 
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 12px;
+    line-height: 1.6;
     color: #666;
     margin: 0;
 }
@@ -777,51 +770,57 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 /* RIGHT HEADER */
 .prev-header-right { 
     text-align: right;
+    flex-shrink: 0;
 }
 
 .prev-title { 
-    font-size: 28px; 
+    font-size: 32px; 
     font-weight: 600;
-    margin: 0 0 4px 0;
+    margin: 0 0 8px 0;
     text-transform: uppercase; 
     color: #1a1a1a;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    line-height: 1;
 }
 
 .prev-inv-num { 
     font-weight: 500;
-    font-size: 13px;
+    font-size: 12px;
     color: #666;
-    margin: 0;
+    margin: 0 0 16px 0;
 }
 
 .prev-balance-group { 
     margin-top: 16px;
     padding-top: 16px;
     border-top: 1px solid #e5e5e5;
+    text-align: right;
 }
 
 .prev-balance-label { 
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: #666;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    display: block;
 }
 
 .prev-balance-amount { 
     font-size: 24px;
     font-weight: 700;
     color: #1a1a1a;
+    line-height: 1;
 }
 
 /* INFO ROW */
 .prev-info-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 40px;
+    grid-template-columns: 1fr auto;
+    gap: 60px;
+    margin-bottom: 48px;
+    align-items: flex-start;
 }
 
 .prev-bill-to { 
@@ -829,72 +828,93 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 }
 
 .prev-bill-label { 
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: #666;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    display: block;
 }
 
 .prev-bill-name { 
     color: #1a1a1a;
     font-weight: 600;
-    font-size: 15px;
-    margin-bottom: 6px;
+    font-size: 14px;
+    margin-bottom: 8px;
+    line-height: 1.4;
 }
 
 .prev-bill-address { 
-    font-size: 13px;
+    font-size: 12px;
     color: #666;
     line-height: 1.6;
 }
 
 .prev-dates { 
     text-align: right;
+    min-width: 220px;
 }
 
 .prev-date-row { 
     display: flex;
-    justify-content: flex-end;
-    gap: 16px;
-    margin-bottom: 6px;
-    font-size: 13px;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    align-items: center;
 }
 
 .prev-date-label { 
     font-weight: 500;
     color: #666;
+    white-space: nowrap;
 }
 
 .prev-date-val { 
-    font-weight: 400;
+    font-weight: 500;
     color: #1a1a1a;
+    text-align: right;
 }
 
 /* TABLE */
 .prev-table { 
     width: 100%; 
     border-collapse: collapse; 
-    margin-bottom: 24px;
+    margin-bottom: 32px;
 }
 
 .prev-table th { 
     text-align: left; 
-    padding: 12px 8px;
-    font-size: 11px; 
+    padding: 14px 12px;
+    font-size: 10px; 
     text-transform: uppercase; 
     color: #666;
     font-weight: 600;
     border-bottom: 2px solid #e5e5e5;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+}
+
+.prev-table th:first-child {
+    width: 40px;
+}
+
+.prev-table th:nth-child(3),
+.prev-table th:nth-child(4),
+.prev-table th:nth-child(5) {
+    text-align: right;
 }
 
 .prev-table td { 
-    padding: 12px 8px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 14px 12px;
+    border-bottom: 1px solid #f5f5f5;
     font-size: 13px; 
     color: #1a1a1a;
+    vertical-align: top;
+}
+
+.prev-table td:first-child {
+    color: #999;
 }
 
 .prev-table tbody tr:last-child td { 
