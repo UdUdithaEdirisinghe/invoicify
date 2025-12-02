@@ -750,6 +750,8 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     z-index: 5;
     font-size: 12px;
     padding: 4px 10px;
+    margin: 0 !important; /* override stock-badge default margin */
+    line-height: 1; /* tighter vertical metrics for perfect centering */
 }
 
 .editor-layout { 
