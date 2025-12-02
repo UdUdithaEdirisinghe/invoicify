@@ -1192,6 +1192,13 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     line-height: 1.6;
 }
 
+.empty-state .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-width: auto;
+    max-width: 200px;
+}
+
 /* --- Data Table --- */
 .data-table {
     width: 100%;
