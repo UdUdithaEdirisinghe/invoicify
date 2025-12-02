@@ -1295,10 +1295,11 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 .data-table tbody tr {
     border-bottom: 1px solid var(--border-light);
 #products-tbody td:last-child {
-    display: inline-flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
+    display: flex;               /* fill cell height for vertical centering */
+    align-items: center;         /* keep buttons centered vertically */
+    gap: 10px;                   /* even spacing */
+    flex-wrap: nowrap;           /* prevent wrapping when name spans two lines */
+    white-space: nowrap;         /* keep buttons on one line */
 }
 #products-tbody .secondary-btn {
     padding: 8px 14px;
