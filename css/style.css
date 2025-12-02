@@ -1294,6 +1294,41 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 
 .data-table tbody tr {
     border-bottom: 1px solid var(--border-light);
+#products-tbody td:last-child {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+#products-tbody .secondary-btn {
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-xs);
+}
+#products-tbody .secondary-btn:hover {
+    background: var(--bg);
+    border-color: var(--text-muted);
+    transform: translateY(-1px);
+}
+#products-tbody .danger-btn {
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    background: #fff;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-xs);
+}
+#products-tbody .danger-btn:hover {
+    background: var(--danger-light);
+    transform: translateY(-1px);
+}
     transition: var(--transition);
 }
 
