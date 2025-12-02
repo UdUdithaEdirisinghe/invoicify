@@ -190,6 +190,13 @@ button:disabled {
     align-items: center; 
     margin-bottom: 40px;
 }
+
+.view-header .btn {
+    padding: 8px 18px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
 .view-header h1 {
     font-size: 2.25rem;
     font-weight: 700;
