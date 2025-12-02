@@ -568,16 +568,11 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     border-bottom: 1px solid var(--border-light);
     position: relative;
 }
-.editor-items-table td:first-child {
-    /* baseline bottom space so content breathes */
-    padding-bottom: 12px;
-}
-/* When a stock badge exists in the cell, reserve extra space for it */
-.editor-items-table td:first-child:has(.badge-low),
-.editor-items-table td:first-child:has(.badge-out),
-.editor-items-table td:first-child:has(.stock-badge) {
-    padding-bottom: 36px;
-}
+.editor-items-table td:first-child { padding-bottom: 12px; }
+/* Reserve space only when badges are direct children (legacy layout) */
+.editor-items-table td:first-child:has(> .badge-low),
+.editor-items-table td:first-child:has(> .badge-out),
+.editor-items-table td:first-child:has(> .stock-badge) { padding-bottom: 36px; }
 .editor-items-table tbody tr:hover {
     background: var(--primary-subtle);
 }
@@ -731,15 +726,30 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 }
 
 /* Keep stock badges from pushing row height in line items */
-.editor-items-table td .badge-low,
-.editor-items-table td .badge-out,
-.editor-items-table td .stock-badge {
+.editor-items-table td > .badge-low,
+.editor-items-table td > .badge-out,
+.editor-items-table td > .stock-badge {
     position: absolute;
     right: 16px;
     bottom: 8px;
     margin-top: 0; /* override default margin that adds height */
     pointer-events: none; /* visual indicator only */
     z-index: 10; /* under suggestions (1000), above cell background */
+}
+
+/* Inline badge inside the input field */
+.line-item-input-wrap { position: relative; }
+.line-item-input-wrap:has(.inline-badge) .line-item-input { padding-right: 150px; }
+.editor-items-table td .line-item-input-wrap .inline-badge {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    bottom: auto;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 5;
+    font-size: 12px;
+    padding: 4px 10px;
 }
 
 .editor-layout { 

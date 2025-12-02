@@ -292,16 +292,22 @@ class App {
             const qtyAvail = product ? (parseInt(product.current_quantity) || 0) : '';
             const stockState = typeof qtyAvail === 'number' ? (qtyAvail <= 0 ? 'out' : (qtyAvail <= LOW_STOCK_THRESHOLD ? 'low' : 'ok')) : null;
             const isDuplicate = item.productId && duplicateProducts.has(item.productId);
+            const badgeHtml = stockState ? (
+                stockState === 'out'
+                    ? `<span class="badge badge-out inline-badge"><i class="ph ph-warning"></i> Out of stock</span>`
+                    : stockState === 'low'
+                        ? `<span class="badge badge-low inline-badge"><i class="ph ph-warning"></i> Low stock (${qtyAvail})</span>`
+                        : `<span class="stock-badge inline-badge">Available: ${qtyAvail}</span>`
+            ) : '';
+
             tr.innerHTML = `
                 <td>
-                    <input type="text" value="${item.name}" data-idx="${index}" data-field="name" placeholder="Type product name..." class="line-item-input ${isDuplicate ? 'duplicate-warning' : ''}" autocomplete="off">
+                    <div class="line-item-input-wrap">
+                        <input type="text" value="${item.name}" data-idx="${index}" data-field="name" placeholder="Type product name..." class="line-item-input ${isDuplicate ? 'duplicate-warning' : ''}" autocomplete="off">
+                        ${badgeHtml}
+                    </div>
                     <div class="product-suggestions" id="suggestions-${index}"></div>
                     ${isDuplicate ? `<small class="duplicate-badge">⚠️ Duplicate item - consider merging</small>` : ''}
-                    ${stockState ? (stockState === 'out' 
-                        ? `<span class="badge badge-out"><i class="ph ph-warning"></i> Out of stock</span>` 
-                        : stockState === 'low' 
-                            ? `<span class="badge badge-low"><i class="ph ph-warning"></i> Low stock (${qtyAvail})</span>` 
-                            : `<small class="stock-badge">Available: ${qtyAvail}</small>`) : ''}
                 </td>
                 <td><input type="number" value="${item.qty}" data-idx="${index}" data-field="qty" min="1" class="line-item-input"></td>
                 <td><input type="number" value="${item.price}" data-idx="${index}" data-field="price" step="0.01" min="0" class="line-item-input"></td>
