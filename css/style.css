@@ -568,6 +568,16 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     border-bottom: 1px solid var(--border-light);
     position: relative;
 }
+.editor-items-table td:first-child {
+    /* baseline bottom space so content breathes */
+    padding-bottom: 12px;
+}
+/* When a stock badge exists in the cell, reserve extra space for it */
+.editor-items-table td:first-child:has(.badge-low),
+.editor-items-table td:first-child:has(.badge-out),
+.editor-items-table td:first-child:has(.stock-badge) {
+    padding-bottom: 36px;
+}
 .editor-items-table tbody tr:hover {
     background: var(--primary-subtle);
 }
