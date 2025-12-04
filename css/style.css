@@ -1966,7 +1966,7 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
         transform: translateY(0); 
     }
 }
-/* Toast Notifications */
+/* Toast Notifications - Force Update */
 .toast {
     position: fixed;
     bottom: 24px;

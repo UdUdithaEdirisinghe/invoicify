@@ -820,6 +820,7 @@ class App {
 
     // Toast notification helper
     showToast(message, type = 'info') {
+        console.log(`Toast: ${message} (${type})`);
         let toast = document.getElementById('toast');
         if (!toast) {
             toast = document.createElement('div');
