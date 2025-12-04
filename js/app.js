@@ -71,7 +71,7 @@ class App {
             date: new Date().toISOString().split('T')[0],
             dueDate: '',
             customer: { name: '', email: '', phone: '', address: '' },
-            items: [],
+            items: [ { name: '', qty: 1, price: 0, tax: 0, total: 0, productId: null } ],
             totals: { subtotal: 0, tax: 0, discount: 0, shipping: 0, grandTotal: 0 },
             notes: ''
         };
