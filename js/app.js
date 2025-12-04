@@ -219,7 +219,7 @@ class App {
                     const formData = new FormData();
                     formData.append('file', pdfBlob, `${fullDoc.type}-${fullDoc.number}.pdf`);
                     
-                    const token = localStorage.getItem('token');
+                    const token = ApiClient.getToken();
                     const uploadRes = await fetch('/api/upload', {
                         method: 'POST',
                         headers: {
