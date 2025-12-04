@@ -221,7 +221,7 @@ export default async function handler(req, res) {
             }
             if (dueDate !== undefined) {
                 updates.push(`due_date = $${paramCount++}`);
-                values.push(dueDate);
+                values.push(dueDate === '' ? null : dueDate);
             }
             if (notes !== undefined) {
                 updates.push(`notes = $${paramCount++}`);
