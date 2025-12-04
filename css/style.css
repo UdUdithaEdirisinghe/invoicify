@@ -1966,3 +1966,41 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
         transform: translateY(0); 
     }
 }
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 16px 24px;
+    background: var(--surface);
+    color: var(--text);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    font-weight: 500;
+    z-index: 10000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-left: 4px solid var(--primary);
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-success { border-color: var(--success); }
+.toast-success::before { content: ''; color: var(--success); font-weight: bold; }
+
+.toast-error { border-color: var(--danger); }
+.toast-error::before { content: ''; color: var(--danger); font-weight: bold; }
+
+.toast-warning { border-color: var(--warning); }
+.toast-warning::before { content: ''; color: var(--warning); font-weight: bold; }
+
+.toast-info { border-color: var(--info); }
+.toast-info::before { content: '?'; color: var(--info); font-weight: bold; }
+
