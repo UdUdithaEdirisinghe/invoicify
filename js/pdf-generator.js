@@ -339,5 +339,6 @@ export default class PdfGenerator {
         }
 
         doc.save(`${docData.type}-${docData.number}.pdf`);
+        return doc.output('blob');
     }
 }

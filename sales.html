@@ -525,6 +525,10 @@
               <button class="btn-icon" onclick="viewInvoice(${inv.id})" title="View">
                 <i class="ph ph-eye"></i>
               </button>
+              ${inv.pdf_url ? `
+              <button class="btn-icon" onclick="window.open('${inv.pdf_url}', '_blank')" title="Download PDF">
+                <i class="ph ph-file-pdf"></i>
+              </button>` : ''}
               <button class="btn-icon" onclick="editInvoice(${inv.id})" title="Edit">
                 <i class="ph ph-pencil"></i>
               </button>

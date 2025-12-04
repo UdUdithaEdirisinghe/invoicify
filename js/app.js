@@ -185,8 +185,38 @@ class App {
             }
             
             const fullDoc = { ...this.state.currentDoc, business: this.state.settings };
-            PdfGenerator.generate(fullDoc);
-            this.showToast(inventoryUpdated ? 'PDF generated and inventory updated!' : 'PDF generated successfully!', 'success');
+            const pdfBlob = PdfGenerator.generate(fullDoc);
+            
+            // Upload PDF if online
+            if (ApiClient.isAuthenticated() && this.state.currentDoc.id) {
+                try {
+                    this.showToast('Uploading PDF...', 'info');
+                    const formData = new FormData();
+                    formData.append('file', pdfBlob, `${fullDoc.type}-${fullDoc.number}.pdf`);
+                    
+                    const token = localStorage.getItem('token');
+                    const uploadRes = await fetch('/api/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'x-filename': `${fullDoc.type}-${fullDoc.number}.pdf`
+                        },
+                        body: pdfBlob
+                    });
+                    
+                    if (uploadRes.ok) {
+                        const blobData = await uploadRes.json();
+                        // Update invoice with PDF URL
+                        await ApiClient.updateInvoice(this.state.currentDoc.id, { pdf_url: blobData.url });
+                        this.showToast('PDF uploaded and linked to invoice!', 'success');
+                    }
+                } catch (err) {
+                    console.error('PDF upload failed:', err);
+                    this.showToast('PDF generated but upload failed', 'warning');
+                }
+            } else {
+                this.showToast(inventoryUpdated ? 'PDF generated and inventory updated!' : 'PDF generated successfully!', 'success');
+            }
         });
 
         document.getElementById('btn-save-settings').addEventListener('click', async () => {

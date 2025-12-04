@@ -165,13 +165,19 @@ export default async function handler(req, res) {
                 paidAmount,
                 status,
                 dueDate,
-                notes 
+                notes,
+                pdf_url
             } = req.body;
 
             // Build dynamic update query
             const updates = [];
             const values = [];
             let paramCount = 1;
+
+            if (pdf_url !== undefined) {
+                updates.push(`pdf_url = $${paramCount++}`);
+                values.push(pdf_url);
+            }
 
             if (customerId !== undefined) {
                 updates.push(`customer_id = $${paramCount++}`);

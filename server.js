@@ -2,6 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config({ path: '.env.local' });
 
 // Get directory name in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -27,7 +31,8 @@ const apiFiles = [
   'purchase-orders',
   'invoices',
   'settings',
-  'health'
+  'health',
+  'upload'
 ];
 
 // Load API handlers

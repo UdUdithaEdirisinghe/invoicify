@@ -8,12 +8,14 @@
     "build": "echo 'No build step needed for static site + functions'"
   },
   "dependencies": {
+    "@vercel/blob": "^2.0.0",
     "@vercel/postgres": "^0.5.1",
-    "pg": "^8.12.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.12.0"
   },
   "engines": {
     "node": ">=18.0.0"
