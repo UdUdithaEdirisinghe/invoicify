@@ -11,7 +11,7 @@ class App {
             products: []
         };
         this.applyTheme(this.state.settings.themeColor);
-        this.router = new Router(null, (hash) => this.handleRouteChange(hash));
+        this.router = new Router(null, (hash, query) => this.handleRouteChange(hash, query));
         this.init();
     }
 
@@ -77,18 +77,70 @@ class App {
         };
     }
 
-    handleRouteChange(hash) {
+    handleRouteChange(hash, query) {
         if (hash === 'documents') this.renderDocList();
         if (hash === 'customers') this.renderCustomers();
         if (hash === 'settings') this.renderSettings();
         if (hash === 'editor') {
             // Reload settings to get latest changes
             this.loadSettings();
-            if(!this.isEditing) {
+            
+            if (query && query.id) {
+                this.loadInvoiceForEdit(query.id);
+            } else if(!this.isEditing) {
                 this.state.currentDoc = this.getEmptyDoc();
                 this.populateEditor();
             }
             this.isEditing = false;
+        }
+    }
+
+    async loadInvoiceForEdit(id) {
+        try {
+            this.showToast('Loading invoice...', 'info');
+            const invoice = await ApiClient.fetch(`/api/invoices?id=${id}`);
+            
+            // Map API invoice data to editor state
+            this.state.currentDoc = {
+                id: invoice.id,
+                type: 'invoice', // Default to invoice as type might not be saved
+                pageSize: 'a4',
+                number: invoice.invoice_number,
+                date: invoice.invoice_date || invoice.created_at.split('T')[0],
+                dueDate: invoice.due_date || '',
+                customer: {
+                    id: invoice.customer_id,
+                    name: invoice.customer_name || '',
+                    email: invoice.customer_email || '',
+                    phone: '', // Might need to fetch customer details if needed
+                    address: ''
+                },
+                items: invoice.invoice_data.items || [],
+                totals: {
+                    subtotal: Number(invoice.subtotal) || 0,
+                    tax: Number(invoice.tax_amount) || 0,
+                    discount: Number(invoice.discount_amount) || 0,
+                    shipping: Number(invoice.shipping_amount) || 0,
+                    grandTotal: Number(invoice.total_amount) || 0
+                },
+                notes: invoice.notes || ''
+            };
+
+            // If invoice_data has more specific fields, override defaults
+            if (invoice.invoice_data) {
+                if (invoice.invoice_data.customer) {
+                    this.state.currentDoc.customer = { ...this.state.currentDoc.customer, ...invoice.invoice_data.customer };
+                }
+                if (invoice.invoice_data.type) this.state.currentDoc.type = invoice.invoice_data.type;
+                if (invoice.invoice_data.pageSize) this.state.currentDoc.pageSize = invoice.invoice_data.pageSize;
+            }
+
+            this.populateEditor();
+            this.isEditing = true;
+            this.showToast('Invoice loaded for editing', 'success');
+        } catch (error) {
+            console.error('Failed to load invoice for edit:', error);
+            this.showToast('Failed to load invoice', 'error');
         }
     }
 

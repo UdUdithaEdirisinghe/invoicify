@@ -9,7 +9,19 @@ export default class Router {
         this.handleRoute(); 
     }
     handleRoute() {
-        const hash = window.location.hash.slice(1) || 'editor';
+        // Handle query parameters in hash (e.g., #editor?id=1)
+        let hash = window.location.hash.slice(1) || 'editor';
+        let query = {};
+        
+        if (hash.includes('?')) {
+            const parts = hash.split('?');
+            hash = parts[0];
+            const params = new URLSearchParams(parts[1]);
+            for (const [key, value] of params) {
+                query[key] = value;
+            }
+        }
+
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         
@@ -19,7 +31,7 @@ export default class Router {
         const link = document.querySelector(`.nav-link[data-link="${hash}"]`);
         if (link) link.classList.add('active');
 
-        if (this.onRoute) this.onRoute(hash);
+        if (this.onRoute) this.onRoute(hash, query);
     }
     navigate(path) { window.location.hash = path; }
 }
