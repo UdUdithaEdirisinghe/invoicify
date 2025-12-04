@@ -10,6 +10,7 @@
     "api/purchase-orders.js": { "maxDuration": 10 },
     "api/invoices.js": { "maxDuration": 10 },
     "api/settings.js": { "maxDuration": 10 },
+    "api/upload.js": { "maxDuration": 30 },
     "api/health.js": { "maxDuration": 5 }
   },
   "rewrites": [
