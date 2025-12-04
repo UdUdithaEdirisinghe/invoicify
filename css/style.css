@@ -693,9 +693,6 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 .editor-items-table td:nth-child(3),
 .editor-items-table td:nth-child(4) {
     text-align: center;
-    display: flex;
-    align-items: center; /* vertically center when first column grows */
-    justify-content: center;
 }
 .editor-items-table td:nth-child(2) input,
 .editor-items-table td:nth-child(3) input,
