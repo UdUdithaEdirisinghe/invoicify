@@ -744,17 +744,20 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
 }
 
 /* Inline badge inside the input field */
-.line-item-input-wrap { position: relative; display: flex; flex-direction: column; align-items: stretch; }
-.line-item-input-wrap:has(.inline-badge) .line-item-input { padding-right: 14px !important; }
+.line-item-input-wrap { position: relative; display: block; width: 100%; }
+.line-item-input-wrap:has(.inline-badge) .line-item-input { padding-right: 110px !important; }
 .editor-items-table td .line-item-input-wrap .inline-badge {
-    position: static;
-    transform: none;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
     pointer-events: none;
-    z-index: auto;
-    font-size: 12px;
-    padding: 4px 10px;
-    margin-top: 6px !important; /* sit just below the input */
+    z-index: 5;
+    font-size: 11px;
+    padding: 2px 8px;
+    margin-top: 0 !important;
     line-height: 1.2;
+    white-space: nowrap;
 }
 
 .editor-layout { 
