@@ -14,11 +14,24 @@ export default async function handler(req, res) {
     try {
         const filename = req.headers['x-filename'] || `invoice-${Date.now()}.pdf`;
         
+        // Read the request body into a buffer to ensure we have the data
+        const chunks = [];
+        for await (const chunk of req) {
+            chunks.push(chunk);
+        }
+        const buffer = Buffer.concat(chunks);
+
+        console.log(`Uploading file: ${filename}, Size: ${buffer.length} bytes`);
+
+        if (buffer.length === 0) {
+            return res.status(400).json({ error: 'Empty file content' });
+        }
+
         // Upload to Vercel Blob
-        // Note: req is a readable stream, which put() accepts
-        const blob = await put(filename, req, {
+        const blob = await put(filename, buffer, {
             access: 'public',
-            token: process.env.BLOB_READ_WRITE_TOKEN
+            token: process.env.BLOB_READ_WRITE_TOKEN,
+            contentType: 'application/pdf'
         });
 
         return res.status(200).json(blob);

@@ -216,6 +216,8 @@ class App {
                     }
 
                     this.showToast('Uploading PDF...', 'info');
+                    console.log(`PDF Blob size: ${pdfBlob.size} bytes`);
+                    
                     const formData = new FormData();
                     formData.append('file', pdfBlob, `${fullDoc.type}-${fullDoc.number}.pdf`);
                     
