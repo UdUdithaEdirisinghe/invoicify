@@ -124,12 +124,15 @@ export default async function handler(req, res) {
                 req.body.invoiceNumber = nextNumber;
             }
 
+            // Extract date from invoiceData or use current date
+            const invoiceDate = invoiceData?.date || new Date().toISOString().split('T')[0];
+
             const result = await pool.query(
                 `INSERT INTO invoices (
                     user_id, customer_id, invoice_number, invoice_data, 
                     subtotal, tax_amount, discount_amount, shipping_amount, total_amount,
-                    paid_amount, status, due_date, notes
-                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+                    paid_amount, status, due_date, notes, invoice_date
+                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
                 [
                     userId, 
                     customerId || null, 
@@ -143,7 +146,8 @@ export default async function handler(req, res) {
                     0, // paid_amount starts at 0
                     status || 'draft',
                     dueDate || null,
-                    notes || null
+                    notes || null,
+                    invoiceDate
                 ]
             );
 
