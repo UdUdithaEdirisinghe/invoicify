@@ -260,7 +260,7 @@ export default class PdfGenerator {
                 lineWidth: 0 // Default footer cells to no border (overridden in footerRows definitions)
             },
             columnStyles: {
-                0: { cellWidth: 10, halign: 'center' }, // Narrow '#' column
+                0: { cellWidth: 15, halign: 'center' }, // Narrow '#' column
                 1: { cellWidth: 'auto' },
                 2: { cellWidth: 20, halign: 'center' }, // Qty Center
                 3: { cellWidth: 30, halign: 'right' },

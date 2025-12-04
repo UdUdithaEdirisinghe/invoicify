@@ -999,7 +999,7 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     margin: auto;
     position: relative;
-    overflow: auto; /* allow scrolling anywhere inside modal content */
+    overflow: hidden; /* prevent scrolling of the container itself */
     -webkit-overflow-scrolling: touch;
 }
 
@@ -1026,8 +1026,6 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     justify-content: space-between;
     flex-shrink: 0;
     background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg) 100%);
-    position: sticky;
-    top: 0;
     z-index: 2;
 }
 
@@ -1066,6 +1064,7 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     padding: 28px;
     flex: 1 1 auto;
     min-height: 0;
+    overflow-y: auto;
 }
 
 .modal-body::-webkit-scrollbar {
@@ -1094,8 +1093,6 @@ tbody tr.low-stock:hover { background: var(--primary-subtle); }
     justify-content: flex-end;
     flex-shrink: 0;
     background: var(--bg);
-    position: sticky;
-    bottom: 0;
     z-index: 2;
 }
 
