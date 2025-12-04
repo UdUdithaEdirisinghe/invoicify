@@ -188,8 +188,33 @@ class App {
             const pdfBlob = PdfGenerator.generate(fullDoc);
             
             // Upload PDF if online
-            if (ApiClient.isAuthenticated() && this.state.currentDoc.id) {
+            if (ApiClient.isAuthenticated()) {
                 try {
+                    let invoiceId = this.state.currentDoc.id;
+                    // Check if it's a new invoice (local string ID) or existing (numeric DB ID)
+                    const isNew = !invoiceId || isNaN(Number(invoiceId));
+
+                    if (isNew) {
+                        this.showToast('Saving invoice...', 'info');
+                        const payload = {
+                            customerId: this.state.currentDoc.customer?.id,
+                            invoiceNumber: this.state.currentDoc.number,
+                            invoiceData: this.state.currentDoc,
+                            subtotal: this.state.currentDoc.totals?.subtotal || 0,
+                            taxAmount: this.state.currentDoc.totals?.tax || 0,
+                            discountAmount: this.state.currentDoc.totals?.discount || 0,
+                            shippingAmount: this.state.currentDoc.totals?.shipping || 0,
+                            totalAmount: this.state.currentDoc.totals?.grandTotal || 0,
+                            dueDate: this.state.currentDoc.dueDate,
+                            status: 'sent',
+                            notes: this.state.currentDoc.notes
+                        };
+                        
+                        const savedInvoice = await ApiClient.createInvoice(payload);
+                        this.state.currentDoc.id = savedInvoice.id;
+                        invoiceId = savedInvoice.id;
+                    }
+
                     this.showToast('Uploading PDF...', 'info');
                     const formData = new FormData();
                     formData.append('file', pdfBlob, `${fullDoc.type}-${fullDoc.number}.pdf`);
@@ -207,7 +232,7 @@ class App {
                     if (uploadRes.ok) {
                         const blobData = await uploadRes.json();
                         // Update invoice with PDF URL
-                        await ApiClient.updateInvoice(this.state.currentDoc.id, { pdf_url: blobData.url });
+                        await ApiClient.updateInvoice(invoiceId, { pdf_url: blobData.url });
                         this.showToast('PDF uploaded and linked to invoice!', 'success');
                     }
                 } catch (err) {
